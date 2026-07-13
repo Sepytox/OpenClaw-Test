@@ -31,7 +31,7 @@
             <section class="facts">
                 <div class="fact-card">
                     <h3>⚡ Schnellstes Kawasaki Motorrad</h3>
-                    <p><strong>Kawasaki Ninja H2</strong></p>
+                    <p><strong class="h2-trigger" id="h2Trigger" onclick="openH2Modal()" role="button" tabindex="0" aria-label="Kawasaki Ninja H2 Details anzeigen" title="Klicken für mehr Infos">Kawasaki Ninja H2</strong></p>
                     <p>Mit über <strong>300 km/h</strong> Höchstgeschwindigkeit ist die H2 eines der schnellsten Serienmotorräder der Welt. Der Kompressor-Motor liefert gigantische 231 PS.</p>
                 </div>
                 <div class="fact-card">
@@ -57,7 +57,102 @@
         </main>
         <footer><p>&copy; 2026 Vrooooom Kawasaki | Test Website</p></footer>
     </div>
+    <!-- Modal: Kawasaki Ninja H2 Specs -->
+    <div class="modal-overlay" id="h2Modal" role="dialog" aria-modal="true" aria-labelledby="h2ModalTitle" onclick="handleModalOverlayClick(event)">
+        <div class="modal-content">
+            <button class="modal-close" id="modalCloseBtn" onclick="closeH2Modal()" aria-label="Modal schließen" title="Schließen">&times;</button>
+            <div class="modal-header">
+                <span class="modal-icon">⚡</span>
+                <h2 id="h2ModalTitle">Kawasaki Ninja H2</h2>
+                <p class="modal-subtitle">Supercharged Hypersport</p>
+            </div>
+            <div class="modal-body">
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <span class="spec-label">🔧 Motor</span>
+                        <span class="spec-value">1340cc Supercharged 4-Zylinder</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">💪 Leistung</span>
+                        <span class="spec-value">231 PS</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">🏁 Höchstgeschwindigkeit</span>
+                        <span class="spec-value">300+ km/h</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">⏱️ 0–100 km/h</span>
+                        <span class="spec-value">~3.0 Sekunden</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">⚖️ Gewicht</span>
+                        <span class="spec-value">238 kg</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">💰 Preis</span>
+                        <span class="spec-value">~30.000 €</span>
+                    </div>
+                </div>
+                <div class="modal-highlights">
+                    <h3>✨ Besonderheiten</h3>
+                    <ul>
+                        <li>Kompressor-Motor (Supercharger)</li>
+                        <li>Limited Edition Colors</li>
+                        <li>Track Record Holder</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        /**
+         * Kawasaki Ninja H2 Modal
+         */
+        function openH2Modal() {
+            var modal = document.getElementById('h2Modal');
+            modal.classList.add('modal-visible');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('modalCloseBtn').focus();
+        }
+
+        function closeH2Modal() {
+            var modal = document.getElementById('h2Modal');
+            modal.classList.remove('modal-visible');
+            document.body.style.overflow = '';
+            document.getElementById('h2Trigger').focus();
+        }
+
+        function handleModalOverlayClick(event) {
+            // Close only when clicking the backdrop (overlay), not the modal content
+            if (event.target === document.getElementById('h2Modal')) {
+                closeH2Modal();
+            }
+        }
+
+        // Keyboard support: open on Enter/Space for the trigger
+        document.addEventListener('DOMContentLoaded', function() {
+            var trigger = document.getElementById('h2Trigger');
+            if (trigger) {
+                trigger.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openH2Modal();
+                    }
+                });
+            }
+        });
+
+        // Keyboard support: close on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var modal = document.getElementById('h2Modal');
+                if (modal && modal.classList.contains('modal-visible')) {
+                    closeH2Modal();
+                }
+            }
+        });
+
         /**
          * Dark Mode Toggle Implementation
          * - Persists preference via localStorage
