@@ -5,13 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vrooooom - Kawasaki Motorräder</title>
     <link rel="stylesheet" href="styles.css">
+    <script>
+        // Apply saved preference immediately to avoid flash of wrong theme
+        (function() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark-mode-pending');
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
         <header>
             <div class="header-top">
                 <h1>🏍️ Vrooooom</h1>
-                <button class="theme-toggle" onclick="toggleDarkMode()">🌓</button>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
             </div>
             <p class="subtitle">Schnell, Klassisch & Legendär</p>
         </header>
@@ -50,13 +58,34 @@
         <footer><p>&copy; 2026 Vrooooom Kawasaki | Test Website</p></footer>
     </div>
     <script>
+        /**
+         * Dark Mode Toggle Implementation
+         * - Persists preference via localStorage
+         * - Provides smooth transitions via CSS
+         * - Updates button aria-label for accessibility
+         */
         function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+            var isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            updateToggleButton(isDark);
         }
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
+
+        function updateToggleButton(isDark) {
+            var btn = document.getElementById('themeToggle');
+            if (btn) {
+                btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+                btn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+            }
         }
+
+        // Restore saved preference on page load
+        (function() {
+            var savedMode = localStorage.getItem('darkMode');
+            if (savedMode === 'true') {
+                document.body.classList.add('dark-mode');
+                updateToggleButton(true);
+            }
+        })();
     </script>
 </body>
 </html>
