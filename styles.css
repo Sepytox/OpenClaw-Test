@@ -1421,3 +1421,227 @@ body.dark-mode .fact-card-clickable:focus-visible {
         height: 140px;
     }
 }
+
+/* ==========================================================
+   EXTENDED DATABASE: Nav, Quickstats, Race, Advice, Compare+
+   ========================================================== */
+
+/* --- Section Nav --- */
+.main-nav {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+.nav-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+.nav-btn:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-1px); }
+.nav-btn-active { background: rgba(255, 255, 255, 0.35); font-weight: bold; }
+
+/* --- Card quick stats --- */
+.card-quickstats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0 4px;
+}
+.qstat {
+    background: #eef2f7;
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 0.8rem;
+    color: #333;
+    white-space: nowrap;
+}
+.qstat-license { background: #e3f3e6; }
+body.dark-mode .qstat { background: #2c3440; color: #d6dbe3; }
+body.dark-mode .qstat-license { background: #23402a; }
+
+/* --- Race Section --- */
+.race-section {
+    background: linear-gradient(135deg, #1c1c2b, #2b2b45);
+    color: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 30px 0;
+}
+.race-title { color: #ffd257; margin-bottom: 8px; }
+.race-desc { color: #cfd3e8; font-size: 0.95rem; margin-bottom: 16px; }
+.race-controls { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.btn-race-start, .btn-race-reset, .btn-race-from-bar {
+    background: linear-gradient(135deg, #ff9d00, #ff5e00);
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    padding: 10px 22px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+}
+.btn-race-start:hover:not(:disabled), .btn-race-from-bar:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(255, 120, 0, 0.5);
+}
+.btn-race-start:disabled { opacity: 0.6; cursor: wait; }
+.btn-race-from-bar:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-race-reset { background: #444a63; }
+
+.race-lane { margin-bottom: 18px; }
+.race-lane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+    font-size: 0.95rem;
+}
+.race-lane-name { font-weight: bold; }
+.race-speed {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    color: #7fe7a0;
+    min-width: 90px;
+    text-align: right;
+}
+.race-road {
+    position: relative;
+    height: 46px;
+    background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+    border-radius: 8px;
+    border: 2px solid #555;
+    overflow: hidden;
+}
+.race-road-lines {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    transform: translateY(-50%);
+    background-image: repeating-linear-gradient(90deg, #ffd257 0 24px, transparent 24px 48px);
+    opacity: 0.6;
+}
+.race-rider {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) scaleX(-1);
+    font-size: 1.8rem;
+    transition: none;
+    will-change: left;
+    z-index: 2;
+}
+.race-finish {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.4rem;
+}
+.race-winner .race-road {
+    border-color: #ffd257;
+    box-shadow: 0 0 18px rgba(255, 210, 87, 0.65);
+}
+.race-winner .race-lane-name { color: #ffd257; }
+.race-rider-winner {
+    filter: drop-shadow(0 0 8px gold);
+    animation: winnerPulse 0.9s ease-in-out infinite alternate;
+}
+@keyframes winnerPulse {
+    from { filter: drop-shadow(0 0 4px gold); }
+    to { filter: drop-shadow(0 0 14px gold); }
+}
+.race-result {
+    background: rgba(255, 210, 87, 0.15);
+    border: 1px solid #ffd257;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 1.05rem;
+    color: #ffe9a8;
+}
+
+/* --- Advice / Kaufberatung --- */
+.advice-section { margin: 30px 0; }
+.advice-title { color: #2c3e50; margin-bottom: 16px; }
+body.dark-mode .advice-title { color: #e8eaed; }
+.advice-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+.advice-card {
+    background: #fff;
+    border: 1px solid #e2e6ec;
+    border-radius: 12px;
+    padding: 18px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.2s;
+}
+.advice-card:hover, .advice-card:focus {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    outline: none;
+}
+.advice-emoji { font-size: 2rem; margin-bottom: 6px; }
+.advice-card-title { font-size: 1.05rem; margin-bottom: 4px; color: #2c3e50; }
+.advice-bike-name { margin-bottom: 6px; }
+.advice-reason { font-size: 0.88rem; color: #555; margin-bottom: 8px; }
+.advice-price { font-size: 0.85rem; color: #0b8043; font-weight: bold; }
+body.dark-mode .advice-card { background: #232a35; border-color: #3a4450; }
+body.dark-mode .advice-card-title { color: #e8eaed; }
+body.dark-mode .advice-reason { color: #b6bdc7; }
+body.dark-mode .advice-price { color: #7fe7a0; }
+
+/* --- Modal advice banner --- */
+.modal-advice-banner {
+    background: #eaf6ee;
+    border: 1px solid #bfe3cb;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 14px 0 4px;
+    font-size: 0.92rem;
+}
+body.dark-mode .modal-advice-banner { background: #1e3226; border-color: #2f5a3d; color: #cfe9d8; }
+
+/* --- Compare enhancements --- */
+.best-value-banner {
+    background: linear-gradient(135deg, #fff7df, #ffefb8);
+    border: 1px solid #f0c54a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 0.95rem;
+    color: #6b5200;
+}
+body.dark-mode .best-value-banner {
+    background: #3a3016;
+    border-color: #a88a2f;
+    color: #ffe9a8;
+}
+.cmp-pct { font-size: 0.78rem; opacity: 0.85; }
+.compare-legend-pct { font-size: 0.8rem; color: #777; margin-left: 12px; }
+body.dark-mode .compare-legend-pct { color: #9aa3ae; }
+.compare-advice { margin-top: 16px; }
+.compare-advice-title { font-size: 1rem; margin-bottom: 8px; color: #2c3e50; }
+body.dark-mode .compare-advice-title { color: #e8eaed; }
+.compare-advice-item { font-size: 0.9rem; margin-bottom: 5px; }
+
+/* --- Responsive --- */
+@media (max-width: 640px) {
+    .race-rider { font-size: 1.4rem; }
+    .race-road { height: 38px; }
+    .advice-grid { grid-template-columns: 1fr; }
+    .main-nav { gap: 6px; }
+    .nav-btn { padding: 6px 12px; font-size: 0.85rem; }
+    .card-quickstats { gap: 4px; }
+    .qstat { font-size: 0.72rem; }
+}
