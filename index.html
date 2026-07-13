@@ -19,7 +19,7 @@
         <header>
             <div class="header-top">
                 <h1>🏍️ Vrooooom</h1>
-                <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
             </div>
             <p class="subtitle">Schnell, Klassisch & Legendär</p>
         </header>
@@ -29,25 +29,29 @@
                 <p>Kawasaki ist eine der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren.</p>
             </section>
             <section class="facts">
-                <div class="fact-card">
+                <div class="fact-card fact-card-clickable" data-bike="h2" role="button" tabindex="0" aria-label="Kawasaki Ninja H2 Details anzeigen" title="Klicken für technische Specs">
                     <h3>⚡ Schnellstes Kawasaki Motorrad</h3>
-                    <p><strong class="h2-trigger" id="h2Trigger" onclick="openH2Modal()" role="button" tabindex="0" aria-label="Kawasaki Ninja H2 Details anzeigen" title="Klicken für mehr Infos">Kawasaki Ninja H2</strong></p>
+                    <p><strong>Kawasaki Ninja H2</strong></p>
                     <p>Mit über <strong>300 km/h</strong> Höchstgeschwindigkeit ist die H2 eines der schnellsten Serienmotorräder der Welt. Der Kompressor-Motor liefert gigantische 231 PS.</p>
+                    <span class="card-hint">🔍 Specs anzeigen</span>
                 </div>
-                <div class="fact-card">
+                <div class="fact-card fact-card-clickable" data-bike="klx110" role="button" tabindex="0" aria-label="Kawasaki KLX 110 Details anzeigen" title="Klicken für technische Specs">
                     <h3>🐢 Langsamstes Kawasaki Motorrad</h3>
                     <p><strong>Kawasaki KLX 110</strong></p>
                     <p>Diese kleine Dirt Bike ist perfekt für Anfänger und Kinder. Mit nur 113cc Motor und maximal <strong>~90 km/h</strong>, sicher und zuverlässig.</p>
+                    <span class="card-hint">🔍 Specs anzeigen</span>
                 </div>
-                <div class="fact-card">
+                <div class="fact-card fact-card-clickable" data-bike="hybrid1200" role="button" tabindex="0" aria-label="Kawasaki Ninja 1200 Hybrid Details anzeigen" title="Klicken für technische Specs">
                     <h3>🆕 Neuestes Kawasaki Modell</h3>
                     <p><strong>Kawasaki Ninja 1200 Hybrid (2026)</strong></p>
                     <p>Die neueste Innovation mit Hybrid-Technologie. Verbindung von elektrischer und Benzin-Antrieb für maximale Effizienz und Performance.</p>
+                    <span class="card-hint">🔍 Specs anzeigen</span>
                 </div>
-                <div class="fact-card">
+                <div class="fact-card fact-card-clickable" data-bike="samurai" role="button" tabindex="0" aria-label="Kawasaki Samurai Details anzeigen" title="Klicken für technische Specs">
                     <h3>⏰ Ältestes Kawasaki Motorrad</h3>
                     <p><strong>Kawasaki Samurai (1960er)</strong></p>
                     <p>Das älteste Kawasaki Motorrad stammt aus den 1960er Jahren. Klassisches Design und robuste Technik, die bis heute geschätzt wird.</p>
+                    <span class="card-hint">🔍 Specs anzeigen</span>
                 </div>
             </section>
             <section class="closing">
@@ -57,114 +61,292 @@
         </main>
         <footer><p>&copy; 2026 Vrooooom Kawasaki | Test Website</p></footer>
     </div>
-    <!-- Modal: Kawasaki Ninja H2 Specs -->
-    <div class="modal-overlay" id="h2Modal" role="dialog" aria-modal="true" aria-labelledby="h2ModalTitle" onclick="handleModalOverlayClick(event)">
+
+    <!-- Spec Modal (data-driven, shared by all bikes) -->
+    <div class="modal-overlay" id="specModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
         <div class="modal-content">
-            <button class="modal-close" id="modalCloseBtn" onclick="closeH2Modal()" aria-label="Modal schließen" title="Schließen">&times;</button>
+            <button class="modal-close" id="modalCloseBtn" aria-label="Modal schließen" title="Schließen">&times;</button>
             <div class="modal-header">
-                <span class="modal-icon">⚡</span>
-                <h2 id="h2ModalTitle">Kawasaki Ninja H2</h2>
-                <p class="modal-subtitle">Supercharged Hypersport</p>
+                <span class="modal-icon" id="modalIcon" aria-hidden="true">⚡</span>
+                <h2 id="modalTitle">Motorrad</h2>
+                <p class="modal-subtitle" id="modalSubtitle"></p>
             </div>
             <div class="modal-body">
-                <div class="specs-grid">
-                    <div class="spec-item">
-                        <span class="spec-label">🔧 Motor</span>
-                        <span class="spec-value">1340cc Supercharged 4-Zylinder</span>
-                    </div>
-                    <div class="spec-item">
-                        <span class="spec-label">💪 Leistung</span>
-                        <span class="spec-value">231 PS</span>
-                    </div>
-                    <div class="spec-item">
-                        <span class="spec-label">🏁 Höchstgeschwindigkeit</span>
-                        <span class="spec-value">300+ km/h</span>
-                    </div>
-                    <div class="spec-item">
-                        <span class="spec-label">⏱️ 0–100 km/h</span>
-                        <span class="spec-value">~3.0 Sekunden</span>
-                    </div>
-                    <div class="spec-item">
-                        <span class="spec-label">⚖️ Gewicht</span>
-                        <span class="spec-value">238 kg</span>
-                    </div>
-                    <div class="spec-item">
-                        <span class="spec-label">💰 Preis</span>
-                        <span class="spec-value">~30.000 €</span>
+                <!-- Image Gallery / Slideshow -->
+                <div class="gallery" aria-roledescription="Karussell" aria-label="Bildergalerie">
+                    <div class="gallery-viewport" id="galleryViewport"></div>
+                    <button class="gallery-btn gallery-prev" id="galleryPrev" aria-label="Vorheriges Bild">&#10094;</button>
+                    <button class="gallery-btn gallery-next" id="galleryNext" aria-label="Nächstes Bild">&#10095;</button>
+                    <div class="gallery-footer">
+                        <span class="gallery-counter" id="galleryCounter" aria-live="polite">1/1</span>
+                        <button class="gallery-autoplay" id="galleryAutoplay" aria-label="Auto-Play starten" aria-pressed="false" title="Auto-Play">▶ Auto</button>
                     </div>
                 </div>
-                <div class="modal-highlights">
-                    <h3>✨ Besonderheiten</h3>
-                    <ul>
-                        <li>Kompressor-Motor (Supercharger)</li>
-                        <li>Limited Edition Colors</li>
-                        <li>Track Record Holder</li>
-                    </ul>
-                </div>
+                <!-- Technical Specs -->
+                <div class="specs-grid" id="specsGrid"></div>
             </div>
         </div>
     </div>
 
     <script>
-        /**
-         * Kawasaki Ninja H2 Modal
-         */
-        function openH2Modal() {
-            var modal = document.getElementById('h2Modal');
-            modal.classList.add('modal-visible');
-            document.body.style.overflow = 'hidden';
-            document.getElementById('modalCloseBtn').focus();
-        }
+        'use strict';
 
-        function closeH2Modal() {
-            var modal = document.getElementById('h2Modal');
-            modal.classList.remove('modal-visible');
-            document.body.style.overflow = '';
-            document.getElementById('h2Trigger').focus();
-        }
-
-        function handleModalOverlayClick(event) {
-            // Close only when clicking the backdrop (overlay), not the modal content
-            if (event.target === document.getElementById('h2Modal')) {
-                closeH2Modal();
+        /* ==========================================
+           Bike Data
+           ========================================== */
+        var BIKES = {
+            h2: {
+                name: 'Kawasaki Ninja H2',
+                subtitle: 'Supercharged Hypersport',
+                icon: '⚡',
+                specs: {
+                    'Motor': '1340cc Supercharged 4-Zylinder',
+                    'Leistung': '231 PS',
+                    'Drehmoment': '230 Nm',
+                    'Gewicht': '238 kg',
+                    'Höchstgeschwindigkeit': '300+ km/h',
+                    '0–100 km/h': '~3.0 s',
+                    'Modelljahr': '2015'
+                },
+                slides: [
+                    { emoji: '🏍️', caption: 'Ninja H2 – Seitenansicht', gradient: 'linear-gradient(135deg, #0f2027, #2c5364)' },
+                    { emoji: '💨', caption: 'Supercharger in Aktion', gradient: 'linear-gradient(135deg, #16222a, #3a6073)' },
+                    { emoji: '🏁', caption: 'Auf der Rennstrecke', gradient: 'linear-gradient(135deg, #232526, #414345)' },
+                    { emoji: '🔧', caption: 'Kompressor-Motor Detail', gradient: 'linear-gradient(135deg, #1f1c2c, #928dab)' }
+                ]
+            },
+            klx110: {
+                name: 'Kawasaki KLX 110',
+                subtitle: 'Einsteiger Dirt Bike',
+                icon: '🐢',
+                specs: {
+                    'Motor': '113cc Einzylinder 4-Takt',
+                    'Leistung': '13 PS',
+                    'Drehmoment': '12 Nm',
+                    'Gewicht': '138 kg',
+                    'Höchstgeschwindigkeit': '~90 km/h',
+                    '0–100 km/h': 'N/A',
+                    'Modelljahr': '2008'
+                },
+                slides: [
+                    { emoji: '🏍️', caption: 'KLX 110 – Seitenansicht', gradient: 'linear-gradient(135deg, #134e5e, #71b280)' },
+                    { emoji: '🌲', caption: 'Im Gelände unterwegs', gradient: 'linear-gradient(135deg, #2c3e50, #4ca1af)' },
+                    { emoji: '👶', caption: 'Perfekt für Einsteiger', gradient: 'linear-gradient(135deg, #355c7d, #6c5b7b)' }
+                ]
+            },
+            hybrid1200: {
+                name: 'Kawasaki Ninja 1200 Hybrid',
+                subtitle: 'Hybrid-Innovation 2026',
+                icon: '🆕',
+                specs: {
+                    'Motor': '1200cc Hybrid (Benzin + Elektro)',
+                    'Leistung': '220 PS',
+                    'Drehmoment': '220 Nm',
+                    'Gewicht': '250 kg',
+                    'Höchstgeschwindigkeit': '280 km/h',
+                    '0–100 km/h': '~3.2 s',
+                    'Modelljahr': '2026'
+                },
+                slides: [
+                    { emoji: '🏍️', caption: 'Ninja 1200 Hybrid – Front', gradient: 'linear-gradient(135deg, #42275a, #734b6d)' },
+                    { emoji: '🔋', caption: 'Elektro-Antriebseinheit', gradient: 'linear-gradient(135deg, #141e30, #243b55)' },
+                    { emoji: '⛽', caption: 'Benzin + Elektro kombiniert', gradient: 'linear-gradient(135deg, #283048, #859398)' },
+                    { emoji: '🌆', caption: 'Urban Riding Mode', gradient: 'linear-gradient(135deg, #3a1c71, #d76d77)' }
+                ]
+            },
+            samurai: {
+                name: 'Kawasaki Samurai (Replica)',
+                subtitle: 'Klassiker der 1960er',
+                icon: '⏰',
+                specs: {
+                    'Motor': '500cc 2-Takt',
+                    'Leistung': '45 PS',
+                    'Drehmoment': '55 Nm',
+                    'Gewicht': '150 kg',
+                    'Höchstgeschwindigkeit': '160 km/h',
+                    '0–100 km/h': 'N/A',
+                    'Modelljahr': '1960'
+                },
+                slides: [
+                    { emoji: '🏍️', caption: 'Samurai – Originalzustand', gradient: 'linear-gradient(135deg, #4b1248, #f0c27b)' },
+                    { emoji: '🗾', caption: 'Japanische Klassik', gradient: 'linear-gradient(135deg, #603813, #b29f94)' },
+                    { emoji: '🏛️', caption: 'Museums-Exponat', gradient: 'linear-gradient(135deg, #3e5151, #decba4)' }
+                ]
             }
-        }
+        };
 
-        // Keyboard support: open on Enter/Space for the trigger
-        document.addEventListener('DOMContentLoaded', function() {
-            var trigger = document.getElementById('h2Trigger');
-            if (trigger) {
-                trigger.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        openH2Modal();
-                    }
+        /* ==========================================
+           Modal + Gallery Controller
+           ========================================== */
+        var Modal = (function() {
+            var overlay = document.getElementById('specModal');
+            var titleEl = document.getElementById('modalTitle');
+            var subtitleEl = document.getElementById('modalSubtitle');
+            var iconEl = document.getElementById('modalIcon');
+            var specsGrid = document.getElementById('specsGrid');
+            var viewport = document.getElementById('galleryViewport');
+            var counterEl = document.getElementById('galleryCounter');
+            var autoplayBtn = document.getElementById('galleryAutoplay');
+            var closeBtn = document.getElementById('modalCloseBtn');
+
+            var currentSlides = [];
+            var currentIndex = 0;
+            var autoplayTimer = null;
+            var lastTrigger = null;
+
+            function renderSpecs(specs) {
+                specsGrid.textContent = '';
+                Object.keys(specs).forEach(function(label) {
+                    var item = document.createElement('div');
+                    item.className = 'spec-item';
+                    var labelSpan = document.createElement('span');
+                    labelSpan.className = 'spec-label';
+                    labelSpan.textContent = label;
+                    var valueSpan = document.createElement('span');
+                    valueSpan.className = 'spec-value';
+                    valueSpan.textContent = specs[label];
+                    item.appendChild(labelSpan);
+                    item.appendChild(valueSpan);
+                    specsGrid.appendChild(item);
                 });
             }
-        });
 
-        // Keyboard support: close on Escape
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                var modal = document.getElementById('h2Modal');
-                if (modal && modal.classList.contains('modal-visible')) {
-                    closeH2Modal();
+            function renderSlides(slides) {
+                viewport.textContent = '';
+                slides.forEach(function(slide, i) {
+                    var el = document.createElement('div');
+                    el.className = 'gallery-slide';
+                    el.style.background = slide.gradient;
+                    el.setAttribute('role', 'group');
+                    el.setAttribute('aria-label', 'Bild ' + (i + 1) + ' von ' + slides.length + ': ' + slide.caption);
+                    var emoji = document.createElement('span');
+                    emoji.className = 'gallery-emoji';
+                    emoji.setAttribute('aria-hidden', 'true');
+                    emoji.textContent = slide.emoji;
+                    var caption = document.createElement('span');
+                    caption.className = 'gallery-caption';
+                    caption.textContent = slide.caption;
+                    el.appendChild(emoji);
+                    el.appendChild(caption);
+                    viewport.appendChild(el);
+                });
+            }
+
+            function showSlide(index) {
+                var slides = viewport.children;
+                if (!slides.length) return;
+                currentIndex = (index + slides.length) % slides.length;
+                for (var i = 0; i < slides.length; i++) {
+                    slides[i].classList.toggle('gallery-slide-active', i === currentIndex);
+                }
+                counterEl.textContent = (currentIndex + 1) + '/' + slides.length;
+            }
+
+            function stopAutoplay() {
+                if (autoplayTimer !== null) {
+                    clearInterval(autoplayTimer);
+                    autoplayTimer = null;
+                    autoplayBtn.textContent = '▶ Auto';
+                    autoplayBtn.setAttribute('aria-pressed', 'false');
+                    autoplayBtn.setAttribute('aria-label', 'Auto-Play starten');
                 }
             }
+
+            function toggleAutoplay() {
+                if (autoplayTimer !== null) {
+                    stopAutoplay();
+                } else {
+                    autoplayTimer = setInterval(function() { showSlide(currentIndex + 1); }, 2500);
+                    autoplayBtn.textContent = '⏸ Auto';
+                    autoplayBtn.setAttribute('aria-pressed', 'true');
+                    autoplayBtn.setAttribute('aria-label', 'Auto-Play stoppen');
+                }
+            }
+
+            function open(bikeKey, triggerEl) {
+                var bike = BIKES[bikeKey];
+                if (!bike) return;
+                lastTrigger = triggerEl || null;
+                titleEl.textContent = bike.name;
+                subtitleEl.textContent = bike.subtitle;
+                iconEl.textContent = bike.icon;
+                renderSpecs(bike.specs);
+                renderSlides(bike.slides);
+                currentSlides = bike.slides;
+                showSlide(0);
+                overlay.classList.add('modal-visible');
+                overlay.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                closeBtn.focus();
+            }
+
+            function close() {
+                stopAutoplay();
+                overlay.classList.add('modal-closing');
+                setTimeout(function() {
+                    overlay.classList.remove('modal-visible', 'modal-closing');
+                    overlay.setAttribute('aria-hidden', 'true');
+                }, 220);
+                document.body.style.overflow = '';
+                if (lastTrigger) lastTrigger.focus();
+            }
+
+            function isOpen() {
+                return overlay.classList.contains('modal-visible');
+            }
+
+            /* Event wiring (once) */
+            closeBtn.addEventListener('click', close);
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) close();
+            });
+            document.getElementById('galleryPrev').addEventListener('click', function() {
+                stopAutoplay();
+                showSlide(currentIndex - 1);
+            });
+            document.getElementById('galleryNext').addEventListener('click', function() {
+                stopAutoplay();
+                showSlide(currentIndex + 1);
+            });
+            autoplayBtn.addEventListener('click', toggleAutoplay);
+
+            document.addEventListener('keydown', function(e) {
+                if (!isOpen()) return;
+                if (e.key === 'Escape') {
+                    close();
+                } else if (e.key === 'ArrowLeft') {
+                    stopAutoplay();
+                    showSlide(currentIndex - 1);
+                } else if (e.key === 'ArrowRight') {
+                    stopAutoplay();
+                    showSlide(currentIndex + 1);
+                }
+            });
+
+            return { open: open, close: close };
+        })();
+
+        /* ==========================================
+           Fact-Card Triggers (click + keyboard)
+           ========================================== */
+        document.querySelectorAll('.fact-card-clickable').forEach(function(card) {
+            var key = card.getAttribute('data-bike');
+            card.addEventListener('click', function() {
+                Modal.open(key, card);
+            });
+            card.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    Modal.open(key, card);
+                }
+            });
         });
 
-        /**
-         * Dark Mode Toggle Implementation
-         * - Persists preference via localStorage
-         * - Provides smooth transitions via CSS
-         * - Updates button aria-label for accessibility
-         */
-        function toggleDarkMode() {
-            var isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isDark);
-            updateToggleButton(isDark);
-        }
-
+        /* ==========================================
+           Dark Mode Toggle
+           - Persists preference via localStorage
+           - Updates button aria-label for accessibility
+           ========================================== */
         function updateToggleButton(isDark) {
             var btn = document.getElementById('themeToggle');
             if (btn) {
@@ -173,10 +355,17 @@
             }
         }
 
+        function toggleDarkMode() {
+            var isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            updateToggleButton(isDark);
+        }
+
+        document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
+
         // Restore saved preference on page load
         (function() {
-            var savedMode = localStorage.getItem('darkMode');
-            if (savedMode === 'true') {
+            if (localStorage.getItem('darkMode') === 'true') {
                 document.body.classList.add('dark-mode');
                 updateToggleButton(true);
             }
