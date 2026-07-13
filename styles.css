@@ -234,19 +234,33 @@ body.dark-mode footer {
 }
 
 /* ==========================================
-   H2 TRIGGER (clickable text)
+   CLICKABLE FACT-CARDS
    ========================================== */
-.h2-trigger {
+.fact-card-clickable {
     cursor: pointer;
-    text-decoration: underline dotted;
-    transition: color 0.2s ease, text-shadow 0.2s ease;
+    position: relative;
 }
 
-.h2-trigger:hover,
-.h2-trigger:focus {
-    color: #ffe066;
-    text-shadow: 0 0 8px rgba(255, 224, 102, 0.7);
-    outline: none;
+.fact-card-clickable:focus-visible {
+    outline: 3px solid #ffe066;
+    outline-offset: 3px;
+}
+
+.card-hint {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.82em;
+    opacity: 0.75;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 4px 12px;
+    transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.fact-card-clickable:hover .card-hint,
+.fact-card-clickable:focus .card-hint {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.28);
 }
 
 /* ==========================================
@@ -270,9 +284,27 @@ body.dark-mode footer {
     animation: overlayFadeIn 0.25s ease;
 }
 
+.modal-overlay.modal-closing {
+    animation: overlayFadeOut 0.22s ease forwards;
+}
+
+.modal-overlay.modal-closing .modal-content {
+    animation: modalSlideOut 0.22s ease forwards;
+}
+
 @keyframes overlayFadeIn {
     from { opacity: 0; }
     to   { opacity: 1; }
+}
+
+@keyframes overlayFadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+}
+
+@keyframes modalSlideOut {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to   { opacity: 0; transform: translateY(-20px) scale(0.97); }
 }
 
 .modal-content {
@@ -338,14 +370,135 @@ body.dark-mode footer {
 }
 
 .modal-body {
-    padding: 28px 30px 30px;
+    padding: 24px 30px 30px;
+}
+
+/* ==========================================
+   GALLERY / SLIDESHOW
+   ========================================== */
+.gallery {
+    position: relative;
+    margin-bottom: 22px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.gallery-viewport {
+    position: relative;
+    height: 200px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.gallery-slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: white;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.gallery-slide-active {
+    opacity: 1;
+    visibility: visible;
+    animation: slideFadeIn 0.4s ease;
+}
+
+@keyframes slideFadeIn {
+    from { opacity: 0; transform: scale(1.03); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.gallery-emoji {
+    font-size: 4em;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+}
+
+.gallery-caption {
+    font-size: 0.95em;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 4px 14px;
+    border-radius: 20px;
+}
+
+.gallery-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.45);
+    color: white;
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+    z-index: 5;
+}
+
+.gallery-btn:hover,
+.gallery-btn:focus-visible {
+    background: rgba(0, 0, 0, 0.75);
+    transform: translateY(-50%) scale(1.12);
+    outline: none;
+}
+
+.gallery-prev { left: 10px; }
+.gallery-next { right: 10px; }
+
+.gallery-footer {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    z-index: 5;
+}
+
+.gallery-counter {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 0.82em;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.gallery-autoplay {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    font-size: 0.8em;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.gallery-autoplay:hover,
+.gallery-autoplay:focus-visible {
+    background: rgba(0, 0, 0, 0.8);
+    outline: none;
+}
+
+.gallery-autoplay[aria-pressed="true"] {
+    background: #667eea;
 }
 
 .specs-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
-    margin-bottom: 24px;
 }
 
 .spec-item {
@@ -450,6 +603,30 @@ body.dark-mode .modal-highlights ul li {
     color: #bbb;
 }
 
+body.dark-mode .gallery-autoplay[aria-pressed="true"] {
+    background: #9b8fd8;
+    color: #1a1a2e;
+}
+
+body.dark-mode .card-hint {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+body.dark-mode .fact-card-clickable:focus-visible {
+    outline-color: #9b8fd8;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    .modal-overlay.modal-visible,
+    .modal-content,
+    .gallery-slide-active,
+    .modal-overlay.modal-closing,
+    .modal-overlay.modal-closing .modal-content {
+        animation: none;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     header h1 {
@@ -496,5 +673,36 @@ body.dark-mode .modal-highlights ul li {
 
     .modal-body {
         padding: 20px;
+    }
+
+    .gallery-viewport {
+        height: 160px;
+    }
+
+    .gallery-emoji {
+        font-size: 3em;
+    }
+
+    .gallery-btn {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .modal-content {
+        max-width: 500px;
+    }
+}
+
+/* Small phones */
+@media (max-width: 400px) {
+    .modal-header h2 {
+        font-size: 1.3em;
+    }
+
+    .gallery-viewport {
+        height: 140px;
     }
 }
