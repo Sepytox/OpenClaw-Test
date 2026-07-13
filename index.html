@@ -3,57 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kawasaki Motorräder - Fakten & Wissenswertes</title>
+    <title>Vrooooom - Kawasaki Motorräder</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🏍️ Kawasaki Motorräder</h1>
+            <div class="header-top">
+                <h1>🏍️ Vrooooom</h1>
+                <button class="theme-toggle" onclick="toggleDarkMode()">🌓</button>
+            </div>
             <p class="subtitle">Schnell, Klassisch & Legendär</p>
         </header>
-
         <main>
             <section class="intro">
                 <h2>Über Kawasaki</h2>
                 <p>Kawasaki ist eine der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren.</p>
             </section>
-
             <section class="facts">
                 <div class="fact-card">
                     <h3>⚡ Schnellstes Kawasaki Motorrad</h3>
                     <p><strong>Kawasaki Ninja H2</strong></p>
                     <p>Mit über <strong>300 km/h</strong> Höchstgeschwindigkeit ist die H2 eines der schnellsten Serienmotorräder der Welt. Der Kompressor-Motor liefert gigantische 231 PS.</p>
                 </div>
-
                 <div class="fact-card">
                     <h3>🐢 Langsamstes Kawasaki Motorrad</h3>
                     <p><strong>Kawasaki KLX 110</strong></p>
                     <p>Diese kleine Dirt Bike ist perfekt für Anfänger und Kinder. Mit nur 113cc Motor und maximal <strong>~90 km/h</strong>, sicher und zuverlässig.</p>
                 </div>
-
                 <div class="fact-card">
                     <h3>🆕 Neuestes Kawasaki Modell</h3>
                     <p><strong>Kawasaki Ninja 1200 Hybrid (2026)</strong></p>
                     <p>Die neueste Innovation mit Hybrid-Technologie. Verbindung von elektrischer und Benzin-Antrieb für maximale Effizienz und Performance.</p>
                 </div>
-
                 <div class="fact-card">
                     <h3>⏰ Ältestes Kawasaki Motorrad</h3>
                     <p><strong>Kawasaki Samurai (1960er)</strong></p>
                     <p>Das älteste Kawasaki Motorrad stammt aus den 1960er Jahren. Klassisches Design und robuste Technik, die bis heute geschätzt wird.</p>
                 </div>
             </section>
-
             <section class="closing">
                 <h2>Kawasaki - Tradition trifft Zukunft</h2>
                 <p>Von klassischen Modellen bis zu High-Tech Superbikes - Kawasaki bleibt eine der Top-Adressen für Motorrad-Enthusiasten weltweit.</p>
             </section>
         </main>
-
-        <footer>
-            <p>&copy; 2026 Kawasaki Motorräder | Test Website</p>
-        </footer>
+        <footer><p>&copy; 2026 Vrooooom Kawasaki | Test Website</p></footer>
     </div>
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
 </body>
 </html>
