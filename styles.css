@@ -10,6 +10,7 @@ body {
     color: #333;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -25,18 +26,48 @@ header {
     text-align: center;
     margin-bottom: 40px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    position: relative;
+    transition: background 0.3s ease;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 10px;
 }
 
 header h1 {
     font-size: 3em;
     color: #222;
-    margin-bottom: 10px;
+    margin-bottom: 0;
+    transition: color 0.3s ease;
+}
+
+.theme-toggle {
+    background: none;
+    border: 2px solid #667eea;
+    border-radius: 50px;
+    padding: 8px 16px;
+    font-size: 1.3em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #667eea;
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    background: #667eea;
+    color: white;
+    transform: scale(1.1);
 }
 
 .subtitle {
     font-size: 1.3em;
     color: #666;
     font-style: italic;
+    transition: color 0.3s ease;
 }
 
 main {
@@ -44,6 +75,7 @@ main {
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .intro {
@@ -55,6 +87,7 @@ main {
     font-size: 2em;
     color: #667eea;
     margin-bottom: 15px;
+    transition: color 0.3s ease;
 }
 
 .intro p {
@@ -62,6 +95,7 @@ main {
     color: #555;
     max-width: 600px;
     margin: 0 auto;
+    transition: color 0.3s ease;
 }
 
 .facts {
@@ -76,7 +110,7 @@ main {
     color: white;
     padding: 25px;
     border-radius: 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
@@ -108,17 +142,20 @@ main {
     border-radius: 10px;
     text-align: center;
     margin-top: 40px;
+    transition: background 0.3s ease;
 }
 
 .closing h2 {
     color: #667eea;
     margin-bottom: 15px;
     font-size: 1.8em;
+    transition: color 0.3s ease;
 }
 
 .closing p {
     color: #555;
     font-size: 1.1em;
+    transition: color 0.3s ease;
 }
 
 footer {
@@ -127,6 +164,73 @@ footer {
     margin-top: 40px;
     padding: 20px;
     font-size: 0.9em;
+    transition: color 0.3s ease;
+}
+
+/* ==========================================
+   DARK MODE STYLES
+   ========================================== */
+body.dark-mode {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #e0e0e0;
+}
+
+body.dark-mode header {
+    background: rgba(30, 30, 50, 0.97);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode header h1 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .subtitle {
+    color: #aaa;
+}
+
+body.dark-mode .theme-toggle {
+    border-color: #9b8fd8;
+    color: #9b8fd8;
+}
+
+body.dark-mode .theme-toggle:hover {
+    background: #9b8fd8;
+    color: #1a1a2e;
+}
+
+body.dark-mode main {
+    background: #1e1e32;
+    color: #e0e0e0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .intro h2 {
+    color: #9b8fd8;
+}
+
+body.dark-mode .intro p {
+    color: #bbb;
+}
+
+body.dark-mode .fact-card {
+    background: linear-gradient(135deg, #2d2b55 0%, #3d1a6e 100%);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .closing {
+    background: #252540;
+}
+
+body.dark-mode .closing h2 {
+    color: #9b8fd8;
+}
+
+body.dark-mode .closing p {
+    color: #bbb;
+}
+
+body.dark-mode footer {
+    color: #aaa;
 }
 
 /* Responsive Design */
@@ -153,5 +257,15 @@ footer {
 
     .fact-card p {
         font-size: 0.95em;
+    }
+
+    .header-top {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .theme-toggle {
+        font-size: 1.1em;
+        padding: 6px 14px;
     }
 }
