@@ -11,6 +11,10 @@
             if (localStorage.getItem('darkMode') === 'true') {
                 document.documentElement.classList.add('dark-mode-pending');
             }
+            // Ensure English is set as default if no language preference is stored
+            if (!localStorage.getItem('language')) {
+                localStorage.setItem('language', 'en');
+            }
         })();
     </script>
 </head>
@@ -21,6 +25,7 @@
                 <h1>🏍️ Vrooooom</h1>
                 <div class="header-controls">
                     <div class="lang-switcher" id="langSwitcher" role="group" aria-label="Language switcher">
+                        <span class="lang-label">🌐</span>
                         <button class="lang-btn active" id="btnEn" onclick="setLanguage('en')" aria-label="Switch to English" title="English">
                             🇬🇧 EN
                         </button>
