@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vrooooom - Kawasaki Motorcycles</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Apply saved preferences immediately to avoid flash of wrong theme/language
+        (function() {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.documentElement.classList.add('dark-mode-pending');
+            }
+            // Ensure English is set as default if no language preference is stored
+            if (!localStorage.getItem('language')) {
+                localStorage.setItem('language', 'en');
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <h1>🏍️ Vrooooom</h1>
+                <div class="header-controls">
+                    <div class="lang-switcher" id="langSwitcher" role="group" aria-label="Language switcher">
+                        <span class="lang-label">🌐</span>
+                        <button class="lang-btn active" id="btnEn" onclick="setLanguage('en')" aria-label="Switch to English" title="English">
+                            🇬🇧 EN
+                        </button>
+                        <button class="lang-btn" id="btnDe" onclick="setLanguage('de')" aria-label="Auf Deutsch wechseln" title="Deutsch">
+                            🇩🇪 DE
+                        </button>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
+                </div>
+            </div>
+            <p class="subtitle" data-i18n="subtitle">Fast, Classic &amp; Legendary</p>
+        </header>
+        <main>
+            <section class="intro">
+                <h2 data-i18n="aboutTitle">About Kawasaki</h2>
+                <p data-i18n="aboutText">Kawasaki is one of the oldest and most renowned motorcycle manufacturers in the world. Known for performance, innovation, and reliability for over 100 years.</p>
+            </section>
+            <section class="facts">
+                <div class="fact-card">
+                    <h3 data-i18n="fastestTitle">⚡ Fastest Kawasaki Motorcycle</h3>
+                    <p><strong>Kawasaki Ninja H2</strong></p>
+                    <p data-i18n="fastestDesc">With a top speed of over <strong>300 km/h</strong>, the H2 is one of the fastest production motorcycles in the world. The supercharged engine delivers a massive 231 HP.</p>
+                </div>
+                <div class="fact-card">
+                    <h3 data-i18n="slowestTitle">🐢 Slowest Kawasaki Motorcycle</h3>
+                    <p><strong>Kawasaki KLX 110</strong></p>
+                    <p data-i18n="slowestDesc">This small dirt bike is perfect for beginners and children. With only a 113cc engine and a top speed of <strong>~90 km/h</strong>, it is safe and reliable.</p>
+                </div>
+                <div class="fact-card">
+                    <h3 data-i18n="newestTitle">🆕 Newest Kawasaki Model</h3>
+                    <p><strong>Kawasaki Ninja 1200 Hybrid (2026)</strong></p>
+                    <p data-i18n="newestDesc">The latest innovation with hybrid technology. Combining electric and petrol drive for maximum efficiency and performance.</p>
+                </div>
+                <div class="fact-card">
+                    <h3 data-i18n="oldestTitle">⏰ Oldest Kawasaki Motorcycle</h3>
+                    <p><strong>Kawasaki Samurai (1960s)</strong></p>
+                    <p data-i18n="oldestDesc">The oldest Kawasaki motorcycle dates back to the 1960s. Classic design and robust engineering that is still appreciated to this day.</p>
+                </div>
+            </section>
+            <section class="closing">
+                <h2 data-i18n="closingTitle">Kawasaki — Tradition Meets the Future</h2>
+                <p data-i18n="closingText">From classic models to high-tech superbikes — Kawasaki remains one of the top destinations for motorcycle enthusiasts worldwide.</p>
+            </section>
+        </main>
+        <footer><p data-i18n="footer">&copy; 2026 Vrooooom Kawasaki | Test Website</p></footer>
+    </div>
+
+    <script>
+        /**
+         * =====================================================
+         *  i18n — Internationalisation System
+         *  Supports: English (default) and German
+         *  Persisted via localStorage key: 'language'
+         * =====================================================
+         */
+        var translations = {
+            en: {
+                pageTitle:    'Vrooooom - Kawasaki Motorcycles',
+                subtitle:     'Fast, Classic & Legendary',
+                aboutTitle:   'About Kawasaki',
+                aboutText:    'Kawasaki is one of the oldest and most renowned motorcycle manufacturers in the world. Known for performance, innovation, and reliability for over 100 years.',
+                fastestTitle: '⚡ Fastest Kawasaki Motorcycle',
+                fastestDesc:  'With a top speed of over <strong>300 km/h</strong>, the H2 is one of the fastest production motorcycles in the world. The supercharged engine delivers a massive 231 HP.',
+                slowestTitle: '🐢 Slowest Kawasaki Motorcycle',
+                slowestDesc:  'This small dirt bike is perfect for beginners and children. With only a 113cc engine and a top speed of <strong>~90 km/h</strong>, it is safe and reliable.',
+                newestTitle:  '🆕 Newest Kawasaki Model',
+                newestDesc:   'The latest innovation with hybrid technology. Combining electric and petrol drive for maximum efficiency and performance.',
+                oldestTitle:  '⏰ Oldest Kawasaki Motorcycle',
+                oldestDesc:   'The oldest Kawasaki motorcycle dates back to the 1960s. Classic design and robust engineering that is still appreciated to this day.',
+                closingTitle: 'Kawasaki — Tradition Meets the Future',
+                closingText:  'From classic models to high-tech superbikes — Kawasaki remains one of the top destinations for motorcycle enthusiasts worldwide.',
+                footer:       '© 2026 Vrooooom Kawasaki | Test Website',
+                themeToggleLight: 'Switch to light mode',
+                themeToggleDark:  'Switch to dark mode'
+            },
+            de: {
+                pageTitle:    'Vrooooom - Kawasaki Motorräder',
+                subtitle:     'Schnell, Klassisch & Legendär',
+                aboutTitle:   'Über Kawasaki',
+                aboutText:    'Kawasaki ist einer der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren.',
+                fastestTitle: '⚡ Schnellstes Kawasaki Motorrad',
+                fastestDesc:  'Mit über <strong>300 km/h</strong> Höchstgeschwindigkeit ist die H2 eines der schnellsten Serienmotorräder der Welt. Der Kompressor-Motor liefert gigantische 231 PS.',
+                slowestTitle: '🐢 Langsamstes Kawasaki Motorrad',
+                slowestDesc:  'Diese kleine Dirt Bike ist perfekt für Anfänger und Kinder. Mit nur 113cc Motor und maximal <strong>~90 km/h</strong>, sicher und zuverlässig.',
+                newestTitle:  '🆕 Neuestes Kawasaki Modell',
+                newestDesc:   'Die neueste Innovation mit Hybrid-Technologie. Verbindung von elektrischer und Benzin-Antrieb für maximale Effizienz und Performance.',
+                oldestTitle:  '⏰ Ältestes Kawasaki Motorrad',
+                oldestDesc:   'Das älteste Kawasaki Motorrad stammt aus den 1960er Jahren. Klassisches Design und robuste Technik, die bis heute geschätzt wird.',
+                closingTitle: 'Kawasaki – Tradition trifft Zukunft',
+                closingText:  'Von klassischen Modellen bis zu High-Tech Superbikes – Kawasaki bleibt eine der Top-Adressen für Motorrad-Enthusiasten weltweit.',
+                footer:       '© 2026 Vrooooom Kawasaki | Test Website',
+                themeToggleLight: 'Zum hellen Modus wechseln',
+                themeToggleDark:  'Zum dunklen Modus wechseln'
+            }
+        };
+
+        var currentLang = 'en'; // default
+
+        /**
+         * Apply all [data-i18n] translations and update page metadata.
+         * Uses innerHTML to support embedded <strong> tags in translations.
+         */
+        function applyTranslations(lang) {
+            var t = translations[lang];
+            if (!t) return;
+
+            // Update page title
+            document.title = t.pageTitle;
+
+            // Update html lang attribute
+            document.documentElement.setAttribute('lang', lang);
+
+            // Update all data-i18n elements
+            var elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(function(el) {
+                var key = el.getAttribute('data-i18n');
+                if (t[key] !== undefined) {
+                    el.innerHTML = t[key];
+                }
+            });
+
+            // Update theme toggle aria-labels to match current lang
+            var isDark = document.body.classList.contains('dark-mode');
+            updateToggleButton(isDark);
+        }
+
+        /**
+         * Switch the active language, persist to localStorage, update UI.
+         */
+        function setLanguage(lang) {
+            if (!translations[lang]) return;
+            currentLang = lang;
+            localStorage.setItem('language', lang);
+
+            // Update button active states
+            document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+            document.getElementById('btnDe').classList.toggle('active', lang === 'de');
+
+            applyTranslations(lang);
+        }
+
+        /**
+         * =====================================================
+         *  Dark Mode Toggle
+         * =====================================================
+         */
+        function toggleDarkMode() {
+            var isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            updateToggleButton(isDark);
+        }
+
+        function updateToggleButton(isDark) {
+            var btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            var t = translations[currentLang] || translations['en'];
+            var label = isDark ? t.themeToggleLight : t.themeToggleDark;
+            btn.setAttribute('aria-label', label);
+            btn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+        }
+
+        /**
+         * =====================================================
+         *  Initialisation — runs once on page load
+         * =====================================================
+         */
+        (function init() {
+            // 1. Restore dark mode
+            var savedDark = localStorage.getItem('darkMode');
+            if (savedDark === 'true') {
+                document.body.classList.add('dark-mode');
+                updateToggleButton(true);
+            }
+
+            // 2. Restore language — default to 'en'
+            var savedLang = localStorage.getItem('language') || 'en';
+            currentLang = savedLang;
+
+            // Sync button active state
+            document.getElementById('btnEn').classList.toggle('active', savedLang === 'en');
+            document.getElementById('btnDe').classList.toggle('active', savedLang === 'de');
+
+            // Apply translations (will overwrite static HTML with correct language)
+            applyTranslations(savedLang);
+        })();
+    </script>
+</body>
+</html>
