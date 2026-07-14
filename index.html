@@ -21,13 +21,37 @@
                 <h1>🏍️ Vrooooom</h1>
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
             </div>
-            <p class="subtitle">Schnell, Klassisch &amp; Legendär</p>
+            <p class="subtitle">Schnell, Klassisch &amp; Legendär — 14 Kawasaki Modelle</p>
+            <nav class="main-nav" aria-label="Bereiche">
+                <button class="nav-btn nav-btn-active" data-target="bikesGrid">🏍️ Übersicht</button>
+                <button class="nav-btn" data-target="raceSection">🏁 Speed-Race</button>
+                <button class="nav-btn" data-target="adviceSection">🧭 Kaufberatung</button>
+            </nav>
         </header>
         <main>
             <!-- ===== SEARCH & FILTER ===== -->
             <section class="search-filter-section" aria-label="Suche und Filter">
                 <div class="search-bar-wrap">
                     <input type="search" id="searchInput" class="search-input" placeholder="🔍 Motorrad suchen..." aria-label="Motorrad nach Name suchen">
+                </div>
+                <div class="filter-row">
+                    <label class="filter-label" for="filterCategory">Kategorie:</label>
+                    <select id="filterCategory" class="filter-select" aria-label="Nach Kategorie filtern">
+                        <option value="">Alle Kategorien</option>
+                    </select>
+                    <label class="filter-label" for="filterLicense">Führerschein:</label>
+                    <select id="filterLicense" class="filter-select" aria-label="Nach Führerscheinklasse filtern">
+                        <option value="">Alle Klassen</option>
+                        <option value="A2">A2 (bis 48 PS)</option>
+                        <option value="A">A (unbeschränkt)</option>
+                    </select>
+                    <label class="filter-label" for="filterBudget">Budget:</label>
+                    <select id="filterBudget" class="filter-select" aria-label="Nach Budget filtern">
+                        <option value="">Alle Preise</option>
+                        <option value="b1">Bis 7.000 €</option>
+                        <option value="b2">7.000–15.000 €</option>
+                        <option value="b3">15.000 €+</option>
+                    </select>
                 </div>
                 <div class="filter-row">
                     <label class="filter-label" for="filterPS">PS:</label>
@@ -57,7 +81,7 @@
 
             <section class="intro">
                 <h2>Über Kawasaki</h2>
-                <p>Kawasaki ist eine der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren.</p>
+                <p>Kawasaki ist eine der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren. Hier findest du <strong>14 Modelle</strong> — vom Einsteiger-Bike bis zum 300-km/h-Hypersportler.</p>
             </section>
 
             <!-- ===== FAVORITES SECTION ===== -->
@@ -70,83 +94,33 @@
             <div class="compare-bar" id="compareBar" aria-live="polite" hidden>
                 <span class="compare-bar-info" id="compareBarInfo">0/3 Motorräder gewählt</span>
                 <button class="btn-compare" id="btnCompare" aria-label="Vergleich anzeigen" disabled>⚖️ Vergleich anzeigen</button>
+                <button class="btn-race-from-bar" id="btnRaceFromBar" aria-label="Speed-Race mit Auswahl starten" disabled>🏁 Speed-Race</button>
                 <button class="btn-clear-compare" id="btnClearCompare" aria-label="Vergleichsauswahl leeren">✕ Auswahl leeren</button>
             </div>
 
-            <section class="facts" id="bikesGrid" aria-label="Kawasaki Motorräder">
-                <div class="fact-card fact-card-clickable" data-bike="h2" role="button" tabindex="0" aria-label="Kawasaki Ninja H2 Details anzeigen" title="Klicken für technische Specs">
-                    <div class="card-top-row">
-                        <label class="compare-checkbox-wrap" aria-label="Zum Vergleich hinzufügen">
-                            <input type="checkbox" class="compare-checkbox" data-bike="h2" aria-label="Ninja H2 zum Vergleich">
-                            <span class="compare-checkbox-label">Vergleich</span>
-                        </label>
-                        <button class="fav-btn" data-bike="h2" aria-label="Zu Favoriten hinzufügen" title="Favorit">🤍</button>
-                    </div>
-                    <h3>⚡ Schnellstes Kawasaki Motorrad</h3>
-                    <p><strong>Kawasaki Ninja H2</strong></p>
-                    <p>Mit über <strong>300 km/h</strong> Höchstgeschwindigkeit ist die H2 eines der schnellsten Serienmotorräder der Welt. Der Kompressor-Motor liefert gigantische 231 PS.</p>
-                    <div class="card-footer-row">
-                        <span class="card-hint">🔍 Specs anzeigen</span>
-                        <span class="card-rating-badge" id="ratingBadge-h2" hidden></span>
-                        <span class="card-fav-badge" id="favBadge-h2" hidden>❤️</span>
-                    </div>
-                </div>
-                <div class="fact-card fact-card-clickable" data-bike="klx110" role="button" tabindex="0" aria-label="Kawasaki KLX 110 Details anzeigen" title="Klicken für technische Specs">
-                    <div class="card-top-row">
-                        <label class="compare-checkbox-wrap" aria-label="Zum Vergleich hinzufügen">
-                            <input type="checkbox" class="compare-checkbox" data-bike="klx110" aria-label="KLX 110 zum Vergleich">
-                            <span class="compare-checkbox-label">Vergleich</span>
-                        </label>
-                        <button class="fav-btn" data-bike="klx110" aria-label="Zu Favoriten hinzufügen" title="Favorit">🤍</button>
-                    </div>
-                    <h3>🐢 Langsamstes Kawasaki Motorrad</h3>
-                    <p><strong>Kawasaki KLX 110</strong></p>
-                    <p>Diese kleine Dirt Bike ist perfekt für Anfänger und Kinder. Mit nur 113cc Motor und maximal <strong>~90 km/h</strong>, sicher und zuverlässig.</p>
-                    <div class="card-footer-row">
-                        <span class="card-hint">🔍 Specs anzeigen</span>
-                        <span class="card-rating-badge" id="ratingBadge-klx110" hidden></span>
-                        <span class="card-fav-badge" id="favBadge-klx110" hidden>❤️</span>
-                    </div>
-                </div>
-                <div class="fact-card fact-card-clickable" data-bike="hybrid1200" role="button" tabindex="0" aria-label="Kawasaki Ninja 1200 Hybrid Details anzeigen" title="Klicken für technische Specs">
-                    <div class="card-top-row">
-                        <label class="compare-checkbox-wrap" aria-label="Zum Vergleich hinzufügen">
-                            <input type="checkbox" class="compare-checkbox" data-bike="hybrid1200" aria-label="Ninja 1200 Hybrid zum Vergleich">
-                            <span class="compare-checkbox-label">Vergleich</span>
-                        </label>
-                        <button class="fav-btn" data-bike="hybrid1200" aria-label="Zu Favoriten hinzufügen" title="Favorit">🤍</button>
-                    </div>
-                    <h3>🆕 Neuestes Kawasaki Modell</h3>
-                    <p><strong>Kawasaki Ninja 1200 Hybrid (2026)</strong></p>
-                    <p>Die neueste Innovation mit Hybrid-Technologie. Verbindung von elektrischer und Benzin-Antrieb für maximale Effizienz und Performance.</p>
-                    <div class="card-footer-row">
-                        <span class="card-hint">🔍 Specs anzeigen</span>
-                        <span class="card-rating-badge" id="ratingBadge-hybrid1200" hidden></span>
-                        <span class="card-fav-badge" id="favBadge-hybrid1200" hidden>❤️</span>
-                    </div>
-                </div>
-                <div class="fact-card fact-card-clickable" data-bike="samurai" role="button" tabindex="0" aria-label="Kawasaki Samurai Details anzeigen" title="Klicken für technische Specs">
-                    <div class="card-top-row">
-                        <label class="compare-checkbox-wrap" aria-label="Zum Vergleich hinzufügen">
-                            <input type="checkbox" class="compare-checkbox" data-bike="samurai" aria-label="Kawasaki Samurai zum Vergleich">
-                            <span class="compare-checkbox-label">Vergleich</span>
-                        </label>
-                        <button class="fav-btn" data-bike="samurai" aria-label="Zu Favoriten hinzufügen" title="Favorit">🤍</button>
-                    </div>
-                    <h3>⏰ Ältestes Kawasaki Motorrad</h3>
-                    <p><strong>Kawasaki Samurai (1960er)</strong></p>
-                    <p>Das älteste Kawasaki Motorrad stammt aus den 1960er Jahren. Klassisches Design und robuste Technik, die bis heute geschätzt wird.</p>
-                    <div class="card-footer-row">
-                        <span class="card-hint">🔍 Specs anzeigen</span>
-                        <span class="card-rating-badge" id="ratingBadge-samurai" hidden></span>
-                        <span class="card-fav-badge" id="favBadge-samurai" hidden>❤️</span>
-                    </div>
-                </div>
-            </section>
+            <section class="facts" id="bikesGrid" aria-label="Kawasaki Motorräder"></section>
 
             <div class="no-results" id="noResults" hidden aria-live="polite">
                 <p>😔 Keine Motorräder gefunden. Versuche andere Suchbegriffe oder Filter.</p>
             </div>
+
+            <!-- ===== SPEED RACE SECTION ===== -->
+            <section class="race-section" id="raceSection" aria-label="Speed-Race">
+                <h2 class="race-title">🏁 Rennstrecken-Modus: Speed-Race</h2>
+                <p class="race-desc">Wähle oben bei den Karten 2–3 Motorräder (Vergleich-Checkbox) — oder starte direkt das Standard-Rennen. Jedes Bike fährt bis zu seiner echten Vmax. Der Sieger leuchtet gold! 🏆</p>
+                <div class="race-controls">
+                    <button class="btn-race-start" id="btnRaceStart">🏁 Speed-Race starten</button>
+                    <button class="btn-race-reset" id="btnRaceReset" hidden>↺ Zurücksetzen</button>
+                </div>
+                <div class="race-track" id="raceTrack" aria-live="polite"></div>
+                <p class="race-result" id="raceResult" hidden></p>
+            </section>
+
+            <!-- ===== KAUFBERATUNG SECTION ===== -->
+            <section class="advice-section" id="adviceSection" aria-label="Kaufberatung">
+                <h2 class="advice-title">🧭 Kaufberatung: Welches Motorrad für wen?</h2>
+                <div class="advice-grid" id="adviceGrid"></div>
+            </section>
 
             <section class="closing">
                 <h2>Kawasaki - Tradition trifft Zukunft</h2>
@@ -166,7 +140,6 @@
                 <p class="modal-subtitle" id="modalSubtitle"></p>
             </div>
             <div class="modal-body">
-                <!-- Image Gallery / Slideshow -->
                 <div class="gallery" aria-roledescription="Karussell" aria-label="Bildergalerie">
                     <div class="gallery-viewport" id="galleryViewport"></div>
                     <button class="gallery-btn gallery-prev" id="galleryPrev" aria-label="Vorheriges Bild">&#10094;</button>
@@ -177,7 +150,8 @@
                     </div>
                 </div>
 
-                <!-- Action buttons row -->
+                <div class="modal-advice-banner" id="modalAdviceBanner" hidden></div>
+
                 <div class="modal-actions">
                     <button class="btn-youtube" id="modalYoutubeBtn" aria-label="YouTube Video öffnen" title="YouTube Video in neuem Tab öffnen">
                         ▶ YouTube Video
@@ -187,10 +161,8 @@
                     </button>
                 </div>
 
-                <!-- Technical Specs -->
                 <div class="specs-grid" id="specsGrid"></div>
 
-                <!-- Extended Specs (expandable) -->
                 <details class="extended-specs" id="extendedSpecsSection">
                     <summary class="extended-specs-toggle" aria-label="Erweiterte Spezifikationen ein-/ausklappen">
                         🔧 Erweiterte Spezifikationen
@@ -198,7 +170,6 @@
                     <div class="specs-grid extended-specs-grid" id="extendedSpecsGrid"></div>
                 </details>
 
-                <!-- Review / Rating Section -->
                 <div class="review-section" id="reviewSection">
                     <h3 class="review-title">⭐ Bewertung &amp; Review</h3>
                     <div class="avg-rating-display" id="avgRatingDisplay" hidden></div>
@@ -225,9 +196,10 @@
             <div class="modal-header">
                 <span class="modal-icon" aria-hidden="true">⚖️</span>
                 <h2 id="compareModalTitle">Motorrad Vergleich</h2>
-                <p class="modal-subtitle">Bis zu 3 Modelle vergleichen</p>
+                <p class="modal-subtitle">Seite-an-Seite mit Preis-Leistungs-Bewertung</p>
             </div>
             <div class="modal-body compare-modal-body">
+                <div class="best-value-banner" id="bestValueBanner" hidden></div>
                 <div class="compare-table-wrap">
                     <table class="compare-table" id="compareTable" aria-label="Motorrad Vergleichstabelle">
                         <thead id="compareTableHead"></thead>
@@ -235,9 +207,11 @@
                     </table>
                 </div>
                 <p class="compare-legend">
-                    <span class="compare-legend-best">■ Beste Wert</span>
-                    <span class="compare-legend-worst">■ Schlechteste Wert</span>
+                    <span class="compare-legend-best">■ Bester Wert</span>
+                    <span class="compare-legend-worst">■ Schlechtester Wert</span>
+                    <span class="compare-legend-pct">±% = Unterschied zum besten Wert</span>
                 </p>
+                <div class="compare-advice" id="compareAdvice"></div>
             </div>
         </div>
     </div>
@@ -246,148 +220,286 @@
         'use strict';
 
         /* ==========================================
-           Bike Data
+           Bike Database — 14 Kawasaki Modelle
            ========================================== */
+        function makeSlides(name, emoji, g1, g2) {
+            var enc = encodeURIComponent(name);
+            return [
+                { type: 'img', src: 'https://placehold.co/520x200/' + g1 + '/ffffff?text=' + enc, caption: name + ' – Seitenansicht', gradient: 'linear-gradient(135deg, #' + g1 + ', #' + g2 + ')' },
+                { type: 'emoji', emoji: emoji, caption: name + ' unterwegs', gradient: 'linear-gradient(135deg, #' + g2 + ', #' + g1 + ')' },
+                { type: 'emoji', emoji: '🔧', caption: 'Technik im Detail', gradient: 'linear-gradient(135deg, #232526, #414345)' }
+            ];
+        }
+
+        // Full data model: raw numeric fields for filtering/compare/race + rendered spec maps
+        function makeBike(d) {
+            return {
+                name: d.name,
+                subtitle: d.subtitle,
+                icon: d.icon,
+                category: d.category,
+                license: d.license,
+                youtubeUrl: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(d.youtubeSearchQuery),
+                psRaw: d.ps, kwRaw: d.kw, vmaxRaw: d.vmax, yearRaw: d.year,
+                priceRaw: d.price, weightRaw: d.weight, accelRaw: d.accel,
+                torqueRaw: d.torque, consumptionRaw: d.consumption,
+                advice: d.advice,
+                headline: d.headline || null,
+                blurb: d.blurb,
+                specs: {
+                    'Kategorie': d.category + ' (Klasse ' + d.license + ')',
+                    'Motor': d.engine,
+                    'Leistung': d.ps + ' PS (' + d.kw + ' kW)',
+                    'Drehmoment': d.torque + ' Nm',
+                    'Gewicht (trocken)': d.weight + ' kg',
+                    'Höchstgeschwindigkeit': d.vmax + ' km/h',
+                    '0–100 km/h': d.accel ? '~' + d.accel.toFixed(1) + ' s' : 'N/A',
+                    'Modelljahr': String(d.year),
+                    'Kaufpreis (UVP ca.)': d.price.toLocaleString('de-DE') + ' €'
+                },
+                extendedSpecs: {
+                    'Hubraum': d.cc + ' cc',
+                    'Getriebe': d.transmission,
+                    'Verbrauch': d.consumption.toFixed(1) + ' L/100km',
+                    'Kraftstofftank': d.tank + ' Liter',
+                    'Sitzhöhe': d.seatHeight + ' cm',
+                    'Bremsen vorn': d.brakes.front,
+                    'Bremsen hinten': d.brakes.rear,
+                    'Reifen': d.tires,
+                    'Führerscheinklasse': d.license
+                },
+                slides: makeSlides(d.name, d.icon, d.g1, d.g2)
+            };
+        }
+
         var BIKES = {
-            h2: {
-                name: 'Kawasaki Ninja H2',
-                subtitle: 'Supercharged Hypersport',
-                icon: '⚡',
-                youtubeUrl: 'https://www.youtube.com/results?search_query=Kawasaki+Ninja+H2+Review',
-                psRaw: 231,
-                vmaxRaw: 300,
-                yearRaw: 2015,
-                specs: {
-                    'Motor': '1340cc Supercharged 4-Zylinder',
-                    'Leistung': '231 PS',
-                    'Drehmoment': '230 Nm',
-                    'Gewicht': '238 kg',
-                    'Höchstgeschwindigkeit': '300+ km/h',
-                    '0–100 km/h': '~3.0 s',
-                    'Modelljahr': '2015',
-                    'Preis (ca.)': '~29.000 €'
-                },
-                extendedSpecs: {
-                    'Hubraum': '1340 cc',
-                    'Getriebe': 'Manuell (6-Gang)',
-                    'Verbrauch': '8.2 L/100km',
-                    'Kraftstofftank': '17 Liter',
-                    'Sitzhöhe': '82.5 cm',
-                    'Bremsanlage': 'Radial-Brembo, ABS',
-                    'Reifen vorn': '120/70 ZR17',
-                    'Reifen hinten': '200/55 ZR17'
-                },
-                slides: [
-                    { type: 'img', src: 'https://placehold.co/520x200/0f2027/ffffff?text=Ninja+H2+Seitenansicht', caption: 'Ninja H2 – Seitenansicht', gradient: 'linear-gradient(135deg, #0f2027, #2c5364)' },
-                    { type: 'img', src: 'https://placehold.co/520x200/16222a/ffffff?text=Supercharger', caption: 'Supercharger in Aktion', gradient: 'linear-gradient(135deg, #16222a, #3a6073)' },
-                    { type: 'emoji', emoji: '🏁', caption: 'Auf der Rennstrecke', gradient: 'linear-gradient(135deg, #232526, #414345)' },
-                    { type: 'emoji', emoji: '🔧', caption: 'Kompressor-Motor Detail', gradient: 'linear-gradient(135deg, #1f1c2c, #928dab)' }
-                ]
-            },
-            klx110: {
-                name: 'Kawasaki KLX 110',
-                subtitle: 'Einsteiger Dirt Bike',
-                icon: '🐢',
-                youtubeUrl: 'https://www.youtube.com/results?search_query=Kawasaki+KLX+110+Dirt+Bike',
-                psRaw: 13,
-                vmaxRaw: 90,
-                yearRaw: 2008,
-                specs: {
-                    'Motor': '113cc Einzylinder 4-Takt',
-                    'Leistung': '13 PS',
-                    'Drehmoment': '12 Nm',
-                    'Gewicht': '138 kg',
-                    'Höchstgeschwindigkeit': '~90 km/h',
-                    '0–100 km/h': 'N/A',
-                    'Modelljahr': '2008',
-                    'Preis (ca.)': '~2.500 €'
-                },
-                extendedSpecs: {
-                    'Hubraum': '112 cc',
-                    'Getriebe': 'Manuell (4-Gang)',
-                    'Verbrauch': '2.5 L/100km',
-                    'Kraftstofftank': '3.5 Liter',
-                    'Sitzhöhe': '73 cm',
-                    'Bremsanlage': 'Scheibenbremse vorn, Trommel hinten',
-                    'Reifen vorn': '70/100-17',
-                    'Reifen hinten': '90/100-14'
-                },
-                slides: [
-                    { type: 'img', src: 'https://placehold.co/520x200/134e5e/ffffff?text=KLX+110+Seitenansicht', caption: 'KLX 110 – Seitenansicht', gradient: 'linear-gradient(135deg, #134e5e, #71b280)' },
-                    { type: 'img', src: 'https://placehold.co/520x200/2c3e50/ffffff?text=Im+Gelände', caption: 'Im Gelände unterwegs', gradient: 'linear-gradient(135deg, #2c3e50, #4ca1af)' },
-                    { type: 'emoji', emoji: '👶', caption: 'Perfekt für Einsteiger', gradient: 'linear-gradient(135deg, #355c7d, #6c5b7b)' }
-                ]
-            },
-            hybrid1200: {
-                name: 'Kawasaki Ninja 1200 Hybrid',
-                subtitle: 'Hybrid-Innovation 2026',
-                icon: '🆕',
-                youtubeUrl: 'https://www.youtube.com/results?search_query=Kawasaki+Ninja+1200+Hybrid+2026',
-                psRaw: 220,
-                vmaxRaw: 280,
-                yearRaw: 2026,
-                specs: {
-                    'Motor': '1200cc Hybrid (Benzin + Elektro)',
-                    'Leistung': '220 PS',
-                    'Drehmoment': '220 Nm',
-                    'Gewicht': '250 kg',
-                    'Höchstgeschwindigkeit': '280 km/h',
-                    '0–100 km/h': '~3.2 s',
-                    'Modelljahr': '2026',
-                    'Preis (ca.)': '~35.000 €'
-                },
-                extendedSpecs: {
-                    'Hubraum': '1198 cc (Verbrenner)',
-                    'Getriebe': 'Automatisch (E-Assist)',
-                    'Verbrauch': '5.4 L/100km',
-                    'Kraftstofftank': '19 Liter',
-                    'Sitzhöhe': '84 cm',
-                    'Bremsanlage': 'Brembo Monobloc, Regeneratives Bremsen',
-                    'Reifen vorn': '120/70 ZR17',
-                    'Reifen hinten': '190/55 ZR17'
-                },
-                slides: [
-                    { type: 'img', src: 'https://placehold.co/520x200/42275a/ffffff?text=Ninja+1200+Hybrid', caption: 'Ninja 1200 Hybrid – Front', gradient: 'linear-gradient(135deg, #42275a, #734b6d)' },
-                    { type: 'img', src: 'https://placehold.co/520x200/141e30/ffffff?text=Elektro-Antrieb', caption: 'Elektro-Antriebseinheit', gradient: 'linear-gradient(135deg, #141e30, #243b55)' },
-                    { type: 'emoji', emoji: '⛽', caption: 'Benzin + Elektro kombiniert', gradient: 'linear-gradient(135deg, #283048, #859398)' },
-                    { type: 'emoji', emoji: '🌆', caption: 'Urban Riding Mode', gradient: 'linear-gradient(135deg, #3a1c71, #d76d77)' }
-                ]
-            },
-            samurai: {
-                name: 'Kawasaki Samurai (Replica)',
-                subtitle: 'Klassiker der 1960er',
-                icon: '⏰',
-                youtubeUrl: 'https://www.youtube.com/results?search_query=Kawasaki+Samurai+1960s+Classic',
-                psRaw: 45,
-                vmaxRaw: 160,
-                yearRaw: 1960,
-                specs: {
-                    'Motor': '500cc 2-Takt',
-                    'Leistung': '45 PS',
-                    'Drehmoment': '55 Nm',
-                    'Gewicht': '150 kg',
-                    'Höchstgeschwindigkeit': '160 km/h',
-                    '0–100 km/h': 'N/A',
-                    'Modelljahr': '1960',
-                    'Preis (ca.)': '~8.000 € (Replica)'
-                },
-                extendedSpecs: {
-                    'Hubraum': '500 cc',
-                    'Getriebe': 'Manuell (4-Gang)',
-                    'Verbrauch': '6.0 L/100km',
-                    'Kraftstofftank': '13 Liter',
-                    'Sitzhöhe': '78 cm',
-                    'Bremsanlage': 'Trommelbremse vorn & hinten',
-                    'Reifen vorn': '3.25-18',
-                    'Reifen hinten': '3.50-18'
-                },
-                slides: [
-                    { type: 'img', src: 'https://placehold.co/520x200/4b1248/ffffff?text=Samurai+Originalzustand', caption: 'Samurai – Originalzustand', gradient: 'linear-gradient(135deg, #4b1248, #f0c27b)' },
-                    { type: 'img', src: 'https://placehold.co/520x200/603813/ffffff?text=Japanische+Klassik', caption: 'Japanische Klassik', gradient: 'linear-gradient(135deg, #603813, #b29f94)' },
-                    { type: 'emoji', emoji: '🏛️', caption: 'Museums-Exponat', gradient: 'linear-gradient(135deg, #3e5151, #decba4)' }
-                ]
-            }
+            h2: makeBike({
+                name: 'Kawasaki Ninja H2', subtitle: 'Supercharged Hypersport', icon: '⚡',
+                category: 'Hypersportler', license: 'A',
+                headline: '⚡ Schnellstes Kawasaki Motorrad',
+                blurb: 'Mit über 300 km/h ist die H2 eines der schnellsten Serienmotorräder der Welt. Der Kompressor liefert 231 PS.',
+                engine: '1340cc Supercharged 4-Zylinder, 4-Takt', cc: 1340,
+                ps: 231, kw: 170, torque: 141, weight: 216, vmax: 300, accel: 3.0,
+                seatHeight: 82.5, tank: 17, consumption: 8.2, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Doppelscheibe 330mm, Brembo Stylema', rear: 'Scheibe 250mm' },
+                tires: '120/70 ZR17 + 200/55 ZR17', year: 2015, price: 33000,
+                youtubeSearchQuery: 'Kawasaki Ninja H2 Review',
+                advice: 'Für extreme Speed-Enthusiasten mit großem Budget',
+                g1: '0f2027', g2: '2c5364'
+            }),
+            klx110: makeBike({
+                name: 'Kawasaki KLX 110', subtitle: 'Einsteiger Dirt Bike', icon: '🐢',
+                category: 'Off-Road', license: 'A2',
+                headline: '🐢 Langsamstes Kawasaki Motorrad',
+                blurb: 'Kleine Dirt Bike, perfekt für Anfänger und Kinder. 112cc, maximal ~90 km/h — sicher und zuverlässig.',
+                engine: '112cc Einzylinder, 4-Takt', cc: 112,
+                ps: 7, kw: 5.4, torque: 8, weight: 76, vmax: 90, accel: 0,
+                seatHeight: 68, tank: 3.8, consumption: 2.5, transmission: 'Halbautomatik (4-Gang)',
+                brakes: { front: 'Trommel', rear: 'Trommel' },
+                tires: '2.50-14 + 3.00-12', year: 2008, price: 2800,
+                youtubeSearchQuery: 'Kawasaki KLX 110 Dirt Bike',
+                advice: 'Für Kinder & absolute Off-Road-Einsteiger',
+                g1: '134e5e', g2: '71b280'
+            }),
+            hybrid1200: makeBike({
+                name: 'Kawasaki Ninja 1200 Hybrid', subtitle: 'Hybrid-Innovation 2026', icon: '🆕',
+                category: 'Sport Tourer', license: 'A',
+                headline: '🆕 Neuestes Kawasaki Modell',
+                blurb: 'Die neueste Innovation mit Hybrid-Technologie: E-Motor + Benziner für Effizienz und Performance.',
+                engine: '1200cc Hybrid (Benzin + Elektro)', cc: 1198,
+                ps: 220, kw: 162, torque: 220, weight: 227, vmax: 280, accel: 3.2,
+                seatHeight: 84, tank: 19, consumption: 5.4, transmission: 'Automatisch (E-Assist)',
+                brakes: { front: 'Doppelscheibe, Brembo Monobloc', rear: 'Scheibe, regenerativ' },
+                tires: '120/70 ZR17 + 190/55 ZR17', year: 2026, price: 35000,
+                youtubeSearchQuery: 'Kawasaki Ninja Hybrid 2026',
+                advice: 'Für Tech-Pioniere & effiziente Vielfahrer',
+                g1: '42275a', g2: '734b6d'
+            }),
+            samurai: makeBike({
+                name: 'Kawasaki Samurai (Replica)', subtitle: 'Klassiker der 1960er', icon: '⏰',
+                category: 'Klassiker', license: 'A2',
+                headline: '⏰ Ältestes Kawasaki Motorrad',
+                blurb: 'Das älteste Kawasaki-Modell aus den 1960er Jahren. Klassisches Design und robuste Technik.',
+                engine: '250cc 2-Zylinder, 2-Takt', cc: 247,
+                ps: 31, kw: 23, torque: 25, weight: 145, vmax: 160, accel: 0,
+                seatHeight: 78, tank: 13, consumption: 6.0, transmission: 'Manuell (5-Gang)',
+                brakes: { front: 'Trommel', rear: 'Trommel' },
+                tires: '3.00-18 + 3.25-18', year: 1966, price: 8000,
+                youtubeSearchQuery: 'Kawasaki Samurai A1 1960s Classic',
+                advice: 'Für Sammler & Nostalgie-Fans',
+                g1: '4b1248', g2: 'f0c27b'
+            }),
+            z650: makeBike({
+                name: 'Kawasaki Z650', subtitle: 'Einsteiger-Naked mit Biss', icon: '🟢',
+                category: 'Naked', license: 'A2',
+                blurb: 'Das perfekte Einsteiger-Naked: leicht, agil, 68 PS — auf A2 drosselbar. Preis-Leistungs-Tipp!',
+                engine: '649cc 2-Zylinder Reihenmotor, 4-Takt', cc: 649,
+                ps: 68, kw: 50, torque: 64, weight: 168, vmax: 190, accel: 4.2,
+                seatHeight: 79, tank: 15, consumption: 4.3, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Doppelscheibe 300mm', rear: 'Scheibe 220mm' },
+                tires: '120/70 ZR17 + 160/60 ZR17', year: 2024, price: 7700,
+                youtubeSearchQuery: 'Kawasaki Z650 Review',
+                advice: 'Für Anfänger — bester Allrounder zum Start',
+                g1: '11998e', g2: '38ef7d'
+            }),
+            ninja400: makeBike({
+                name: 'Kawasaki Ninja 400', subtitle: 'Anfänger-Sportler', icon: '🏍️',
+                category: 'Sportler', license: 'A2',
+                blurb: 'Leichter Supersport-Look mit anfängerfreundlichen 45 PS. Ideal für den A2-Führerschein und kleines Budget.',
+                engine: '399cc 2-Zylinder Reihenmotor, 4-Takt', cc: 399,
+                ps: 45, kw: 33, torque: 38, weight: 168, vmax: 190, accel: 4.8,
+                seatHeight: 78.5, tank: 14, consumption: 3.9, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Scheibe 310mm', rear: 'Scheibe 220mm' },
+                tires: '110/70-17 + 150/60-17', year: 2023, price: 6500,
+                youtubeSearchQuery: 'Kawasaki Ninja 400 Review',
+                advice: 'Für Budget-Käufer & Sport-Einsteiger',
+                g1: '1a2980', g2: '26d0ce'
+            }),
+            zx10r: makeBike({
+                name: 'Kawasaki Ninja ZX-10R', subtitle: 'Superbike-Weltmeister', icon: '🏆',
+                category: 'Supersportler', license: 'A',
+                blurb: 'Das WSBK-Championship-Bike: 203 PS, 299 km/h, Rennstrecken-DNA für die Straße.',
+                engine: '998cc 4-Zylinder Reihenmotor, 4-Takt', cc: 998,
+                ps: 203, kw: 149.3, torque: 114.9, weight: 186, vmax: 299, accel: 2.9,
+                seatHeight: 83.5, tank: 17, consumption: 6.9, transmission: 'Manuell (6-Gang, Quickshifter)',
+                brakes: { front: 'Doppelscheibe 330mm, Brembo M50', rear: 'Scheibe 220mm' },
+                tires: '120/70 ZR17 + 190/55 ZR17', year: 2024, price: 20400,
+                youtubeSearchQuery: 'Kawasaki Ninja ZX-10R Review',
+                advice: 'Für Speed-Fans & Rennstrecken-Fahrer',
+                g1: '0b8043', g2: '004d25'
+            }),
+            versys1000: makeBike({
+                name: 'Kawasaki Versys 1000', subtitle: 'Adventure Tourer', icon: '🌍',
+                category: 'Adventure', license: 'A',
+                blurb: 'Der Alleskönner für lange Reisen: 120 PS, aufrechte Sitzposition, 21-Liter-Tank für maximale Reichweite.',
+                engine: '1043cc 4-Zylinder Reihenmotor, 4-Takt', cc: 1043,
+                ps: 120, kw: 88.2, torque: 102, weight: 235, vmax: 220, accel: 3.9,
+                seatHeight: 84, tank: 21, consumption: 5.6, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Doppelscheibe 310mm', rear: 'Scheibe 250mm' },
+                tires: '120/70 ZR17 + 180/55 ZR17', year: 2024, price: 13500,
+                youtubeSearchQuery: 'Kawasaki Versys 1000 Review',
+                advice: 'Für Abenteurer & Langstrecken-Touren',
+                g1: '355c7d', g2: '6c5b7b'
+            }),
+            w800: makeBike({
+                name: 'Kawasaki W800', subtitle: 'Retro-Klassiker', icon: '🕰️',
+                category: 'Klassiker', license: 'A2',
+                blurb: 'Zeitloser Retro-Charme: luftgekühlter Twin mit Kardanwelle-Optik, 48 PS — perfekt A2-tauglich.',
+                engine: '773cc 2-Zylinder Reihenmotor, 4-Takt, luftgekühlt', cc: 773,
+                ps: 48, kw: 35, torque: 62.9, weight: 202, vmax: 170, accel: 6.0,
+                seatHeight: 79, tank: 15, consumption: 4.7, transmission: 'Manuell (5-Gang)',
+                brakes: { front: 'Scheibe 320mm', rear: 'Scheibe 270mm' },
+                tires: '100/90-19 + 130/80-18', year: 2024, price: 10500,
+                youtubeSearchQuery: 'Kawasaki W800 Review',
+                advice: 'Für Klassik-Lover & entspannte Cruiser',
+                g1: '603813', g2: 'b29f94'
+            }),
+            h2sx: makeBike({
+                name: 'Kawasaki Ninja H2 SX', subtitle: 'Supercharged Sport Tourer', icon: '🚀',
+                category: 'Sport Tourer', license: 'A',
+                blurb: 'Kompressor-Power trifft Touring-Komfort: 200 PS mit Koffer-Option und Radar-Assistenzsystemen.',
+                engine: '998cc Supercharged 4-Zylinder, 4-Takt', cc: 998,
+                ps: 200, kw: 147.1, torque: 137.3, weight: 240, vmax: 299, accel: 3.1,
+                seatHeight: 83.5, tank: 19, consumption: 6.4, transmission: 'Manuell (6-Gang, Quickshifter)',
+                brakes: { front: 'Doppelscheibe 320mm, Brembo', rear: 'Scheibe 250mm' },
+                tires: '120/70 ZR17 + 190/55 ZR17', year: 2024, price: 25500,
+                youtubeSearchQuery: 'Kawasaki Ninja H2 SX Review',
+                advice: 'Für schnelle Langstrecken-Reisende',
+                g1: '16222a', g2: '3a6073'
+            }),
+            h2se: makeBike({
+                name: 'Kawasaki Ninja H2 SX SE', subtitle: 'Luxury Supercharged Tourer', icon: '💎',
+                category: 'Sport Tourer', license: 'A',
+                blurb: 'Die Luxus-Ausführung: semi-aktives Skyhook-Fahrwerk, TFT, Kurvenlicht — Kompressor-Touring in Vollausstattung.',
+                engine: '998cc Supercharged 4-Zylinder, 4-Takt', cc: 998,
+                ps: 200, kw: 147.1, torque: 137.3, weight: 243, vmax: 299, accel: 3.1,
+                seatHeight: 83.5, tank: 19, consumption: 6.4, transmission: 'Manuell (6-Gang, Quickshifter)',
+                brakes: { front: 'Doppelscheibe 320mm, Brembo Stylema', rear: 'Scheibe 250mm' },
+                tires: '120/70 ZR17 + 190/55 ZR17', year: 2024, price: 29000,
+                youtubeSearchQuery: 'Kawasaki Ninja H2 SX SE Review',
+                advice: 'Für Luxus-Tourer, die alles wollen',
+                g1: '1f1c2c', g2: '928dab'
+            }),
+            ninja650: makeBike({
+                name: 'Kawasaki Ninja 650', subtitle: 'Mid-Range Sportler', icon: '🎯',
+                category: 'Sportler', license: 'A2',
+                blurb: 'Der goldene Mittelweg: sportliche Verkleidung, alltagstaugliche 68 PS, A2-drosselbar.',
+                engine: '649cc 2-Zylinder Reihenmotor, 4-Takt', cc: 649,
+                ps: 68, kw: 50, torque: 64, weight: 172, vmax: 200, accel: 4.5,
+                seatHeight: 79, tank: 15, consumption: 4.3, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Doppelscheibe 300mm', rear: 'Scheibe 220mm' },
+                tires: '120/70 ZR17 + 160/60 ZR17', year: 2024, price: 8200,
+                youtubeSearchQuery: 'Kawasaki Ninja 650 Review',
+                advice: 'Für Aufsteiger vom Einsteiger-Bike',
+                g1: '141e30', g2: '243b55'
+            }),
+            klx300: makeBike({
+                name: 'Kawasaki KLX 300', subtitle: 'Dual-Sport Enduro', icon: '⛰️',
+                category: 'Off-Road', license: 'A2',
+                blurb: 'Leichte Enduro für Trail und Straße: 292cc Single, langer Federweg, geht fast überall durch.',
+                engine: '292cc Einzylinder, 4-Takt', cc: 292,
+                ps: 27, kw: 20, torque: 26.3, weight: 137, vmax: 137, accel: 7.5,
+                seatHeight: 89.5, tank: 7.7, consumption: 3.5, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Scheibe 270mm', rear: 'Scheibe 240mm' },
+                tires: '3.00-21 + 4.60-18', year: 2024, price: 6200,
+                youtubeSearchQuery: 'Kawasaki KLX 300 Review',
+                advice: 'Für Off-Road-Abenteuer & Trail-Fahrer',
+                g1: '2c3e50', g2: '4ca1af'
+            }),
+            eliminator400: makeBike({
+                name: 'Kawasaki Eliminator 400', subtitle: 'Cruiser-Klassiker neu aufgelegt', icon: '😎',
+                category: 'Cruiser', license: 'A2',
+                blurb: 'Entspannter Cruiser mit extrem niedriger Sitzhöhe (73,5 cm) — ideal für kleinere Fahrer und relaxtes Gleiten.',
+                engine: '451cc 2-Zylinder Reihenmotor, 4-Takt', cc: 451,
+                ps: 45, kw: 33.4, torque: 42.6, weight: 176, vmax: 165, accel: 5.5,
+                seatHeight: 73.5, tank: 13, consumption: 4.1, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Scheibe 310mm', rear: 'Scheibe 240mm' },
+                tires: '130/70-18 + 150/80-16', year: 2024, price: 6700,
+                youtubeSearchQuery: 'Kawasaki Eliminator 400 Review',
+                advice: 'Für Cruiser-Fans & kleinere Fahrer',
+                g1: '870000', g2: '190a05'
+            })
         };
+
+        /* ==========================================
+           Card Rendering (dynamic, all 14 bikes)
+           ========================================== */
+        (function renderCards() {
+            var grid = document.getElementById('bikesGrid');
+            Object.keys(BIKES).forEach(function(key) {
+                var b = BIKES[key];
+                var card = document.createElement('div');
+                card.className = 'fact-card fact-card-clickable';
+                card.setAttribute('data-bike', key);
+                card.setAttribute('role', 'button');
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('aria-label', b.name + ' Details anzeigen');
+                card.setAttribute('title', 'Klicken für technische Specs');
+                card.innerHTML =
+                    '<div class="card-top-row">' +
+                        '<label class="compare-checkbox-wrap" aria-label="Zum Vergleich hinzufügen">' +
+                            '<input type="checkbox" class="compare-checkbox" data-bike="' + key + '" aria-label="' + b.name + ' zum Vergleich">' +
+                            '<span class="compare-checkbox-label">Vergleich</span>' +
+                        '</label>' +
+                        '<button class="fav-btn" data-bike="' + key + '" aria-label="Zu Favoriten hinzufügen" title="Favorit">🤍</button>' +
+                    '</div>' +
+                    '<h3>' + (b.headline || b.icon + ' ' + b.name) + '</h3>' +
+                    '<p><strong>' + b.name + '</strong> — ' + b.subtitle + '</p>' +
+                    '<p>' + b.blurb + '</p>' +
+                    '<div class="card-quickstats">' +
+                        '<span class="qstat">🐎 ' + b.psRaw + ' PS</span>' +
+                        '<span class="qstat">🏁 ' + b.vmaxRaw + ' km/h</span>' +
+                        '<span class="qstat">💶 ' + b.priceRaw.toLocaleString('de-DE') + ' €</span>' +
+                        '<span class="qstat qstat-license">🪪 ' + b.license + '</span>' +
+                    '</div>' +
+                    '<div class="card-footer-row">' +
+                        '<span class="card-hint">🔍 Specs anzeigen</span>' +
+                        '<span class="card-rating-badge" id="ratingBadge-' + key + '" hidden></span>' +
+                        '<span class="card-fav-badge" id="favBadge-' + key + '" hidden>❤️</span>' +
+                    '</div>';
+                grid.appendChild(card);
+            });
+        })();
 
         /* ==========================================
            LocalStorage Helpers
@@ -410,7 +522,6 @@
             var favs = Store.get(KEY, []);
 
             function save() { Store.set(KEY, favs); }
-
             function isFav(bikeKey) { return favs.indexOf(bikeKey) !== -1; }
 
             function toggle(bikeKey) {
@@ -425,20 +536,17 @@
             function renderAll() {
                 Object.keys(BIKES).forEach(function(key) {
                     var isFaved = isFav(key);
-                    // Card fav button
                     var btn = document.querySelector('.fav-btn[data-bike="' + key + '"]');
                     if (btn) {
                         btn.textContent = isFaved ? '❤️' : '🤍';
                         btn.setAttribute('aria-label', isFaved ? 'Von Favoriten entfernen' : 'Zu Favoriten hinzufügen');
                     }
-                    // Card fav badge
                     var badge = document.getElementById('favBadge-' + key);
                     if (badge) { badge.hidden = !isFaved; }
                 });
             }
 
             function getAll() { return favs.slice(); }
-
             return { isFav: isFav, toggle: toggle, renderAll: renderAll, getAll: getAll };
         })();
 
@@ -451,10 +559,7 @@
 
             function render() {
                 var favKeys = Favorites.getAll();
-                if (favKeys.length === 0) {
-                    section.hidden = true;
-                    return;
-                }
+                if (favKeys.length === 0) { section.hidden = true; return; }
                 section.hidden = false;
                 grid.innerHTML = '';
                 favKeys.forEach(function(key) {
@@ -477,7 +582,6 @@
                     grid.appendChild(card);
                 });
             }
-
             return { render: render };
         })();
 
@@ -486,7 +590,7 @@
            ========================================== */
         var Reviews = (function() {
             var KEY = 'vroooom_reviews';
-            var data = Store.get(KEY, {}); // { bikeKey: [{rating, text, date}] }
+            var data = Store.get(KEY, {});
 
             function save() { Store.set(KEY, data); }
 
@@ -504,15 +608,11 @@
                 return (sum / reviews.length).toFixed(1);
             }
 
-            function getAll(bikeKey) {
-                return data[bikeKey] ? data[bikeKey].slice() : [];
-            }
+            function getAll(bikeKey) { return data[bikeKey] ? data[bikeKey].slice() : []; }
 
-            function starsStr(rating, filled) {
+            function starsStr(rating) {
                 var s = '';
-                for (var i = 1; i <= 5; i++) {
-                    s += i <= rating ? (filled ? '★' : '★') : '☆';
-                }
+                for (var i = 1; i <= 5; i++) s += i <= rating ? '★' : '☆';
                 return s;
             }
 
@@ -524,21 +624,16 @@
                         badge.hidden = false;
                         badge.textContent = '⭐ ' + avg;
                         badge.setAttribute('aria-label', 'Durchschnittsbewertung: ' + avg + ' Sterne');
-                    } else {
-                        badge.hidden = true;
-                    }
+                    } else { badge.hidden = true; }
                 }
             }
 
-            function updateAllBadges() {
-                Object.keys(BIKES).forEach(updateCardBadge);
-            }
-
+            function updateAllBadges() { Object.keys(BIKES).forEach(updateCardBadge); }
             return { add: add, getAvg: getAvg, getAll: getAll, starsStr: starsStr, updateAllBadges: updateAllBadges };
         })();
 
         /* ==========================================
-           Compare System
+           Compare System (selection)
            ========================================== */
         var Compare = (function() {
             var selected = [];
@@ -546,6 +641,7 @@
             var bar = document.getElementById('compareBar');
             var barInfo = document.getElementById('compareBarInfo');
             var btnCompare = document.getElementById('btnCompare');
+            var btnRace = document.getElementById('btnRaceFromBar');
             var btnClear = document.getElementById('btnClearCompare');
 
             function updateBar() {
@@ -553,6 +649,7 @@
                 bar.hidden = count === 0;
                 barInfo.textContent = count + '/3 Motorräder gewählt';
                 btnCompare.disabled = count < 2;
+                btnRace.disabled = count < 2;
             }
 
             function toggle(bikeKey, checkboxEl) {
@@ -581,48 +678,50 @@
 
             btnClear.addEventListener('click', clear);
             btnCompare.addEventListener('click', function() { CompareModal.open(selected); });
+            btnRace.addEventListener('click', function() {
+                document.getElementById('raceSection').scrollIntoView({ behavior: 'smooth' });
+                Race.start(selected);
+            });
 
             return { toggle: toggle, clear: clear, getSelected: getSelected };
         })();
 
         /* ==========================================
-           Compare Modal
+           Compare Modal — mit Preis-Leistung & %-Diff
            ========================================== */
         var CompareModal = (function() {
             var overlay = document.getElementById('compareModal');
             var closeBtn = document.getElementById('compareModalCloseBtn');
             var thead = document.getElementById('compareTableHead');
             var tbody = document.getElementById('compareTableBody');
+            var banner = document.getElementById('bestValueBanner');
+            var adviceBox = document.getElementById('compareAdvice');
 
-            // Rows to compare (label, key in specs or extendedSpecs, numeric extractor for highlight)
+            // numeric: raw field name; higher: true = mehr ist besser
             var ROWS = [
-                { label: 'Motor', key: 'Motor', src: 'specs' },
-                { label: 'Leistung (PS)', key: 'psRaw', src: 'raw', numeric: true, unit: 'PS', higher: true },
-                { label: 'Drehmoment', key: 'Drehmoment', src: 'specs' },
-                { label: 'Gewicht', key: 'Gewicht', src: 'specs' },
-                { label: 'Vmax', key: 'vmaxRaw', src: 'raw', numeric: true, unit: 'km/h', higher: true },
-                { label: '0–100 km/h', key: '0–100 km/h', src: 'specs' },
-                { label: 'Baujahr', key: 'yearRaw', src: 'raw', numeric: true, unit: '', higher: false },
-                { label: 'Preis (ca.)', key: 'Preis (ca.)', src: 'specs' },
-                { label: 'Hubraum', key: 'Hubraum', src: 'extended' },
-                { label: 'Getriebe', key: 'Getriebe', src: 'extended' },
-                { label: 'Verbrauch', key: 'Verbrauch', src: 'extended' },
-                { label: 'Kraftstofftank', key: 'Kraftstofftank', src: 'extended' },
-                { label: 'Sitzhöhe', key: 'Sitzhöhe', src: 'extended' }
+                { label: 'Kategorie', get: function(b) { return b.category; } },
+                { label: 'Motor', get: function(b) { return b.specs['Motor']; } },
+                { label: 'Leistung', raw: 'psRaw', unit: ' PS', higher: true },
+                { label: 'Drehmoment', raw: 'torqueRaw', unit: ' Nm', higher: true },
+                { label: 'Gewicht (trocken)', raw: 'weightRaw', unit: ' kg', higher: false },
+                { label: 'Vmax', raw: 'vmaxRaw', unit: ' km/h', higher: true },
+                { label: '0–100 km/h', raw: 'accelRaw', unit: ' s', higher: false, skipZero: true },
+                { label: 'Verbrauch', raw: 'consumptionRaw', unit: ' L/100km', higher: false },
+                { label: 'Baujahr', raw: 'yearRaw', unit: '', higher: true, noPct: true },
+                { label: 'Kaufpreis (UVP)', raw: 'priceRaw', unit: ' €', higher: false, fmt: true },
+                { label: 'PS pro 1.000 €', calc: function(b) { return b.psRaw / (b.priceRaw / 1000); }, unit: '', higher: true, dec: 2 },
+                { label: 'km/h Vmax pro 1.000 €', calc: function(b) { return b.vmaxRaw / (b.priceRaw / 1000); }, unit: '', higher: true, dec: 1 },
+                { label: 'Führerschein', get: function(b) { return b.license; } },
+                { label: 'Getriebe', get: function(b) { return b.extendedSpecs['Getriebe']; } },
+                { label: 'Sitzhöhe', get: function(b) { return b.extendedSpecs['Sitzhöhe']; } },
+                { label: 'Tank', get: function(b) { return b.extendedSpecs['Kraftstofftank']; } }
             ];
-
-            function getValue(bike, row) {
-                if (row.src === 'raw') return bike[row.key] !== undefined ? bike[row.key] : '–';
-                if (row.src === 'specs') return bike.specs[row.key] || '–';
-                if (row.src === 'extended') return bike.extendedSpecs[row.key] || '–';
-                return '–';
-            }
 
             function open(keys) {
                 var bikes = keys.map(function(k) { return { key: k, bike: BIKES[k] }; }).filter(function(b) { return b.bike; });
                 if (bikes.length < 2) return;
 
-                // Build header
+                // Header
                 thead.innerHTML = '';
                 var hrow = document.createElement('tr');
                 var emptyTh = document.createElement('th');
@@ -635,7 +734,7 @@
                 });
                 thead.appendChild(hrow);
 
-                // Build rows
+                // Rows
                 tbody.innerHTML = '';
                 ROWS.forEach(function(row) {
                     var tr = document.createElement('tr');
@@ -644,32 +743,59 @@
                     labelTd.textContent = row.label;
                     tr.appendChild(labelTd);
 
-                    var values = bikes.map(function(b) { return getValue(b.bike, row); });
+                    if (row.raw || row.calc) {
+                        var nums = bikes.map(function(b) {
+                            return row.calc ? row.calc(b.bike) : b.bike[row.raw];
+                        });
+                        var valid = nums.map(function(n) { return !(row.skipZero && (!n || n === 0)); });
+                        var validNums = nums.filter(function(n, i) { return valid[i]; });
+                        var bestV = row.higher ? Math.max.apply(null, validNums) : Math.min.apply(null, validNums);
+                        var worstV = row.higher ? Math.min.apply(null, validNums) : Math.max.apply(null, validNums);
 
-                    // Find best/worst for numeric rows
-                    var bestIdx = -1, worstIdx = -1;
-                    if (row.numeric && bikes.length >= 2) {
-                        var nums = values.map(Number);
-                        var allValid = nums.every(function(n) { return !isNaN(n); });
-                        if (allValid) {
-                            var maxV = Math.max.apply(null, nums);
-                            var minV = Math.min.apply(null, nums);
-                            // best = higher value wins (for PS/vmax/year) or lower wins (for weight/consumption)
-                            bestIdx = row.higher ? nums.indexOf(maxV) : nums.indexOf(minV);
-                            worstIdx = row.higher ? nums.indexOf(minV) : nums.indexOf(maxV);
-                        }
+                        nums.forEach(function(n, i) {
+                            var td = document.createElement('td');
+                            if (!valid[i]) {
+                                td.textContent = 'N/A';
+                            } else {
+                                var display = row.dec !== undefined ? n.toFixed(row.dec)
+                                    : (row.fmt ? n.toLocaleString('de-DE') : String(n));
+                                var html = '<span class="cmp-val">' + display + row.unit + '</span>';
+                                if (n === bestV && bestV !== worstV) td.className = 'compare-best';
+                                else if (n === worstV && bestV !== worstV) td.className = 'compare-worst';
+                                // % Differenz zum besten Wert
+                                if (!row.noPct && bestV !== 0 && n !== bestV && validNums.length > 1) {
+                                    var pct = ((n - bestV) / bestV) * 100;
+                                    var sign = pct > 0 ? '+' : '';
+                                    html += ' <span class="cmp-pct">(' + sign + pct.toFixed(0) + '%)</span>';
+                                }
+                                td.innerHTML = html;
+                            }
+                            tr.appendChild(td);
+                        });
+                    } else {
+                        bikes.forEach(function(b) {
+                            var td = document.createElement('td');
+                            td.textContent = row.get(b.bike) || '–';
+                            tr.appendChild(td);
+                        });
                     }
-
-                    values.forEach(function(val, i) {
-                        var td = document.createElement('td');
-                        td.textContent = row.src === 'raw' && row.unit ? val + ' ' + row.unit : val;
-                        if (i === bestIdx) td.className = 'compare-best';
-                        else if (i === worstIdx) td.className = 'compare-worst';
-                        tr.appendChild(td);
-                    });
-
                     tbody.appendChild(tr);
                 });
+
+                // Best-Value: höchste PS pro Euro
+                var best = bikes.reduce(function(acc, b) {
+                    var v = b.bike.psRaw / b.bike.priceRaw;
+                    return (!acc || v > acc.v) ? { b: b, v: v } : acc;
+                }, null);
+                banner.hidden = false;
+                banner.innerHTML = '🏅 <strong>Best-Value Empfehlung:</strong> ' + best.b.bike.icon + ' ' +
+                    best.b.bike.name + ' — ' + (best.v * 1000).toFixed(2) + ' PS pro 1.000 € (bestes Preis-Leistungs-Verhältnis)';
+
+                // Kaufberatung pro Bike
+                adviceBox.innerHTML = '<h3 class="compare-advice-title">🧭 Wer sollte was kaufen?</h3>' +
+                    bikes.map(function(b) {
+                        return '<p class="compare-advice-item"><strong>' + b.bike.icon + ' ' + b.bike.name + ':</strong> ' + b.bike.advice + '</p>';
+                    }).join('');
 
                 overlay.classList.add('modal-visible');
                 overlay.setAttribute('aria-hidden', 'false');
@@ -696,6 +822,160 @@
         })();
 
         /* ==========================================
+           🏁 SPEED RACE — Rennstrecken-Animation
+           ========================================== */
+        var Race = (function() {
+            var track = document.getElementById('raceTrack');
+            var btnStart = document.getElementById('btnRaceStart');
+            var btnReset = document.getElementById('btnRaceReset');
+            var resultEl = document.getElementById('raceResult');
+            var DEFAULT_RACERS = ['h2', 'zx10r', 'ninja400'];
+            var DURATION = 4000; // 4s Zeitlupen-Rennen
+            var animId = null;
+            var racing = false;
+
+            function buildLanes(keys) {
+                track.innerHTML = '';
+                keys.forEach(function(key) {
+                    var b = BIKES[key];
+                    var lane = document.createElement('div');
+                    lane.className = 'race-lane';
+                    lane.setAttribute('data-bike', key);
+                    lane.innerHTML =
+                        '<div class="race-lane-header">' +
+                            '<span class="race-lane-name">' + b.icon + ' ' + b.name + '</span>' +
+                            '<span class="race-speed" id="raceSpeed-' + key + '">0 km/h</span>' +
+                        '</div>' +
+                        '<div class="race-road">' +
+                            '<div class="race-road-lines"></div>' +
+                            '<span class="race-rider" id="raceRider-' + key + '">🏍️</span>' +
+                            '<span class="race-finish">🏁</span>' +
+                        '</div>';
+                    track.appendChild(lane);
+                });
+            }
+
+            function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+            function start(selectedKeys) {
+                if (racing) return;
+                var keys = (selectedKeys && selectedKeys.length >= 2) ? selectedKeys.slice(0, 3) : DEFAULT_RACERS;
+                buildLanes(keys);
+                resultEl.hidden = true;
+                btnReset.hidden = true;
+                racing = true;
+                btnStart.disabled = true;
+                btnStart.textContent = '🏍️ Rennen läuft...';
+
+                var maxVmax = Math.max.apply(null, keys.map(function(k) { return BIKES[k].vmaxRaw; }));
+                var startTime = null;
+
+                function frame(ts) {
+                    if (!startTime) startTime = ts;
+                    var t = Math.min((ts - startTime) / DURATION, 1);
+                    var eased = easeOutCubic(t);
+
+                    keys.forEach(function(k) {
+                        var b = BIKES[k];
+                        var frac = b.vmaxRaw / maxVmax;
+                        var rider = document.getElementById('raceRider-' + k);
+                        var speedEl = document.getElementById('raceSpeed-' + k);
+                        if (rider) {
+                            // Position: 0% → (frac * 88%) der Fahrbahn
+                            rider.style.left = (eased * frac * 88) + '%';
+                        }
+                        if (speedEl) {
+                            speedEl.textContent = Math.round(eased * b.vmaxRaw) + ' km/h';
+                        }
+                    });
+
+                    if (t < 1) {
+                        animId = requestAnimationFrame(frame);
+                    } else {
+                        finish(keys, maxVmax);
+                    }
+                }
+                animId = requestAnimationFrame(frame);
+            }
+
+            function finish(keys, maxVmax) {
+                racing = false;
+                btnStart.disabled = false;
+                btnStart.textContent = '🏁 Speed-Race starten';
+                btnReset.hidden = false;
+
+                // Sieger = höchste Vmax (bei Gleichstand: alle golden)
+                var winners = keys.filter(function(k) { return BIKES[k].vmaxRaw === maxVmax; });
+                winners.forEach(function(k) {
+                    var lane = track.querySelector('.race-lane[data-bike="' + k + '"]');
+                    if (lane) lane.classList.add('race-winner');
+                    var rider = document.getElementById('raceRider-' + k);
+                    if (rider) rider.classList.add('race-rider-winner');
+                });
+
+                var names = winners.map(function(k) { return BIKES[k].icon + ' ' + BIKES[k].name; }).join(' & ');
+                resultEl.hidden = false;
+                resultEl.innerHTML = '🏆 <strong>Sieger:</strong> ' + names + ' mit <strong>' + maxVmax + ' km/h</strong>!';
+            }
+
+            function reset() {
+                if (animId) cancelAnimationFrame(animId);
+                racing = false;
+                btnStart.disabled = false;
+                btnStart.textContent = '🏁 Speed-Race starten';
+                btnReset.hidden = true;
+                resultEl.hidden = true;
+                track.innerHTML = '';
+                buildLanes(Compare.getSelected().length >= 2 ? Compare.getSelected().slice(0, 3) : DEFAULT_RACERS);
+            }
+
+            btnStart.addEventListener('click', function() { start(Compare.getSelected()); });
+            btnReset.addEventListener('click', reset);
+
+            // Initial lanes preview
+            buildLanes(DEFAULT_RACERS);
+
+            return { start: start, reset: reset };
+        })();
+
+        /* ==========================================
+           🧭 Kaufberatung Section
+           ========================================== */
+        (function renderAdvice() {
+            var PERSONAS = [
+                { emoji: '🔰', title: 'Für Anfänger', bike: 'z650', reason: 'Leicht, gutmütig, A2-drosselbar — und mit 68 PS wächst sie mit.' },
+                { emoji: '⚡', title: 'Für Speed-Fans', bike: 'zx10r', reason: '203 PS, 299 km/h, Superbike-WM-Gene. Alternativ: die Ninja H2 mit Kompressor.' },
+                { emoji: '🌍', title: 'Für Abenteurer', bike: 'versys1000', reason: '21-Liter-Tank, bequeme Sitzposition, 120 PS — gebaut für lange Reisen.' },
+                { emoji: '💰', title: 'Für Budget-Käufer', bike: 'ninja400', reason: 'Ab ~6.500 € voller Sport-Look mit A2-tauglichen 45 PS.' },
+                { emoji: '🕰️', title: 'Für Klassik-Lover', bike: 'w800', reason: 'Luftgekühlter Retro-Twin mit zeitlosem Design und entspanntem Charakter.' },
+                { emoji: '⛰️', title: 'Für Off-Road-Fans', bike: 'klx300', reason: 'Leichte Dual-Sport-Enduro — Trail-tauglich und straßenzugelassen.' },
+                { emoji: '😎', title: 'Für Cruiser-Fahrer', bike: 'eliminator400', reason: 'Extrem niedrige Sitzhöhe (73,5 cm), entspannte Haltung, A2-fertig.' },
+                { emoji: '💎', title: 'Für Luxus-Tourer', bike: 'h2se', reason: 'Kompressor-Power plus semi-aktives Fahrwerk und Vollausstattung.' }
+            ];
+            var grid = document.getElementById('adviceGrid');
+            PERSONAS.forEach(function(p) {
+                var b = BIKES[p.bike];
+                var card = document.createElement('div');
+                card.className = 'advice-card';
+                card.setAttribute('role', 'button');
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('aria-label', p.title + ': ' + b.name + ' — Details anzeigen');
+                card.innerHTML =
+                    '<div class="advice-emoji">' + p.emoji + '</div>' +
+                    '<h3 class="advice-card-title">' + p.title + '</h3>' +
+                    '<p class="advice-bike-name">→ ' + b.icon + ' <strong>' + b.name + '</strong></p>' +
+                    '<p class="advice-reason">' + p.reason + '</p>' +
+                    '<p class="advice-price">💶 ab ' + b.priceRaw.toLocaleString('de-DE') + ' € | 🪪 Klasse ' + b.license + '</p>';
+                function openIt() { Modal.open(p.bike, card); }
+                card.addEventListener('click', openIt);
+                card.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openIt(); }
+                });
+                grid.appendChild(card);
+            });
+        })();
+
+        /* ==========================================
            Modal + Gallery Controller
            ========================================== */
         var Modal = (function() {
@@ -711,14 +991,13 @@
             var closeBtn = document.getElementById('modalCloseBtn');
             var youtubeBtn = document.getElementById('modalYoutubeBtn');
             var favBtn = document.getElementById('modalFavBtn');
+            var adviceBanner = document.getElementById('modalAdviceBanner');
 
-            var currentSlides = [];
             var currentIndex = 0;
             var autoplayTimer = null;
             var lastTrigger = null;
             var currentBikeKey = null;
 
-            // Star rating state
             var selectedRating = 0;
             var starBtns = document.querySelectorAll('.star-btn');
             var starHint = document.getElementById('starHint');
@@ -727,8 +1006,8 @@
             var reviewsList = document.getElementById('reviewsList');
             var avgRatingDisplay = document.getElementById('avgRatingDisplay');
 
-            function renderSpecs(specs) {
-                specsGrid.textContent = '';
+            function renderSpecPairs(grid, specs) {
+                grid.textContent = '';
                 Object.keys(specs).forEach(function(label) {
                     var item = document.createElement('div');
                     item.className = 'spec-item';
@@ -740,24 +1019,7 @@
                     valueSpan.textContent = specs[label];
                     item.appendChild(labelSpan);
                     item.appendChild(valueSpan);
-                    specsGrid.appendChild(item);
-                });
-            }
-
-            function renderExtendedSpecs(specs) {
-                extendedGrid.textContent = '';
-                Object.keys(specs).forEach(function(label) {
-                    var item = document.createElement('div');
-                    item.className = 'spec-item';
-                    var labelSpan = document.createElement('span');
-                    labelSpan.className = 'spec-label';
-                    labelSpan.textContent = label;
-                    var valueSpan = document.createElement('span');
-                    valueSpan.className = 'spec-value';
-                    valueSpan.textContent = specs[label];
-                    item.appendChild(labelSpan);
-                    item.appendChild(valueSpan);
-                    extendedGrid.appendChild(item);
+                    grid.appendChild(item);
                 });
             }
 
@@ -777,7 +1039,6 @@
                         img.className = 'gallery-img';
                         img.setAttribute('loading', 'lazy');
                         img.onerror = function() {
-                            // Fallback to emoji on load error
                             el.removeChild(img);
                             var emoji = document.createElement('span');
                             emoji.className = 'gallery-emoji';
@@ -833,7 +1094,6 @@
                 }
             }
 
-            // Star rating UI
             function setStarHighlight(rating) {
                 starBtns.forEach(function(btn, i) {
                     btn.classList.toggle('star-active', i < rating);
@@ -846,7 +1106,6 @@
                 setStarHighlight(0);
                 starHint.textContent = 'Deine Bewertung';
 
-                // Show average
                 var avg = Reviews.getAvg(bikeKey);
                 if (avg !== null) {
                     avgRatingDisplay.hidden = false;
@@ -855,7 +1114,6 @@
                     avgRatingDisplay.hidden = true;
                 }
 
-                // Render existing reviews
                 reviewsList.innerHTML = '';
                 Reviews.getAll(bikeKey).forEach(function(r) {
                     var item = document.createElement('div');
@@ -919,14 +1177,18 @@
                 titleEl.textContent = bike.name;
                 subtitleEl.textContent = bike.subtitle;
                 iconEl.textContent = bike.icon;
-                renderSpecs(bike.specs);
-                renderExtendedSpecs(bike.extendedSpecs);
+                renderSpecPairs(specsGrid, bike.specs);
+                renderSpecPairs(extendedGrid, bike.extendedSpecs);
                 renderSlides(bike.slides);
-                currentSlides = bike.slides;
                 showSlide(0);
                 updateFavBtn(bikeKey);
                 initReviewSection(bikeKey);
-                // Reset extended specs collapse
+                if (bike.advice) {
+                    adviceBanner.hidden = false;
+                    adviceBanner.innerHTML = '🧭 <strong>Empfehlung:</strong> ' + bike.advice;
+                } else {
+                    adviceBanner.hidden = true;
+                }
                 var detailsEl = document.getElementById('extendedSpecsSection');
                 if (detailsEl) detailsEl.removeAttribute('open');
                 overlay.classList.add('modal-visible');
@@ -946,48 +1208,30 @@
                 if (lastTrigger) lastTrigger.focus();
             }
 
-            function isOpen() {
-                return overlay.classList.contains('modal-visible');
-            }
+            function isOpen() { return overlay.classList.contains('modal-visible'); }
 
-            /* Event wiring (once) */
             closeBtn.addEventListener('click', close);
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay) close();
-            });
-            document.getElementById('galleryPrev').addEventListener('click', function() {
-                stopAutoplay();
-                showSlide(currentIndex - 1);
-            });
-            document.getElementById('galleryNext').addEventListener('click', function() {
-                stopAutoplay();
-                showSlide(currentIndex + 1);
-            });
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) close(); });
+            document.getElementById('galleryPrev').addEventListener('click', function() { stopAutoplay(); showSlide(currentIndex - 1); });
+            document.getElementById('galleryNext').addEventListener('click', function() { stopAutoplay(); showSlide(currentIndex + 1); });
             autoplayBtn.addEventListener('click', toggleAutoplay);
 
             document.addEventListener('keydown', function(e) {
                 if (!isOpen()) return;
-                if (e.key === 'Escape') {
-                    close();
-                } else if (e.key === 'ArrowLeft') {
-                    stopAutoplay();
-                    showSlide(currentIndex - 1);
-                } else if (e.key === 'ArrowRight') {
-                    stopAutoplay();
-                    showSlide(currentIndex + 1);
-                }
+                if (e.key === 'Escape') close();
+                else if (e.key === 'ArrowLeft') { stopAutoplay(); showSlide(currentIndex - 1); }
+                else if (e.key === 'ArrowRight') { stopAutoplay(); showSlide(currentIndex + 1); }
             });
 
             return { open: open, close: close };
         })();
 
         /* ==========================================
-           Fact-Card Triggers (click + keyboard)
+           Card Triggers, Compare Checkboxes, Fav Buttons
            ========================================== */
-        document.querySelectorAll('.fact-card-clickable[data-bike]').forEach(function(card) {
+        document.querySelectorAll('#bikesGrid .fact-card-clickable[data-bike]').forEach(function(card) {
             var key = card.getAttribute('data-bike');
             card.addEventListener('click', function(e) {
-                // Don't open modal when clicking compare checkbox/label or fav button
                 if (e.target.classList.contains('compare-checkbox') ||
                     e.target.classList.contains('compare-checkbox-label') ||
                     e.target.classList.contains('compare-checkbox-wrap') ||
@@ -1002,46 +1246,55 @@
             });
         });
 
-        /* ==========================================
-           Compare Checkboxes
-           ========================================== */
         document.querySelectorAll('.compare-checkbox').forEach(function(cb) {
             cb.addEventListener('change', function(e) {
                 e.stopPropagation();
-                var bikeKey = cb.getAttribute('data-bike');
-                Compare.toggle(bikeKey, cb);
+                Compare.toggle(cb.getAttribute('data-bike'), cb);
             });
-            // Stop click from propagating to card
             cb.addEventListener('click', function(e) { e.stopPropagation(); });
         });
 
-        /* ==========================================
-           Favorites Buttons on Cards
-           ========================================== */
         document.querySelectorAll('.fav-btn').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                var bikeKey = btn.getAttribute('data-bike');
-                Favorites.toggle(bikeKey);
+                Favorites.toggle(btn.getAttribute('data-bike'));
             });
         });
 
         /* ==========================================
-           Search & Filter
+           Search & Filter (inkl. Kategorie, Lizenz, Budget)
            ========================================== */
         var Filter = (function() {
             var searchInput = document.getElementById('searchInput');
             var filterPS = document.getElementById('filterPS');
             var filterVmax = document.getElementById('filterVmax');
             var filterEra = document.getElementById('filterEra');
+            var filterCategory = document.getElementById('filterCategory');
+            var filterLicense = document.getElementById('filterLicense');
+            var filterBudget = document.getElementById('filterBudget');
             var noResults = document.getElementById('noResults');
             var bikesGrid = document.getElementById('bikesGrid');
+
+            // Populate category options from data
+            (function() {
+                var cats = {};
+                Object.keys(BIKES).forEach(function(k) { cats[BIKES[k].category] = true; });
+                Object.keys(cats).sort().forEach(function(c) {
+                    var opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    filterCategory.appendChild(opt);
+                });
+            })();
 
             function apply() {
                 var query = searchInput.value.toLowerCase().trim();
                 var psFilter = filterPS.value;
                 var vmaxFilter = filterVmax.value;
                 var eraFilter = filterEra.value;
+                var catFilter = filterCategory.value;
+                var licFilter = filterLicense.value;
+                var budgetFilter = filterBudget.value;
 
                 var cards = bikesGrid.querySelectorAll('.fact-card-clickable[data-bike]');
                 var visibleCount = 0;
@@ -1051,7 +1304,7 @@
                     var bike = BIKES[key];
                     if (!bike) return;
 
-                    var nameMatch = bike.name.toLowerCase().indexOf(query) !== -1 || bike.subtitle.toLowerCase().indexOf(query) !== -1;
+                    var nameMatch = bike.name.toLowerCase().indexOf(query) !== -1 || bike.subtitle.toLowerCase().indexOf(query) !== -1 || bike.category.toLowerCase().indexOf(query) !== -1;
 
                     var psMatch = true;
                     if (psFilter === 'low') psMatch = bike.psRaw <= 50;
@@ -1068,7 +1321,15 @@
                     else if (eraFilter === 'modern') eraMatch = bike.yearRaw >= 1980 && bike.yearRaw <= 2010;
                     else if (eraFilter === 'new') eraMatch = bike.yearRaw > 2010;
 
-                    var show = nameMatch && psMatch && vmaxMatch && eraMatch;
+                    var catMatch = !catFilter || bike.category === catFilter;
+                    var licMatch = !licFilter || bike.license === licFilter;
+
+                    var budgetMatch = true;
+                    if (budgetFilter === 'b1') budgetMatch = bike.priceRaw <= 7000;
+                    else if (budgetFilter === 'b2') budgetMatch = bike.priceRaw > 7000 && bike.priceRaw <= 15000;
+                    else if (budgetFilter === 'b3') budgetMatch = bike.priceRaw > 15000;
+
+                    var show = nameMatch && psMatch && vmaxMatch && eraMatch && catMatch && licMatch && budgetMatch;
                     card.style.display = show ? '' : 'none';
                     if (show) visibleCount++;
                 });
@@ -1076,21 +1337,35 @@
                 noResults.hidden = visibleCount > 0;
             }
 
-            searchInput.addEventListener('input', apply);
-            filterPS.addEventListener('change', apply);
-            filterVmax.addEventListener('change', apply);
-            filterEra.addEventListener('change', apply);
+            [searchInput, filterPS, filterVmax, filterEra, filterCategory, filterLicense, filterBudget].forEach(function(el) {
+                el.addEventListener(el === searchInput ? 'input' : 'change', apply);
+            });
 
             document.getElementById('clearFiltersBtn').addEventListener('click', function() {
                 searchInput.value = '';
                 filterPS.value = '';
                 filterVmax.value = '';
                 filterEra.value = '';
+                filterCategory.value = '';
+                filterLicense.value = '';
+                filterBudget.value = '';
                 apply();
             });
 
             return { apply: apply };
         })();
+
+        /* ==========================================
+           Section Nav
+           ========================================== */
+        document.querySelectorAll('.nav-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('nav-btn-active'); });
+                btn.classList.add('nav-btn-active');
+                var target = document.getElementById(btn.getAttribute('data-target'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
 
         /* ==========================================
            Dark Mode Toggle
@@ -1111,7 +1386,6 @@
 
         document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
 
-        // Restore saved preference on page load
         (function() {
             if (localStorage.getItem('darkMode') === 'true') {
                 document.body.classList.add('dark-mode');
