@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vrooooom - Kawasaki Motorräder</title>
+    <title>Vrooooom - Kawasaki Motorräder | 19 Modelle</title>
     <link rel="stylesheet" href="styles.css">
     <script>
         // Apply saved preference immediately to avoid flash of wrong theme
@@ -21,7 +21,7 @@
                 <h1>🏍️ Vrooooom</h1>
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
             </div>
-            <p class="subtitle">Schnell, Klassisch &amp; Legendär — 14 Kawasaki Modelle</p>
+            <p class="subtitle">Schnell, Klassisch &amp; Legendär — 19 Kawasaki Modelle</p>
             <nav class="main-nav" aria-label="Bereiche">
                 <button class="nav-btn nav-btn-active" data-target="bikesGrid">🏍️ Übersicht</button>
                 <button class="nav-btn" data-target="raceSection">🏁 Speed-Race</button>
@@ -81,7 +81,7 @@
 
             <section class="intro">
                 <h2>Über Kawasaki</h2>
-                <p>Kawasaki ist eine der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren. Hier findest du <strong>14 Modelle</strong> — vom Einsteiger-Bike bis zum 300-km/h-Hypersportler.</p>
+                <p>Kawasaki ist eine der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren. Hier findest du <strong>19 Modelle</strong> — vom Einsteiger-Bike bis zum 300-km/h-Hypersportler.</p>
             </section>
 
             <!-- ===== FAVORITES SECTION ===== -->
@@ -220,7 +220,7 @@
         'use strict';
 
         /* ==========================================
-           Bike Database — 14 Kawasaki Modelle
+           Bike Database — 19 Kawasaki Modelle
            ========================================== */
         function makeSlides(name, emoji, g1, g2) {
             var enc = encodeURIComponent(name);
@@ -458,11 +458,77 @@
                 youtubeSearchQuery: 'Kawasaki Eliminator 400 Review',
                 advice: 'Für Cruiser-Fans & kleinere Fahrer',
                 g1: '870000', g2: '190a05'
+            }),
+            zx6r: makeBike({
+                name: 'Kawasaki Ninja ZX-6R', subtitle: '636cc Supersport-Legende', icon: '🔥',
+                category: 'Supersportler', license: 'A',
+                blurb: 'Die 636cc Supersport-Ikone: 130 PS, extrem agil auf der Rennstrecke — die perfekte Brücke zwischen Mittelklasse und Superbike.',
+                engine: '636cc 4-Zylinder Reihenmotor, 4-Takt', cc: 636,
+                ps: 130, kw: 95.6, torque: 70.8, weight: 193, vmax: 260, accel: 3.5,
+                seatHeight: 83, tank: 17, consumption: 5.8, transmission: 'Manuell (6-Gang, Quickshifter)',
+                brakes: { front: 'Doppelscheibe 310mm, Nissin', rear: 'Scheibe 220mm' },
+                tires: '120/70 ZR17 + 180/55 ZR17', year: 2024, price: 12900,
+                youtubeSearchQuery: 'Kawasaki Ninja ZX-6R 636 Review',
+                advice: 'Für Trackday-Fans & Supersport-Liebhaber',
+                g1: '1a0030', g2: 'ff6600'
+            }),
+            z900: makeBike({
+                name: 'Kawasaki Z900', subtitle: 'Aggressive Naked-Macht', icon: '💪',
+                category: 'Naked', license: 'A',
+                blurb: 'Die schärfste Naked-Bike Kawasakis: 125 PS, 248 km/h, aggressive Optik und Superbike-Performance ohne Verkleidung.',
+                engine: '948cc 4-Zylinder Reihenmotor, 4-Takt', cc: 948,
+                ps: 125, kw: 91.9, torque: 98.6, weight: 193, vmax: 248, accel: 3.4,
+                seatHeight: 79, tank: 17, consumption: 5.5, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Doppelscheibe 300mm', rear: 'Scheibe 250mm' },
+                tires: '120/70 ZR17 + 190/50 ZR17', year: 2024, price: 10200,
+                youtubeSearchQuery: 'Kawasaki Z900 Review 2024',
+                advice: 'Für Naked-Fans mit A-Führerschein & Drang zur Power',
+                g1: '0d0d0d', g2: '00c853'
+            }),
+            zh2: makeBike({
+                name: 'Kawasaki Z H2', subtitle: 'Supercharged Naked Monster', icon: '👹',
+                category: 'Naked', license: 'A',
+                headline: '👹 Supercharged Naked — Z H2',
+                blurb: 'Der nackte Kompressor-Riese: 200 PS ohne Verkleidung, für Adrenalin pur im Alltag. Das wildeste Naked der Welt.',
+                engine: '998cc Supercharged 4-Zylinder, 4-Takt', cc: 998,
+                ps: 200, kw: 147, torque: 137, weight: 239, vmax: 290, accel: 3.2,
+                seatHeight: 83, tank: 19, consumption: 7.2, transmission: 'Manuell (6-Gang, Quickshifter)',
+                brakes: { front: 'Doppelscheibe 320mm, Brembo', rear: 'Scheibe 260mm' },
+                tires: '120/70 ZR17 + 190/55 ZR17', year: 2024, price: 22900,
+                youtubeSearchQuery: 'Kawasaki Z H2 Review 2024',
+                advice: 'Für Naked-Fans die Kompressor-Power wollen ohne Verkleidung',
+                g1: '1a1a1a', g2: '8b0000'
+            }),
+            zx25r: makeBike({
+                name: 'Kawasaki Ninja ZX-25R', subtitle: '4-Zylinder 250cc Revolution', icon: '🎆',
+                category: 'Sportler', license: 'A2',
+                blurb: 'Ein 250cc mit 4-Zylinder-Motor! 51 PS bei 17.000 U/min — der reinste Klang in der Klasse. Einmalig am Markt.',
+                engine: '249cc 4-Zylinder Reihenmotor, 4-Takt, 17.000 U/min', cc: 249,
+                ps: 51, kw: 37.5, torque: 22.9, weight: 182, vmax: 215, accel: 5.0,
+                seatHeight: 78.5, tank: 15, consumption: 5.1, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Doppelscheibe 290mm, Brembo', rear: 'Scheibe 220mm' },
+                tires: '110/70 R17 + 150/60 R17', year: 2023, price: 9800,
+                youtubeSearchQuery: 'Kawasaki Ninja ZX-25R Review Sound',
+                advice: 'Für Enthusiasten, die den reinsten Motorsound wollen',
+                g1: '0a1628', g2: '1565c0'
+            }),
+            kx450: makeBike({
+                name: 'Kawasaki KX 450', subtitle: 'MX-Rennmaschine pur', icon: '🏟️',
+                category: 'Off-Road', license: 'A',
+                blurb: 'Die Renn-Enduro vom Motocross-WM-Podium: 449cc Monster, kein Licht, keine Zulassung — reiner Motorsport.',
+                engine: '449cc Einzylinder, 4-Takt, hochverdichtet', cc: 449,
+                ps: 62, kw: 45.6, torque: 54, weight: 110, vmax: 150, accel: 3.8,
+                seatHeight: 96, tank: 7.7, consumption: 4.8, transmission: 'Manuell (5-Gang)',
+                brakes: { front: 'Scheibe 250mm', rear: 'Scheibe 240mm' },
+                tires: '80/100-21 + 110/90-19', year: 2024, price: 9500,
+                youtubeSearchQuery: 'Kawasaki KX450 2024 Motocross',
+                advice: 'Für MX-Racer & Rennstrecken-Off-Road-Fahrer',
+                g1: '1b5e20', g2: 'f57f17'
             })
         };
 
         /* ==========================================
-           Card Rendering (dynamic, all 14 bikes)
+           Card Rendering (dynamic, all 19 bikes)
            ========================================== */
         (function renderCards() {
             var grid = document.getElementById('bikesGrid');
