@@ -321,13 +321,31 @@ main {
 
 /* ==========================================
    BIKES GRID
+   Desktop: 3 columns | Tablet: 2 columns | Mobile: 1 column
    ========================================== */
 .facts {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    /* Desktop: 3 columns */
+    grid-template-columns: repeat(3, 1fr);
     gap: 22px;
     margin-bottom: 36px;
     animation: fadeInUp 0.6s ease both;
+}
+
+/* Tablet: 2 columns (768–1024px) */
+@media (max-width: 1024px) {
+    .facts {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+}
+
+/* Mobile: 1 column (<768px) */
+@media (max-width: 768px) {
+    .facts {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
 }
 
 /* ==========================================
@@ -1012,10 +1030,7 @@ body.dark-mode .extended-specs summary:hover {
         padding: 24px 16px;
     }
 
-    .facts {
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 16px;
-    }
+    /* .facts already handled above in responsive grid section */
 
     .filter-row {
         gap: 8px;
@@ -1082,9 +1097,7 @@ body.dark-mode .extended-specs summary:hover {
         padding: 7px 14px;
     }
 
-    .facts {
-        grid-template-columns: 1fr;
-    }
+    /* .facts: 1 column handled in responsive grid above */
 
     .search-filter-section {
         padding: 16px;
