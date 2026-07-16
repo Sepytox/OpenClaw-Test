@@ -1140,3 +1140,48 @@ body.dark-mode .sc-intro {
 .sc-exhaust-row.playing {
   animation: borderPulse 1.5s ease-in-out infinite, rowPlayingPulse 1s ease-in-out infinite;
 }
+
+/* ============================================================
+   19. DREI AUSPUFF-VARIANTEN — Stock / Racing / Custom Styles
+   ============================================================ */
+
+/* Row highlighting per exhaust type */
+.sc-exhaust-row[data-ex-idx="0"] {
+  border-left: 3px solid rgba(0, 255, 224, 0.5);
+}
+
+.sc-exhaust-row[data-ex-idx="1"] {
+  border-left: 3px solid rgba(255, 0, 110, 0.5);
+}
+
+.sc-exhaust-row[data-ex-idx="2"] {
+  border-left: 3px solid rgba(255, 215, 0, 0.5);
+}
+
+.sc-exhaust-row[data-ex-idx="0"]:hover,
+.sc-exhaust-row[data-ex-idx="0"].active {
+  border-left-color: var(--cp-cyan, #00FFE0);
+}
+
+.sc-exhaust-row[data-ex-idx="1"]:hover,
+.sc-exhaust-row[data-ex-idx="1"].active {
+  border-left-color: var(--cp-magenta, #FF006E);
+}
+
+.sc-exhaust-row[data-ex-idx="2"]:hover,
+.sc-exhaust-row[data-ex-idx="2"].active {
+  border-left-color: var(--cp-yellow, #FFD700);
+}
+
+/* DB bar gradient per type */
+.sc-exhaust-row[data-ex-idx="0"] .sc-db-bar-fill {
+  background: linear-gradient(90deg, #00FFE0, rgba(0,255,224,0.5));
+}
+
+.sc-exhaust-row[data-ex-idx="1"] .sc-db-bar-fill {
+  background: linear-gradient(90deg, #FF006E, rgba(255,0,110,0.5));
+}
+
+.sc-exhaust-row[data-ex-idx="2"] .sc-db-bar-fill {
+  background: linear-gradient(90deg, #FFD700, rgba(255,215,0,0.5));
+}
