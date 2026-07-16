@@ -5,42 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vrooooom - Kawasaki Motorräder | 19 Modelle</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="cyberpunk.css">
-    <link rel="stylesheet" href="themes.css">
-    <script>
-        (function() {
-            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
-            document.documentElement.setAttribute('data-theme', t);
-        })();
-    </script>
-    <script>
-        // Apply saved preference immediately to avoid flash of wrong theme
-        (function() {
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.documentElement.classList.add('dark-mode-pending');
-            }
-        })();
-    </script>
+    <link rel="stylesheet" href="design.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
 </head>
 <body>
+    <nav class="site-nav">
+        <a class="brand" href="index.html">🏍️ Vrooooom</a>
+        <a href="index.html" class="active">Übersicht</a>
+        <a href="soundcheck.html">SoundCheck</a>
+        <a href="race.html">Racing Sim</a>
+        <a href="shop.html">Aftermarket</a>
+        <a href="quiz.html">Quiz</a>
+        <a href="wheel.html">Wheel</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
+    </nav>
     <div class="container">
-        <header>
-            <div class="header-top">
-                <h1>🏍️ Vrooooom</h1>
-                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
-            </div>
-            <p class="subtitle">Schnell, Klassisch &amp; Legendär — 19 Kawasaki Modelle</p>
-            <nav class="main-nav" aria-label="Bereiche">
-                <button class="nav-btn nav-btn-active" data-target="bikesGrid">🏍️ Übersicht</button>
-                <button class="nav-btn" data-target="raceSection">🏁 Speed-Race</button>
-                <button class="nav-btn" data-target="adviceSection">🧭 Kaufberatung</button>
-                <a class="nav-btn" href="soundcheck.html" style="text-decoration:none;">🔊 SoundCheck</a>
-                <a class="nav-btn" href="race.html" style="text-decoration:none;">🏁 Racing Sim</a>
-                <a class="nav-btn" href="shop.html" style="text-decoration:none;">🔧 Aftermarket</a>
-                <a class="nav-btn" href="quiz.html" style="text-decoration:none;">🎯 Quiz</a>
-                <a class="nav-btn" href="wheel.html" style="text-decoration:none;">🎡 Wheel</a>
-            </nav>
-        </header>
         <main>
             <!-- ===== SEARCH & FILTER ===== -->
             <section class="search-filter-section" aria-label="Suche und Filter">
@@ -107,7 +86,6 @@
             <div class="compare-bar" id="compareBar" aria-live="polite" hidden>
                 <span class="compare-bar-info" id="compareBarInfo">0/3 Motorräder gewählt</span>
                 <button class="btn-compare" id="btnCompare" aria-label="Vergleich anzeigen" disabled>⚖️ Vergleich anzeigen</button>
-                <button class="btn-race-from-bar" id="btnRaceFromBar" aria-label="Speed-Race mit Auswahl starten" disabled>🏁 Speed-Race</button>
                 <button class="btn-clear-compare" id="btnClearCompare" aria-label="Vergleichsauswahl leeren">✕ Auswahl leeren</button>
             </div>
 
@@ -116,18 +94,6 @@
             <div class="no-results" id="noResults" hidden aria-live="polite">
                 <p>😔 Keine Motorräder gefunden. Versuche andere Suchbegriffe oder Filter.</p>
             </div>
-
-            <!-- ===== SPEED RACE SECTION ===== -->
-            <section class="race-section" id="raceSection" aria-label="Speed-Race">
-                <h2 class="race-title">🏁 Rennstrecken-Modus: Speed-Race</h2>
-                <p class="race-desc">Wähle oben bei den Karten 2–3 Motorräder (Vergleich-Checkbox) — oder starte direkt das Standard-Rennen. Jedes Bike fährt bis zu seiner echten Vmax. Der Sieger leuchtet gold! 🏆</p>
-                <div class="race-controls">
-                    <button class="btn-race-start" id="btnRaceStart">🏁 Speed-Race starten</button>
-                    <button class="btn-race-reset" id="btnRaceReset" hidden>↺ Zurücksetzen</button>
-                </div>
-                <div class="race-track" id="raceTrack" aria-live="polite"></div>
-                <p class="race-result" id="raceResult" hidden></p>
-            </section>
 
             <!-- ===== KAUFBERATUNG SECTION ===== -->
             <section class="advice-section" id="adviceSection" aria-label="Kaufberatung">
@@ -588,8 +554,7 @@
                         '<span class="card-fav-badge" id="favBadge-' + key + '" hidden>❤️</span>' +
                     '</div>' +
                     '<div class="card-action-links" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">' +
-                        '<a href="shop.html?bike=' + key + '" class="card-action-link" style="font-size:0.72rem;padding:3px 8px;border:1px solid #333;border-radius:4px;color:#bf00ff;background:rgba(191,0,255,0.06);text-decoration:none;" onclick="event.stopPropagation();">🔧 Customize</a>' +
-                        '<a href="race.html?bike=' + key + '" class="card-action-link" style="font-size:0.72rem;padding:3px 8px;border:1px solid #333;border-radius:4px;color:#ff6600;background:rgba(255,102,0,0.06);text-decoration:none;" onclick="event.stopPropagation();">🏁 Race Sim</a>' +
+                        '<a href="shop.html?bike=' + key + '" class="card-action-link" style="font-size:0.72rem;padding:3px 8px;border:1px solid var(--border);border-radius:4px;color:var(--accent);background:var(--accent-dim);text-decoration:none;" onclick="event.stopPropagation();">🔧 Customize</a>' +
                     '</div>';
                 grid.appendChild(card);
             });
@@ -735,7 +700,6 @@
             var bar = document.getElementById('compareBar');
             var barInfo = document.getElementById('compareBarInfo');
             var btnCompare = document.getElementById('btnCompare');
-            var btnRace = document.getElementById('btnRaceFromBar');
             var btnClear = document.getElementById('btnClearCompare');
 
             function updateBar() {
@@ -743,7 +707,6 @@
                 bar.hidden = count === 0;
                 barInfo.textContent = count + '/3 Motorräder gewählt';
                 btnCompare.disabled = count < 2;
-                btnRace.disabled = count < 2;
             }
 
             function toggle(bikeKey, checkboxEl) {
@@ -772,10 +735,6 @@
 
             btnClear.addEventListener('click', clear);
             btnCompare.addEventListener('click', function() { CompareModal.open(selected); });
-            btnRace.addEventListener('click', function() {
-                document.getElementById('raceSection').scrollIntoView({ behavior: 'smooth' });
-                Race.start(selected);
-            });
 
             return { toggle: toggle, clear: clear, getSelected: getSelected };
         })();
@@ -915,122 +874,7 @@
             return { open: open, close: close };
         })();
 
-        /* ==========================================
-           🏁 SPEED RACE — Rennstrecken-Animation
-           ========================================== */
-        var Race = (function() {
-            var track = document.getElementById('raceTrack');
-            var btnStart = document.getElementById('btnRaceStart');
-            var btnReset = document.getElementById('btnRaceReset');
-            var resultEl = document.getElementById('raceResult');
-            var DEFAULT_RACERS = ['h2', 'zx10r', 'ninja400'];
-            var DURATION = 4000; // 4s Zeitlupen-Rennen
-            var animId = null;
-            var racing = false;
 
-            function buildLanes(keys) {
-                track.innerHTML = '';
-                keys.forEach(function(key) {
-                    var b = BIKES[key];
-                    var lane = document.createElement('div');
-                    lane.className = 'race-lane';
-                    lane.setAttribute('data-bike', key);
-                    lane.innerHTML =
-                        '<div class="race-lane-header">' +
-                            '<span class="race-lane-name">' + b.icon + ' ' + b.name + '</span>' +
-                            '<span class="race-speed" id="raceSpeed-' + key + '">0 km/h</span>' +
-                        '</div>' +
-                        '<div class="race-road">' +
-                            '<div class="race-road-lines"></div>' +
-                            '<span class="race-rider" id="raceRider-' + key + '">🏍️</span>' +
-                            '<span class="race-finish">🏁</span>' +
-                        '</div>';
-                    track.appendChild(lane);
-                });
-            }
-
-            function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-
-            function start(selectedKeys) {
-                if (racing) return;
-                var keys = (selectedKeys && selectedKeys.length >= 2) ? selectedKeys.slice(0, 3) : DEFAULT_RACERS;
-                buildLanes(keys);
-                resultEl.hidden = true;
-                btnReset.hidden = true;
-                racing = true;
-                btnStart.disabled = true;
-                btnStart.textContent = '🏍️ Rennen läuft...';
-
-                var maxVmax = Math.max.apply(null, keys.map(function(k) { return BIKES[k].vmaxRaw; }));
-                var startTime = null;
-
-                function frame(ts) {
-                    if (!startTime) startTime = ts;
-                    var t = Math.min((ts - startTime) / DURATION, 1);
-                    var eased = easeOutCubic(t);
-
-                    keys.forEach(function(k) {
-                        var b = BIKES[k];
-                        var frac = b.vmaxRaw / maxVmax;
-                        var rider = document.getElementById('raceRider-' + k);
-                        var speedEl = document.getElementById('raceSpeed-' + k);
-                        if (rider) {
-                            // Position: 0% → (frac * 88%) der Fahrbahn
-                            rider.style.left = (eased * frac * 88) + '%';
-                        }
-                        if (speedEl) {
-                            speedEl.textContent = Math.round(eased * b.vmaxRaw) + ' km/h';
-                        }
-                    });
-
-                    if (t < 1) {
-                        animId = requestAnimationFrame(frame);
-                    } else {
-                        finish(keys, maxVmax);
-                    }
-                }
-                animId = requestAnimationFrame(frame);
-            }
-
-            function finish(keys, maxVmax) {
-                racing = false;
-                btnStart.disabled = false;
-                btnStart.textContent = '🏁 Speed-Race starten';
-                btnReset.hidden = false;
-
-                // Sieger = höchste Vmax (bei Gleichstand: alle golden)
-                var winners = keys.filter(function(k) { return BIKES[k].vmaxRaw === maxVmax; });
-                winners.forEach(function(k) {
-                    var lane = track.querySelector('.race-lane[data-bike="' + k + '"]');
-                    if (lane) lane.classList.add('race-winner');
-                    var rider = document.getElementById('raceRider-' + k);
-                    if (rider) rider.classList.add('race-rider-winner');
-                });
-
-                var names = winners.map(function(k) { return BIKES[k].icon + ' ' + BIKES[k].name; }).join(' & ');
-                resultEl.hidden = false;
-                resultEl.innerHTML = '🏆 <strong>Sieger:</strong> ' + names + ' mit <strong>' + maxVmax + ' km/h</strong>!';
-            }
-
-            function reset() {
-                if (animId) cancelAnimationFrame(animId);
-                racing = false;
-                btnStart.disabled = false;
-                btnStart.textContent = '🏁 Speed-Race starten';
-                btnReset.hidden = true;
-                resultEl.hidden = true;
-                track.innerHTML = '';
-                buildLanes(Compare.getSelected().length >= 2 ? Compare.getSelected().slice(0, 3) : DEFAULT_RACERS);
-            }
-
-            btnStart.addEventListener('click', function() { start(Compare.getSelected()); });
-            btnReset.addEventListener('click', reset);
-
-            // Initial lanes preview
-            buildLanes(DEFAULT_RACERS);
-
-            return { start: start, reset: reset };
-        })();
 
         /* ==========================================
            🧭 Kaufberatung Section
@@ -1462,29 +1306,20 @@
         });
 
         /* ==========================================
-           Dark Mode Toggle
+           Theme Toggle (Dark / Light)
            ========================================== */
-        function updateToggleButton(isDark) {
-            var btn = document.getElementById('themeToggle');
-            if (btn) {
-                btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-                btn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
-            }
-        }
-
-        function toggleDarkMode() {
-            var isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isDark);
-            updateToggleButton(isDark);
-        }
-
-        document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
-
         (function() {
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.body.classList.add('dark-mode');
-                updateToggleButton(true);
-            }
+            var btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            var t = localStorage.getItem('theme') || 'dark';
+            btn.textContent = t === 'dark' ? '☀️' : '🌙';
+            btn.addEventListener('click', function() {
+                var current = document.documentElement.getAttribute('data-theme');
+                var next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+                btn.textContent = next === 'dark' ? '☀️' : '🌙';
+            });
         })();
 
         /* ==========================================
@@ -1496,7 +1331,6 @@
             Reviews.updateAllBadges();
         })();
     </script>
-    <script src="cyberpunk-animations.js"></script>
     <script src="settings.js"></script>
 </body>
 </html>

@@ -1,0 +1,168 @@
+/* ============================================================
+   design.css — Vrooooom Unified Design System v2
+   Dark/Light Mode via CSS Custom Properties
+   ============================================================ */
+
+/* === DARK MODE (default) === */
+:root {
+  --bg: #080808;
+  --bg-secondary: #0e0e0e;
+  --card-bg: #111111;
+  --border: #222222;
+  --border-hover: #ff6600;
+  --text: #f0f0f0;
+  --text-muted: #888;
+  --text-subtle: #555;
+  --accent: #ff6600;
+  --accent-hover: #ff8800;
+  --accent-dim: rgba(255, 102, 0, 0.12);
+  --nav-bg: rgba(8,8,8,0.97);
+  --shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+
+/* === LIGHT MODE === */
+[data-theme="light"] {
+  --bg: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --card-bg: #ffffff;
+  --border: #e0e0e0;
+  --border-hover: #ff6600;
+  --text: #1a1a1a;
+  --text-muted: #666;
+  --text-subtle: #999;
+  --accent: #ff6600;
+  --accent-hover: #e55a00;
+  --accent-dim: rgba(255, 102, 0, 0.08);
+  --nav-bg: rgba(245,245,245,0.97);
+  --shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
+}
+
+/* ── Navigation ─────────────────────────────────────────────── */
+.site-nav {
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.site-nav .brand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  margin-right: 1rem;
+}
+
+.site-nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: color 0.2s;
+}
+
+.site-nav a:hover,
+.site-nav a.active {
+  color: var(--accent);
+}
+
+/* Theme toggle button in nav */
+.theme-toggle {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: border-color 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Layout Wrappers ─────────────────────────────────────────── */
+.page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+/* ── Page Header ─────────────────────────────────────────────── */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  color: var(--text);
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+}
+
+.page-header p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ── Card ────────────────────────────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.btn:hover {
+  background: var(--accent-hover);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.btn-outline:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: transparent;
+}

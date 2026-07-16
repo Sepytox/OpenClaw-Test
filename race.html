@@ -5,54 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kawasaki Racing Simulator — Realistic Physics</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="cyberpunk.css">
-    <link rel="stylesheet" href="themes.css">
-    <script>
-        (function() {
-            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
-            document.documentElement.setAttribute('data-theme', t);
-        })();
-    </script>
+    <link rel="stylesheet" href="design.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <style>
-        :root {
-            --neon-green: #39ff14;
-            --neon-cyan: #00eaff;
-            --neon-red: #ff0044;
-            --neon-orange: #ff6600;
-            --neon-yellow: #ffcc00;
-            --dark-bg: #050505;
-            --card-bg: #0d0d0d;
-            --border: #1a1a1a;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background: var(--dark-bg);
+            background: var(--bg);
             color: #e0e0e0;
             font-family: 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
         }
-        /* NAV */
-        .site-nav {
-            background: rgba(5,5,5,0.97);
-            border-bottom: 1px solid var(--neon-green);
-            padding: 0.6rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 0 20px rgba(57,255,20,0.15);
-        }
-        .site-nav .brand { font-size:1.1rem;font-weight:700;color:var(--neon-green);text-decoration:none;text-shadow:0 0 10px var(--neon-green);margin-right:1rem; }
-        .site-nav a { color:#777;text-decoration:none;padding:0.25rem 0.55rem;border-radius:4px;font-size:0.82rem;transition:color 0.2s,background 0.2s; }
-        .site-nav a:hover,.site-nav a.active { color:var(--neon-green);background:rgba(57,255,20,0.08); }
-
-        /* PAGE */
+/* PAGE */
         .race-page { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
         .page-title { text-align:center;margin-bottom:1.5rem; }
-        .page-title h1 { font-size:clamp(1.8rem,5vw,3rem);color:var(--neon-green);text-shadow:0 0 20px var(--neon-green);letter-spacing:3px;margin-bottom:0.3rem; }
+        .page-title h1 { font-size:clamp(1.8rem,5vw,3rem);color:var(--accent);letter-spacing:3px;margin-bottom:0.3rem; }
         .page-title p { color:#666;font-size:0.9rem; }
 
         /* BIKE SELECTOR */
@@ -72,20 +38,20 @@
             color:#e0e0e0;border-radius:8px;font-size:0.9rem;cursor:pointer;
             appearance:none;outline:none;
         }
-        .selector-group select:focus { border-color:var(--neon-green); }
+        .selector-group select:focus { border-color:var(--accent); }
         .mode-toggle-row { display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.75rem; }
         .mode-chip {
             padding:0.4rem 0.85rem;border-radius:20px;border:1px solid #333;background:transparent;
             color:#777;font-size:0.8rem;cursor:pointer;transition:all 0.2s;
         }
-        .mode-chip.active { border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,234,255,0.06); }
+        .mode-chip.active { border-color:var(--accent);color:var(--accent);background:var(--accent-dim); }
         .toggle-group { display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap; }
         .toggle-label { font-size:0.75rem;color:#666;text-transform:uppercase;letter-spacing:1px; }
         .toggle-btn {
             padding:0.35rem 0.8rem;border-radius:6px;border:1px solid #333;background:transparent;
             color:#666;font-size:0.78rem;cursor:pointer;transition:all 0.2s;
         }
-        .toggle-btn.on { border-color:var(--neon-green);color:var(--neon-green);background:rgba(57,255,20,0.06); }
+        .toggle-btn.on { border-color:var(--accent);color:var(--accent);background:var(--accent-dim); }
 
         /* RACE TRACK */
         .race-track-section { margin-bottom:1.5rem; }
@@ -147,15 +113,15 @@
         .stat-box .stat-val {
             font-size: 1.4rem;
             font-weight: 800;
-            color: var(--neon-cyan);
+            color: var(--accent);
             font-variant-numeric: tabular-nums;
             line-height: 1;
         }
         .stat-box .stat-lbl { font-size: 0.68rem; color: #555; margin-top: 0.2rem; }
-        .stat-box.highlight { border-color: var(--neon-green); }
-        .stat-box.highlight .stat-val { color: var(--neon-green); }
-        .stat-box.danger { border-color: var(--neon-red); }
-        .stat-box.danger .stat-val { color: var(--neon-red); }
+        .stat-box.highlight { border-color: var(--accent); }
+        .stat-box.highlight .stat-val { color: var(--accent); }
+        .stat-box.danger { border-color: #ff0044; }
+        .stat-box.danger .stat-val { color: #ff0044; }
 
         /* GEAR DISPLAY */
         .gear-display {
@@ -170,8 +136,8 @@
             font-size: 3.5rem;
             font-weight: 900;
             line-height: 1;
-            color: var(--neon-orange);
-            text-shadow: 0 0 20px var(--neon-orange);
+            color: var(--accent);
+            
             font-variant-numeric: tabular-nums;
         }
         .gear-label { font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 2px; }
@@ -219,18 +185,18 @@
             -webkit-appearance: none;
             width: 22px;
             height: 22px;
-            background: var(--neon-green);
+            background: var(--accent);
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-green);
+            
         }
         .throttle-slider::-moz-range-thumb {
             width: 22px;
             height: 22px;
-            background: var(--neon-green);
+            background: var(--accent);
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-green);
+            
             border: none;
         }
 
@@ -247,9 +213,9 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .shift-up { background:var(--neon-green);color:#000;box-shadow:0 0 12px rgba(57,255,20,0.3); }
-        .shift-up:hover:not(:disabled) { box-shadow:0 0 25px rgba(57,255,20,0.6); }
-        .shift-down { background:transparent;border:1px solid var(--neon-orange);color:var(--neon-orange); }
+        .shift-up { background:var(--accent);color:#000; }
+        .shift-up:hover:not(:disabled) {  }
+        .shift-down { background:transparent;border:1px solid var(--accent);color:var(--accent); }
         .shift-down:hover:not(:disabled) { background:rgba(255,102,0,0.08); }
         .shift-btn:disabled { opacity:0.3;cursor:not-allowed; }
 
@@ -257,8 +223,8 @@
         .race-ctrl-btns { display:flex;gap:0.75rem;flex-wrap:wrap; }
         .race-start-btn {
             padding: 0.9rem 2.5rem;
-            background: linear-gradient(135deg, var(--neon-green), #00e676);
-            color: #000;
+            background: var(--accent);
+            color: #fff;
             border: none;
             border-radius: 50px;
             font-size: 1.1rem;
@@ -266,15 +232,15 @@
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 2px;
-            box-shadow: 0 0 25px rgba(57,255,20,0.4);
+            
             transition: all 0.2s;
         }
-        .race-start-btn:hover { box-shadow:0 0 40px rgba(57,255,20,0.7);transform:translateY(-2px); }
+        .race-start-btn:hover { transform:translateY(-2px); }
         .race-stop-btn {
             padding: 0.9rem 2rem;
             background: transparent;
-            border: 1px solid var(--neon-red);
-            color: var(--neon-red);
+            border: 1px solid #ff0044;
+            color: #ff0044;
             border-radius: 50px;
             font-size: 1rem;
             font-weight: 700;
@@ -301,8 +267,8 @@
         }
         .compare-bike-panel h3 { font-size:0.8rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.75rem; }
         .compare-stat { display:flex;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid #111;font-size:0.85rem; }
-        .compare-stat span:last-child { color:var(--neon-cyan);font-weight:600; }
-        .compare-leading { color: var(--neon-green) !important; }
+        .compare-stat span:last-child { color:var(--accent);font-weight:600; }
+        .compare-leading { color: var(--accent) !important; }
 
         /* LAP/RECORD */
         .records-section {
@@ -322,7 +288,7 @@
             min-width: 140px;
         }
         .record-item .rec-bike { font-size:0.7rem;color:#555;margin-bottom:0.2rem; }
-        .record-item .rec-val { font-size:1.1rem;font-weight:700;color:var(--neon-green); }
+        .record-item .rec-val { font-size:1.1rem;font-weight:700;color:var(--accent); }
         .record-item .rec-lbl { font-size:0.65rem;color:#444; }
 
         /* WARNING */
@@ -330,7 +296,7 @@
             position: fixed;
             top: 80px;
             right: 2rem;
-            background: var(--neon-red);
+            background: #ff0044;
             color: #fff;
             padding: 0.6rem 1.2rem;
             border-radius: 8px;
@@ -342,7 +308,7 @@
             opacity: 0;
             transition: opacity 0.2s;
             pointer-events: none;
-            box-shadow: 0 0 20px var(--neon-red);
+            
         }
         .shift-warning.show { opacity: 1; }
 
@@ -359,7 +325,7 @@
         .splits-table th { color:#555;text-align:left;padding:0.4rem 0.75rem;border-bottom:1px solid #1a1a1a;font-weight:600;text-transform:uppercase;font-size:0.7rem;letter-spacing:1px; }
         .splits-table td { padding:0.4rem 0.75rem;border-bottom:1px solid #111;color:#aaa; }
         .splits-table tr:last-child td { border-bottom:none; }
-        .split-time { color:var(--neon-cyan) !important;font-weight:600; }
+        .split-time { color:var(--accent) !important;font-weight:600; }
 
         /* VELOCITY GRAPH */
         .graph-section {
@@ -382,9 +348,9 @@
             transition: all 0.2s;
         }
         .shift-indicator.normal { color: #444; }
-        .shift-indicator.ready { color: var(--neon-green); background: rgba(57,255,20,0.06); }
-        .shift-indicator.warn { color: var(--neon-orange); background: rgba(255,102,0,0.06); animation: blink 0.4s step-end infinite; }
-        .shift-indicator.redline { color: var(--neon-red); background: rgba(255,0,68,0.1); animation: blink 0.2s step-end infinite; }
+        .shift-indicator.ready { color: var(--accent); background: var(--accent-dim); }
+        .shift-indicator.warn { color: var(--accent); background: var(--accent-dim); animation: blink 0.4s step-end infinite; }
+        .shift-indicator.redline { color: #ff0044; background: rgba(255,0,68,0.1); animation: blink 0.2s step-end infinite; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
         /* GRID BG ANIMATION */
@@ -393,117 +359,14 @@
             to { background-position: 0 40px; }
         }
         .racing-bg {
-            background-image: linear-gradient(rgba(0,234,255,0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0,234,255,0.03) 1px, transparent 1px);
+            background-image: linear-gradient(rgba(255,102,0,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,102,0,0.03) 1px, transparent 1px);
             background-size: 40px 40px;
         }
         .racing-bg.moving {
             animation: grid-scroll 0.3s linear infinite;
         }
     
-
-    /* === Aftermarket Card Layout: Racing Sim === */
-    .race-page { padding: 1.5rem 1rem 4rem !important; }
-    .page-title h1 { font-size: clamp(1.6rem, 5vw, 2rem) !important; }
-    .dashboard-panel, .race-panel, .stat-panel, .race-stats-panel,
-    .bike-selector-section, .race-track-section .track-wrap {
-        background: var(--card-bg) !important;
-        border: 1px solid var(--card-border) !important;
-        border-radius: 14px !important;
-        padding: 1.25rem !important;
-        box-shadow: var(--shadow-card) !important;
-    }
-    .gauge-container, .gauge-wrap { 
-        background: var(--bg-tertiary) !important;
-        border-radius: 10px !important;
-    }
-    .mode-chip, .toggle-btn {
-        background: transparent !important;
-        border-color: var(--card-border) !important;
-        color: var(--text-secondary) !important;
-        border-radius: 8px !important;
-        padding: 0.4rem 0.85rem !important;
-        font-size: 0.8rem !important;
-    }
-    .mode-chip.active, .toggle-btn.on {
-        border-color: var(--accent-primary) !important;
-        color: var(--accent-primary) !important;
-        background: rgba(0,255,224,0.06) !important;
-    }
-    [data-theme="dark-professional"] .mode-chip.active,
-    [data-theme="dark-professional"] .toggle-btn.on {
-        border-color: #3B82F6 !important;
-        color: #93C5FD !important;
-        background: rgba(59,130,246,0.08) !important;
-    }
-    [data-theme="light-professional"] .mode-chip.active,
-    [data-theme="light-professional"] .toggle-btn.on {
-        border-color: #003D7A !important;
-        color: #003D7A !important;
-        background: rgba(0,61,122,0.08) !important;
-    }
-    .race-start-btn, .btn-race-start, .big-btn {
-        background: var(--btn-primary-bg) !important;
-        color: var(--btn-primary-text) !important;
-        border: none !important;
-        border-radius: 12px !important;
-        padding: 0.85rem 2rem !important;
-        font-weight: 800 !important;
-        font-size: 0.95rem !important;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    .race-start-btn:hover, .big-btn:hover {
-        background: var(--btn-primary-hover) !important;
-        transform: translateY(-1px);
-    }
-
-    /* === THEME OVERRIDE: Apply CSS variables to page-specific elements === */
-    body { background-color: var(--bg-primary) !important; color: var(--text-primary) !important; }
-    .site-nav {
-        background: var(--nav-bg) !important;
-        border-bottom: 1px solid var(--nav-border) !important;
-        box-shadow: var(--nav-shadow) !important;
-    }
-    .site-nav .brand { color: var(--accent-primary) !important; text-shadow: var(--glow-text) !important; }
-    .site-nav a { color: var(--text-muted) !important; }
-    .site-nav a:hover, .site-nav a.active {
-        color: var(--accent-primary) !important;
-        background: rgba(0,255,224,0.08) !important;
-    }
-    [data-theme="light-professional"] .site-nav a:hover,
-    [data-theme="light-professional"] .site-nav a.active {
-        background: rgba(0,61,122,0.08) !important;
-    }
-    [data-theme="dark-professional"] .site-nav a:hover,
-    [data-theme="dark-professional"] .site-nav a.active {
-        background: rgba(59,130,246,0.1) !important;
-    }
-    /* Card backgrounds */
-    .part-card, .quiz-card, .option-card, .result-card, .bike-card,
-    .wheel-result, .dashboard-panel, .sc-bike-card, .bike-selector-section,
-    .race-result, .race-stats-panel, .shop-hero, .live-specs-bar,
-    .cart-panel, .category-panel {
-        background: var(--card-bg) !important;
-        border-color: var(--card-border) !important;
-        color: var(--text-primary) !important;
-        box-shadow: var(--shadow-card) !important;
-    }
-    /* Input/select elements */
-    select, input[type="text"], input[type="search"], input[type="email"], textarea {
-        background: var(--input-bg) !important;
-        border-color: var(--input-border) !important;
-        color: var(--input-text) !important;
-    }
-    select:focus, input:focus, textarea:focus {
-        border-color: var(--input-border-focus) !important;
-        box-shadow: var(--focus-ring) !important;
-    }
-    /* Text colors */
-    h1, h2, h3 { color: var(--text-primary) !important; }
-    p, li, span, label { color: inherit; }
-    /* Accent elements stay accent */
-    .neon-text, [class*="neon-"] { color: var(--accent-primary) !important; }
 
     </style>
 </head>
@@ -512,15 +375,15 @@
 <div class="shift-warning" id="shiftWarning">⚠️ SHIFT UP!</div>
 
 <!-- NAV -->
-<nav class="site-nav vc-nav">
-    <a href="index.html" class="brand vc-nav-brand">🏍️ Kawasaki</a>
-    <a href="index.html">🏠 Home</a>
-    <a href="index.html#motorcycles">🏍️ Motorcycles</a>
-    <a href="soundcheck.html">🔊 SoundCheck</a>
-    <a href="race.html" class="active">🏁 Racing Sim</a>
-    <a href="shop.html">🔧 Aftermarket</a>
-    <a href="quiz.html">🎯 Quiz</a>
-    <a href="wheel.html">🎡 Wheel</a>
+<nav class="site-nav">
+    <a class="brand" href="index.html">🏍️ Vrooooom</a>
+    <a href="index.html">Übersicht</a>
+    <a href="soundcheck.html">SoundCheck</a>
+    <a href="race.html" class="active">Racing Sim</a>
+    <a href="shop.html">Aftermarket</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="wheel.html">Wheel</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
 </nav>
 
 <div class="race-page">
@@ -922,8 +785,8 @@ function stepPhysics(state, bike, dt, manual) {
             // Flash visual on split
             const tbody = document.getElementById('splitsBody');
             if (tbody) {
-                tbody.style.boxShadow = '0 0 20px rgba(57,255,20,0.4)';
-                setTimeout(() => { if(tbody) tbody.style.boxShadow = ''; }, 500);
+                tbody.style.outline = '2px solid var(--accent)';
+                setTimeout(() => { if(tbody) tbody.style.outline = ''; }, 500);
             }
         }
     });
@@ -981,9 +844,9 @@ function updateUI(accel) {
     if (raceMode !== 'compare') {
         // Gauges
         // Color-coded RPM zones: cyan=normal, yellow=mid, orange=high, red=redline
-        const rpmColor = rpm > bike.redline * 0.93 ? '#ff0044' : rpm > bike.redline * 0.78 ? '#ff6600' : rpm > bike.redline * 0.5 ? '#ffcc00' : '#00eaff';
+        const rpmColor = rpm > bike.redline * 0.93 ? '#ff0044' : rpm > bike.redline * 0.78 ? '#ff6600' : rpm > bike.redline * 0.5 ? '#ffcc00' : '#ff8800';
         drawGauge('rpmGauge', rpm, bike.redline, rpmColor, rpm.toFixed(0));
-        drawGauge('speedGauge', speedKmh, bike.vmax, '#39ff14', speedKmh.toFixed(0));
+        drawGauge('speedGauge', speedKmh, bike.vmax, '#ff6600', speedKmh.toFixed(0));
 
         // Stat boxes
         document.getElementById('speedDisplay').textContent = speedKmh.toFixed(0);
@@ -1001,7 +864,7 @@ function updateUI(accel) {
         rpmBar.style.width = rpmPct + '%';
         if (rpmPct > 90) { rpmBar.style.background = 'linear-gradient(90deg,#ff0044,#ff4466)'; }
         else if (rpmPct > 75) { rpmBar.style.background = 'linear-gradient(90deg,#ff6600,#ffaa00)'; }
-        else { rpmBar.style.background = 'linear-gradient(90deg,#00eaff,#39ff14)'; }
+        else { rpmBar.style.background = 'linear-gradient(90deg,#ff8800,#ff6600)'; }
 
         // Shift indicator
         const si = document.getElementById('shiftIndicator');
@@ -1085,8 +948,8 @@ function drawGauge(canvasId, value, max, color, label) {
 }
 
 // Draw initial gauges
-drawGauge('rpmGauge', 0, 14000, '#00eaff', '0');
-drawGauge('speedGauge', 0, 300, '#39ff14', '0');
+drawGauge('rpmGauge', 0, 14000, '#ff8800', '0');
+drawGauge('speedGauge', 0, 300, '#ff6600', '0');
 
 // ==========================================
 // TRACK CANVAS
@@ -1137,28 +1000,28 @@ function drawTrack() {
 
     // Finish line
     const finX = W - 4;
-    ctx.strokeStyle = '#39ff14';
+    ctx.strokeStyle = '#ff6600';
     ctx.lineWidth = 3;
-    ctx.shadowColor = '#39ff14';
+    ctx.shadowColor = '#ff6600';
     ctx.shadowBlur = 8;
     ctx.beginPath();
     ctx.moveTo(finX, roadY - 5);
     ctx.lineTo(finX, roadY + roadH + 5);
     ctx.stroke();
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#39ff14';
+    ctx.fillStyle = '#ff6600';
     ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText('🏁 FINISH', finX - 2, roadY - 8);
 
     // Bike 1
     const b1x = Math.min((simState.dist / trackLen) * W, W - 20);
-    drawBikeMarker(ctx, b1x, roadY + roadH/2, '#39ff14', '1');
+    drawBikeMarker(ctx, b1x, roadY + roadH/2, '#ff6600', '1');
 
     // Bike 2
     if (raceMode === 'compare') {
         const b2x = Math.min((sim2State.dist / trackLen) * W, W - 20);
-        drawBikeMarker(ctx, b2x, roadY + roadH/2, '#00eaff', '2');
+        drawBikeMarker(ctx, b2x, roadY + roadH/2, '#ff8800', '2');
     }
 }
 
@@ -1219,8 +1082,8 @@ function drawVelocityGraph() {
         ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W-10, y); ctx.stroke();
     });
 
-    drawLine(hist1, '#39ff14');
-    if (raceMode === 'compare') drawLine(hist2, '#00eaff');
+    drawLine(hist1, '#ff6600');
+    if (raceMode === 'compare') drawLine(hist2, '#ff8800');
 
     // Labels
     ctx.fillStyle = '#444';
@@ -1322,8 +1185,8 @@ function resetRace() {
     resetSimState(sim2State);
     document.getElementById('throttleSlider').value = 0;
     document.getElementById('throttleVal').textContent = '0%';
-    drawGauge('rpmGauge', 0, 14000, '#00eaff', '0');
-    drawGauge('speedGauge', 0, 300, '#39ff14', '0');
+    drawGauge('rpmGauge', 0, 14000, '#ff8800', '0');
+    drawGauge('speedGauge', 0, 300, '#ff6600', '0');
     if (document.getElementById('speedDisplay')) {
         ['speedDisplay','rpmDisplay','timeDisplay','distDisplay','accelDisplay'].forEach(id => {
             const el = document.getElementById(id); if(el) el.textContent = '0';
@@ -1371,7 +1234,7 @@ function updateRecordDisplay() {
     list.innerHTML = sorted.map((k, i) => {
         const bike = RACE_BIKES[k];
         const medal = i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
-        return `<div class="record-item" style="${i === 0 ? 'border-color:var(--neon-green)' : ''}">
+        return `<div class="record-item" style="${i === 0 ? 'border-color:var(--accent)' : ''}">
             <div class="rec-bike">${medal}${bike ? bike.name : k}</div>
             <div class="rec-val">${records[k].toFixed(2)}s</div>
             <div class="rec-lbl">0-100 km/h Rekord</div>
@@ -1426,6 +1289,21 @@ document.addEventListener('keydown', e => {
 
 // Initial draw
 drawTrack();
+
+// Theme toggle
+(function() {
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    var t = localStorage.getItem('theme') || 'dark';
+    btn.textContent = t === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+    btn.addEventListener('click', function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        btn.textContent = next === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+    });
+})();
 </script>
     <script src="settings.js"></script>
 </body>
