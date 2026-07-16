@@ -5,42 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vrooooom - Kawasaki Motorräder | 19 Modelle</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="cyberpunk.css">
-    <link rel="stylesheet" href="themes.css">
-    <script>
-        (function() {
-            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
-            document.documentElement.setAttribute('data-theme', t);
-        })();
-    </script>
-    <script>
-        // Apply saved preference immediately to avoid flash of wrong theme
-        (function() {
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.documentElement.classList.add('dark-mode-pending');
-            }
-        })();
-    </script>
+    <link rel="stylesheet" href="design.css">
 </head>
 <body>
+    <nav class="site-nav">
+        <a class="brand" href="index.html">🏍️ Vrooooom</a>
+        <a href="index.html" class="active">Übersicht</a>
+        <a href="soundcheck.html">SoundCheck</a>
+        <a href="race.html">Racing Sim</a>
+        <a href="shop.html">Aftermarket</a>
+        <a href="quiz.html">Quiz</a>
+        <a href="wheel.html">Wheel</a>
+    </nav>
     <div class="container">
-        <header>
-            <div class="header-top">
-                <h1>🏍️ Vrooooom</h1>
-                <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
-            </div>
-            <p class="subtitle">Schnell, Klassisch &amp; Legendär — 19 Kawasaki Modelle</p>
-            <nav class="main-nav" aria-label="Bereiche">
-                <button class="nav-btn nav-btn-active" data-target="bikesGrid">🏍️ Übersicht</button>
-                <button class="nav-btn" data-target="raceSection">🏁 Speed-Race</button>
-                <button class="nav-btn" data-target="adviceSection">🧭 Kaufberatung</button>
-                <a class="nav-btn" href="soundcheck.html" style="text-decoration:none;">🔊 SoundCheck</a>
-                <a class="nav-btn" href="race.html" style="text-decoration:none;">🏁 Racing Sim</a>
-                <a class="nav-btn" href="shop.html" style="text-decoration:none;">🔧 Aftermarket</a>
-                <a class="nav-btn" href="quiz.html" style="text-decoration:none;">🎯 Quiz</a>
-                <a class="nav-btn" href="wheel.html" style="text-decoration:none;">🎡 Wheel</a>
-            </nav>
-        </header>
         <main>
             <!-- ===== SEARCH & FILTER ===== -->
             <section class="search-filter-section" aria-label="Suche und Filter">
@@ -1496,7 +1473,6 @@
             Reviews.updateAllBadges();
         })();
     </script>
-    <script src="cyberpunk-animations.js"></script>
     <script src="settings.js"></script>
 </body>
 </html>
