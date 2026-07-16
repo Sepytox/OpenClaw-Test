@@ -5,63 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Which Kawasaki Are You? — Quiz</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="cyberpunk.css">
-    <link rel="stylesheet" href="themes.css">
-    <script>
-        (function() {
-            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
-            document.documentElement.setAttribute('data-theme', t);
-        })();
-    </script>
+    <link rel="stylesheet" href="design.css">
     <style>
-        :root {
-            --neon-green: #39ff14;
-            --neon-cyan: #00eaff;
-            --neon-purple: #bf00ff;
-            --neon-orange: #ff6600;
-            --dark-bg: #0a0a0a;
-            --card-bg: #111;
-            --border: #222;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background: var(--dark-bg);
-            color: #e0e0e0;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            min-height: 100vh;
-        }
-        /* NAV */
-        .site-nav {
-            background: rgba(10,10,10,0.95);
-            border-bottom: 1px solid var(--neon-green);
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 0 20px rgba(57,255,20,0.15);
-        }
-        .site-nav .brand {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--neon-green);
-            text-decoration: none;
-            text-shadow: 0 0 10px var(--neon-green);
-            margin-right: 1rem;
-        }
-        .site-nav a {
-            color: #aaa;
-            text-decoration: none;
-            padding: 0.3rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            transition: color 0.2s, background 0.2s;
-        }
-        .site-nav a:hover, .site-nav a.active {
-            color: var(--neon-green);
+            color: var(--accent);
             background: rgba(57,255,20,0.08);
         }
 
@@ -77,8 +23,8 @@
         }
         .quiz-header h1 {
             font-size: clamp(1.8rem, 5vw, 3rem);
-            color: var(--neon-green);
-            text-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green);
+            color: var(--accent);
+            
             letter-spacing: 2px;
             margin-bottom: 0.5rem;
         }
@@ -111,10 +57,10 @@
         }
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
+            background: linear-gradient(90deg, var(--accent), #00c8ff);
             border-radius: 3px;
             transition: width 0.4s ease;
-            box-shadow: 0 0 8px var(--neon-green);
+            
         }
 
         /* QUESTION CARD */
@@ -124,7 +70,7 @@
             border-radius: 12px;
             padding: 2rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 0 30px rgba(0,234,255,0.06);
+            
             position: relative;
         }
         .question-card::before {
@@ -132,12 +78,12 @@
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 2px;
-            background: linear-gradient(90deg, var(--neon-cyan), transparent);
+            background: linear-gradient(90deg, #00c8ff, transparent);
             border-radius: 12px 12px 0 0;
         }
         .question-number {
             font-size: 0.75rem;
-            color: var(--neon-cyan);
+            color: #00c8ff;
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 0.75rem;
@@ -184,24 +130,24 @@
             font-size: 0.75rem;
             font-weight: 700;
             margin-right: 0.5rem;
-            color: var(--neon-cyan);
+            color: #00c8ff;
             flex-shrink: 0;
         }
         .answer-btn:hover {
-            border-color: var(--neon-cyan);
+            border-color: #00c8ff;
             color: #fff;
             background: rgba(0,234,255,0.05);
-            box-shadow: 0 0 12px rgba(0,234,255,0.2);
+            
             transform: translateY(-1px);
         }
         .answer-btn.selected {
-            border-color: var(--neon-green);
+            border-color: var(--accent);
             background: rgba(57,255,20,0.08);
             color: #fff;
-            box-shadow: 0 0 16px rgba(57,255,20,0.3);
+            
         }
         .answer-btn.selected .answer-label {
-            background: var(--neon-green);
+            background: var(--accent);
             color: #000;
         }
 
@@ -225,12 +171,12 @@
             letter-spacing: 1px;
         }
         .quiz-btn-primary {
-            background: var(--neon-green);
+            background: var(--accent);
             color: #000;
-            box-shadow: 0 0 20px rgba(57,255,20,0.4);
+            
         }
         .quiz-btn-primary:hover {
-            box-shadow: 0 0 30px rgba(57,255,20,0.7);
+            
             transform: translateY(-2px);
         }
         .quiz-btn-primary:disabled {
@@ -253,11 +199,11 @@
         #resultsSection { display: none; }
         .result-card {
             background: var(--card-bg);
-            border: 2px solid var(--neon-green);
+            border: 2px solid var(--accent);
             border-radius: 16px;
             padding: 2.5rem;
             text-align: center;
-            box-shadow: 0 0 40px rgba(57,255,20,0.25), 0 0 80px rgba(57,255,20,0.08);
+            
             position: relative;
             overflow: hidden;
         }
@@ -275,7 +221,7 @@
         }
         .result-badge {
             display: inline-block;
-            background: var(--neon-green);
+            background: var(--accent);
             color: #000;
             font-size: 0.75rem;
             font-weight: 700;
@@ -289,13 +235,13 @@
             font-size: 5rem;
             margin: 0.5rem 0;
             display: block;
-            filter: drop-shadow(0 0 20px var(--neon-green));
+            filter: drop-shadow(0 0 20px var(--accent));
         }
         .result-bike-name {
             font-size: clamp(1.5rem, 4vw, 2.5rem);
             font-weight: 800;
-            color: var(--neon-green);
-            text-shadow: 0 0 20px var(--neon-green);
+            color: var(--accent);
+            
             margin-bottom: 0.25rem;
         }
         .result-bike-sub {
@@ -305,7 +251,7 @@
         }
         .result-rider-type {
             font-size: 1.1rem;
-            color: var(--neon-cyan);
+            color: #00c8ff;
             margin-bottom: 2rem;
         }
         .result-rider-type strong {
@@ -334,7 +280,7 @@
             margin-bottom: 0.35rem;
         }
         .match-bar-name { color: #ddd; font-weight: 600; }
-        .match-pct { color: var(--neon-green); font-weight: 700; }
+        .match-pct { color: var(--accent); font-weight: 700; }
         .match-bar-bg {
             height: 8px;
             background: #1a1a1a;
@@ -346,9 +292,9 @@
             border-radius: 4px;
             transition: width 1s ease;
         }
-        .match-bar-fill.first { background: linear-gradient(90deg, var(--neon-green), #00e676); box-shadow: 0 0 8px var(--neon-green); }
-        .match-bar-fill.second { background: linear-gradient(90deg, var(--neon-cyan), #0097a7); box-shadow: 0 0 8px var(--neon-cyan); }
-        .match-bar-fill.third { background: linear-gradient(90deg, var(--neon-purple), #7b1fa2); box-shadow: 0 0 8px var(--neon-purple); }
+        .match-bar-fill.first { background: linear-gradient(90deg, var(--accent), #00e676);  }
+        .match-bar-fill.second { background: linear-gradient(90deg, #00c8ff, #0097a7);  }
+        .match-bar-fill.third { background: linear-gradient(90deg, #bf00ff, #7b1fa2);  }
 
         /* RESULT SPECS */
         .result-specs {
@@ -370,7 +316,7 @@
         .spec-chip .spec-val {
             font-size: 1.1rem;
             font-weight: 700;
-            color: var(--neon-cyan);
+            color: #00c8ff;
         }
         .spec-chip .spec-lbl {
             font-size: 0.7rem;
@@ -399,18 +345,18 @@
             gap: 0.4rem;
         }
         .btn-goto {
-            background: var(--neon-green);
+            background: var(--accent);
             color: #000;
             border: none;
-            box-shadow: 0 0 20px rgba(57,255,20,0.3);
+            
         }
-        .btn-goto:hover { box-shadow: 0 0 30px rgba(57,255,20,0.6); transform: translateY(-2px); }
+        .btn-goto:hover {  transform: translateY(-2px); }
         .btn-share {
             background: transparent;
-            border: 1px solid var(--neon-cyan);
-            color: var(--neon-cyan);
+            border: 1px solid #00c8ff;
+            color: #00c8ff;
         }
-        .btn-share:hover { background: rgba(0,234,255,0.08); box-shadow: 0 0 12px rgba(0,234,255,0.3); }
+        .btn-share:hover { background: rgba(0,234,255,0.08);  }
         .btn-retry {
             background: transparent;
             border: 1px solid #444;
@@ -433,9 +379,9 @@
         }
         .intro-card h2 {
             font-size: 1.8rem;
-            color: var(--neon-green);
+            color: var(--accent);
             margin-bottom: 1rem;
-            text-shadow: 0 0 10px var(--neon-green);
+            
         }
         .intro-card p { color: #aaa; margin-bottom: 1.5rem; line-height: 1.6; }
         .intro-features {
@@ -453,7 +399,7 @@
             font-size: 0.85rem;
             color: #ccc;
         }
-        .intro-feat span { color: var(--neon-cyan); margin-right: 0.4rem; }
+        .intro-feat span { color: #00c8ff; margin-right: 0.4rem; }
 
         /* ANIMATIONS */
         @keyframes slide-in {
@@ -462,129 +408,19 @@
         }
         .question-card { animation: slide-in 0.3s ease; }
         .result-card { animation: slide-in 0.4s ease; }
-    
-
-    /* === Aftermarket Card Layout: Quiz === */
-    .quiz-wrapper { padding: 1.5rem 1rem 4rem !important; }
-    .quiz-header { margin-bottom: 1.75rem !important; }
-    .quiz-header h1 { font-size: clamp(1.6rem, 5vw, 2rem) !important; margin-bottom: 0.4rem !important; }
-    .question-card {
-        background: var(--card-bg) !important;
-        border: 1px solid var(--card-border) !important;
-        border-radius: 14px !important;
-        padding: 1.5rem !important;
-        box-shadow: var(--shadow-card) !important;
-        margin-bottom: 1.5rem !important;
-    }
-    .option-btn, .answer-btn {
-        display: block;
-        width: 100%;
-        text-align: left;
-        padding: 0.85rem 1.1rem !important;
-        border-radius: 10px !important;
-        border: 1.5px solid var(--card-border) !important;
-        background: var(--card-bg) !important;
-        color: var(--text-primary) !important;
-        font-size: 0.875rem !important;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        margin-bottom: 0.5rem;
-    }
-    .option-btn:hover, .answer-btn:hover {
-        border-color: var(--accent-primary) !important;
-        background: var(--card-bg-hover) !important;
-    }
-    .option-btn.selected, .answer-btn.selected, .option-btn.chosen {
-        border-color: var(--accent-primary) !important;
-        background: var(--card-bg-hover) !important;
-        box-shadow: var(--glow-primary) !important;
-    }
-    .result-card {
-        background: var(--card-bg) !important;
-        border: 2px solid var(--accent-primary) !important;
-        border-radius: 16px !important;
-        padding: 1.75rem !important;
-        box-shadow: var(--shadow-hover) !important;
-        text-align: center;
-    }
-    .quiz-nav-btn, .quiz-btn, .btn-next, .btn-submit {
-        background: var(--btn-primary-bg) !important;
-        color: var(--btn-primary-text) !important;
-        border: none !important;
-        border-radius: 10px !important;
-        padding: 0.75rem 1.75rem !important;
-        font-size: 0.9rem !important;
-        font-weight: 700 !important;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        letter-spacing: 0.02em;
-    }
-    .quiz-nav-btn:hover, .quiz-btn:hover, .btn-next:hover {
-        background: var(--btn-primary-hover) !important;
-        transform: translateY(-1px);
-    }
-
-    /* === THEME OVERRIDE: Apply CSS variables to page-specific elements === */
-    body { background-color: var(--bg-primary) !important; color: var(--text-primary) !important; }
-    .site-nav {
-        background: var(--nav-bg) !important;
-        border-bottom: 1px solid var(--nav-border) !important;
-        box-shadow: var(--nav-shadow) !important;
-    }
-    .site-nav .brand { color: var(--accent-primary) !important; text-shadow: var(--glow-text) !important; }
-    .site-nav a { color: var(--text-muted) !important; }
-    .site-nav a:hover, .site-nav a.active {
-        color: var(--accent-primary) !important;
-        background: rgba(0,255,224,0.08) !important;
-    }
-    [data-theme="light-professional"] .site-nav a:hover,
-    [data-theme="light-professional"] .site-nav a.active {
-        background: rgba(0,61,122,0.08) !important;
-    }
-    [data-theme="dark-professional"] .site-nav a:hover,
-    [data-theme="dark-professional"] .site-nav a.active {
-        background: rgba(59,130,246,0.1) !important;
-    }
-    /* Card backgrounds */
-    .part-card, .quiz-card, .option-card, .result-card, .bike-card,
-    .wheel-result, .dashboard-panel, .sc-bike-card, .bike-selector-section,
-    .race-result, .race-stats-panel, .shop-hero, .live-specs-bar,
-    .cart-panel, .category-panel {
-        background: var(--card-bg) !important;
-        border-color: var(--card-border) !important;
-        color: var(--text-primary) !important;
-        box-shadow: var(--shadow-card) !important;
-    }
-    /* Input/select elements */
-    select, input[type="text"], input[type="search"], input[type="email"], textarea {
-        background: var(--input-bg) !important;
-        border-color: var(--input-border) !important;
-        color: var(--input-text) !important;
-    }
-    select:focus, input:focus, textarea:focus {
-        border-color: var(--input-border-focus) !important;
-        box-shadow: var(--focus-ring) !important;
-    }
-    /* Text colors */
-    h1, h2, h3 { color: var(--text-primary) !important; }
-    p, li, span, label { color: inherit; }
-    /* Accent elements stay accent */
-    .neon-text, [class*="neon-"] { color: var(--accent-primary) !important; }
-
     </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav class="site-nav vc-nav">
-    <a href="index.html" class="brand vc-nav-brand">🏍️ Kawasaki</a>
-    <a href="index.html">🏠 Home</a>
-    <a href="index.html#motorcycles">🏍️ Motorcycles</a>
-    <a href="soundcheck.html">🔊 SoundCheck</a>
-    <a href="race.html">🏁 Racing Sim</a>
-    <a href="shop.html">🔧 Aftermarket</a>
-    <a href="quiz.html" class="active">🎯 Quiz</a>
-    <a href="wheel.html">🎡 Wheel</a>
+<nav class="site-nav">
+    <a class="brand" href="index.html">🏍️ Vrooooom</a>
+    <a href="index.html">Übersicht</a>
+    <a href="soundcheck.html">SoundCheck</a>
+    <a href="race.html">Racing Sim</a>
+    <a href="shop.html">Aftermarket</a>
+    <a href="quiz.html" class="active">Quiz</a>
+    <a href="wheel.html">Wheel</a>
 </nav>
 
 <!-- QUIZ WRAPPER -->
