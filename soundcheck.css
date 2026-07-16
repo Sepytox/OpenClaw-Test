@@ -1099,3 +1099,44 @@ body.dark-mode .sc-intro {
     flex-direction: column;
   }
 }
+
+/* ============================================================
+   18. WAVEFORM VISUALIZER — Enhanced Neon Glow
+   ============================================================ */
+
+/* Animated scan line on waveform canvas */
+.sc-waveform {
+  position: relative;
+}
+
+/* Gradient border shimmer for spectrum */
+@keyframes specBorderPulse {
+  0%, 100% { border-color: rgba(0,255,224,0.2); }
+  50%       { border-color: rgba(255,0,110,0.4); }
+}
+
+.sc-spectrum {
+  animation: specBorderPulse 3s ease-in-out infinite;
+}
+
+/* Waveform label */
+.sc-wave-label,
+.sc-spec-label {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.6em;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--cp-text-muted, #5A7098);
+  text-align: right;
+  margin-bottom: 2px;
+}
+
+/* Playing pulse on the card row */
+@keyframes rowPlayingPulse {
+  0%, 100% { background: rgba(255,0,110,0.05); }
+  50%       { background: rgba(255,0,110,0.12); }
+}
+
+.sc-exhaust-row.playing {
+  animation: borderPulse 1.5s ease-in-out infinite, rowPlayingPulse 1s ease-in-out infinite;
+}
