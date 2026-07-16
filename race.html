@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kawasaki Racing Simulator — Realistic Physics</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="cyberpunk.css">
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --neon-cyan: #00eaff;
+            --neon-red: #ff0044;
+            --neon-orange: #ff6600;
+            --neon-yellow: #ffcc00;
+            --dark-bg: #050505;
+            --card-bg: #0d0d0d;
+            --border: #1a1a1a;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+        /* NAV */
+        .site-nav {
+            background: rgba(5,5,5,0.97);
+            border-bottom: 1px solid var(--neon-green);
+            padding: 0.6rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(57,255,20,0.15);
+        }
+        .site-nav .brand { font-size:1.1rem;font-weight:700;color:var(--neon-green);text-decoration:none;text-shadow:0 0 10px var(--neon-green);margin-right:1rem; }
+        .site-nav a { color:#777;text-decoration:none;padding:0.25rem 0.55rem;border-radius:4px;font-size:0.82rem;transition:color 0.2s,background 0.2s; }
+        .site-nav a:hover,.site-nav a.active { color:var(--neon-green);background:rgba(57,255,20,0.08); }
+
+        /* PAGE */
+        .race-page { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+        .page-title { text-align:center;margin-bottom:1.5rem; }
+        .page-title h1 { font-size:clamp(1.8rem,5vw,3rem);color:var(--neon-green);text-shadow:0 0 20px var(--neon-green);letter-spacing:3px;margin-bottom:0.3rem; }
+        .page-title p { color:#666;font-size:0.9rem; }
+
+        /* BIKE SELECTOR */
+        .bike-selector-section {
+            background: var(--card-bg);
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .bike-selector-section h2 { font-size:0.8rem;color:#555;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem; }
+        .bike-selector-row { display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap; }
+        .selector-group { flex:1;min-width:180px; }
+        .selector-group label { display:block;font-size:0.75rem;color:#666;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:1px; }
+        .selector-group select {
+            width:100%;padding:0.6rem 0.75rem;background:#050505;border:1px solid #2a2a2a;
+            color:#e0e0e0;border-radius:8px;font-size:0.9rem;cursor:pointer;
+            appearance:none;outline:none;
+        }
+        .selector-group select:focus { border-color:var(--neon-green); }
+        .mode-toggle-row { display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.75rem; }
+        .mode-chip {
+            padding:0.4rem 0.85rem;border-radius:20px;border:1px solid #333;background:transparent;
+            color:#777;font-size:0.8rem;cursor:pointer;transition:all 0.2s;
+        }
+        .mode-chip.active { border-color:var(--neon-cyan);color:var(--neon-cyan);background:rgba(0,234,255,0.06); }
+        .toggle-group { display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap; }
+        .toggle-label { font-size:0.75rem;color:#666;text-transform:uppercase;letter-spacing:1px; }
+        .toggle-btn {
+            padding:0.35rem 0.8rem;border-radius:6px;border:1px solid #333;background:transparent;
+            color:#666;font-size:0.78rem;cursor:pointer;transition:all 0.2s;
+        }
+        .toggle-btn.on { border-color:var(--neon-green);color:var(--neon-green);background:rgba(57,255,20,0.06); }
+
+        /* RACE TRACK */
+        .race-track-section { margin-bottom:1.5rem; }
+        .track-canvas-wrap { position:relative; }
+        #trackCanvas { width:100%;height:120px;display:block;border-radius:8px; }
+        .track-overlay {
+            position:absolute;top:0;left:0;right:0;bottom:0;
+            display:flex;align-items:center;justify-content:flex-start;
+            padding:0 1rem;
+            pointer-events:none;
+        }
+        /* Progress markers */
+        .track-markers { position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none; }
+
+        /* MAIN DASHBOARD */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width: 700px) { .dashboard { grid-template-columns: 1fr; } }
+
+        /* GAUGES */
+        .gauges-panel {
+            background: var(--card-bg);
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+        .gauges-panel h2 { font-size:0.75rem;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem; }
+        .gauges-row { display:flex;gap:1rem;justify-content:space-around; }
+
+        /* CIRCULAR GAUGE */
+        .gauge-wrap { text-align:center;flex:1; }
+        .gauge-canvas { display:block;margin:0 auto; }
+        .gauge-label { font-size:0.7rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-top:0.25rem; }
+        .gauge-value { font-size:1.1rem;font-weight:700;color:#ddd;line-height:1; }
+
+        /* LIVE STATS */
+        .live-stats {
+            background: var(--card-bg);
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+        .live-stats h2 { font-size:0.75rem;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+        .stat-box {
+            background: #080808;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+        }
+        .stat-box .stat-val {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--neon-cyan);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+        .stat-box .stat-lbl { font-size: 0.68rem; color: #555; margin-top: 0.2rem; }
+        .stat-box.highlight { border-color: var(--neon-green); }
+        .stat-box.highlight .stat-val { color: var(--neon-green); }
+        .stat-box.danger { border-color: var(--neon-red); }
+        .stat-box.danger .stat-val { color: var(--neon-red); }
+
+        /* GEAR DISPLAY */
+        .gear-display {
+            background: #050505;
+            border: 2px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 0.75rem;
+            text-align: center;
+            grid-column: span 2;
+        }
+        .gear-number {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1;
+            color: var(--neon-orange);
+            text-shadow: 0 0 20px var(--neon-orange);
+            font-variant-numeric: tabular-nums;
+        }
+        .gear-label { font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* RPM BAR */
+        .rpm-bar-section { margin-top: 0.75rem; }
+        .rpm-bar-bg {
+            height: 10px;
+            background: #111;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 0.3rem;
+        }
+        .rpm-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.05s linear, background 0.1s;
+        }
+        .rpm-zone-labels { display:flex;justify-content:space-between;font-size:0.65rem;color:#444; }
+
+        /* CONTROLS */
+        .controls-section {
+            background: var(--card-bg);
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .controls-section h2 { font-size:0.75rem;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem; }
+        .controls-row { display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem; }
+
+        /* THROTTLE */
+        .throttle-wrap { flex: 1; min-width: 200px; }
+        .throttle-label { display:flex;justify-content:space-between;font-size:0.75rem;color:#666;margin-bottom:0.4rem; }
+        .throttle-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #111;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+        .throttle-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+        .throttle-slider::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-green);
+            border: none;
+        }
+
+        /* SHIFT BUTTONS */
+        .shift-btns { display:flex;gap:0.6rem;align-items:center; }
+        .shift-btn {
+            padding: 0.65rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .shift-up { background:var(--neon-green);color:#000;box-shadow:0 0 12px rgba(57,255,20,0.3); }
+        .shift-up:hover:not(:disabled) { box-shadow:0 0 25px rgba(57,255,20,0.6); }
+        .shift-down { background:transparent;border:1px solid var(--neon-orange);color:var(--neon-orange); }
+        .shift-down:hover:not(:disabled) { background:rgba(255,102,0,0.08); }
+        .shift-btn:disabled { opacity:0.3;cursor:not-allowed; }
+
+        /* START/STOP */
+        .race-ctrl-btns { display:flex;gap:0.75rem;flex-wrap:wrap; }
+        .race-start-btn {
+            padding: 0.9rem 2.5rem;
+            background: linear-gradient(135deg, var(--neon-green), #00e676);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 25px rgba(57,255,20,0.4);
+            transition: all 0.2s;
+        }
+        .race-start-btn:hover { box-shadow:0 0 40px rgba(57,255,20,0.7);transform:translateY(-2px); }
+        .race-stop-btn {
+            padding: 0.9rem 2rem;
+            background: transparent;
+            border: 1px solid var(--neon-red);
+            color: var(--neon-red);
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .race-stop-btn:hover { background:rgba(255,0,68,0.08); }
+
+        /* COMPARE MODE */
+        .compare-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width:600px) { .compare-grid { grid-template-columns:1fr; } }
+        .compare-bike-panel {
+            background: var(--card-bg);
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        .compare-bike-panel h3 { font-size:0.8rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.75rem; }
+        .compare-stat { display:flex;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid #111;font-size:0.85rem; }
+        .compare-stat span:last-child { color:var(--neon-cyan);font-weight:600; }
+        .compare-leading { color: var(--neon-green) !important; }
+
+        /* LAP/RECORD */
+        .records-section {
+            background: var(--card-bg);
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .records-section h2 { font-size:0.75rem;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem; }
+        .record-list { display:flex;flex-wrap:wrap;gap:0.75rem; }
+        .record-item {
+            background: #080808;
+            border: 1px solid #1e1e1e;
+            border-radius: 8px;
+            padding: 0.65rem 1rem;
+            min-width: 140px;
+        }
+        .record-item .rec-bike { font-size:0.7rem;color:#555;margin-bottom:0.2rem; }
+        .record-item .rec-val { font-size:1.1rem;font-weight:700;color:var(--neon-green); }
+        .record-item .rec-lbl { font-size:0.65rem;color:#444; }
+
+        /* WARNING */
+        .shift-warning {
+            position: fixed;
+            top: 80px;
+            right: 2rem;
+            background: var(--neon-red);
+            color: #fff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            box-shadow: 0 0 20px var(--neon-red);
+        }
+        .shift-warning.show { opacity: 1; }
+
+        /* SPLITS */
+        .splits-section {
+            background: var(--card-bg);
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .splits-section h2 { font-size:0.75rem;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem; }
+        .splits-table { width:100%;border-collapse:collapse;font-size:0.84rem; }
+        .splits-table th { color:#555;text-align:left;padding:0.4rem 0.75rem;border-bottom:1px solid #1a1a1a;font-weight:600;text-transform:uppercase;font-size:0.7rem;letter-spacing:1px; }
+        .splits-table td { padding:0.4rem 0.75rem;border-bottom:1px solid #111;color:#aaa; }
+        .splits-table tr:last-child td { border-bottom:none; }
+        .split-time { color:var(--neon-cyan) !important;font-weight:600; }
+
+        /* VELOCITY GRAPH */
+        .graph-section {
+            background: var(--card-bg);
+            border: 1px solid #1e1e1e;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .graph-section h2 { font-size:0.75rem;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem; }
+        #velCanvas { width:100%;height:160px;display:block;border-radius:6px; }
+
+        /* SHIFT INDICATOR */
+        .shift-indicator {
+            text-align: center;
+            padding: 0.3rem;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+        }
+        .shift-indicator.normal { color: #444; }
+        .shift-indicator.ready { color: var(--neon-green); background: rgba(57,255,20,0.06); }
+        .shift-indicator.warn { color: var(--neon-orange); background: rgba(255,102,0,0.06); animation: blink 0.4s step-end infinite; }
+        .shift-indicator.redline { color: var(--neon-red); background: rgba(255,0,68,0.1); animation: blink 0.2s step-end infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+        /* GRID BG ANIMATION */
+        @keyframes grid-scroll {
+            from { background-position: 0 0; }
+            to { background-position: 0 40px; }
+        }
+        .racing-bg {
+            background-image: linear-gradient(rgba(0,234,255,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0,234,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .racing-bg.moving {
+            animation: grid-scroll 0.3s linear infinite;
+        }
+    </style>
+</head>
+<body class="racing-bg" id="bodyEl">
+
+<div class="shift-warning" id="shiftWarning">⚠️ SHIFT UP!</div>
+
+<!-- NAV -->
+<nav class="site-nav">
+    <a href="index.html" class="brand">🏍️ Kawasaki</a>
+    <a href="index.html">🏠 Home</a>
+    <a href="index.html#motorcycles">🏍️ Motorcycles</a>
+    <a href="soundcheck.html">🔊 SoundCheck</a>
+    <a href="race.html" class="active">🏁 Racing Sim</a>
+    <a href="shop.html">🔧 Aftermarket</a>
+    <a href="quiz.html">🎯 Quiz</a>
+    <a href="wheel.html">🎡 Wheel</a>
+</nav>
+
+<div class="race-page">
+    <div class="page-title">
+        <h1>🏁 RACING SIMULATOR</h1>
+        <p>Realistic Physics — RPM · Gears · Torque · 0-400m</p>
+    </div>
+
+    <!-- BIKE SELECTOR -->
+    <div class="bike-selector-section">
+        <h2>⚙️ Konfiguration</h2>
+        <div class="bike-selector-row">
+            <div class="selector-group">
+                <label>Bike 1</label>
+                <select id="bike1Select" onchange="updateBike1()">
+                    <!-- filled by JS -->
+                </select>
+            </div>
+            <div class="selector-group" id="bike2SelectWrap">
+                <label>Bike 2 (Vergleich)</label>
+                <select id="bike2Select" onchange="updateBike2()">
+                    <!-- filled by JS -->
+                </select>
+            </div>
+            <div class="selector-group">
+                <label>Strecke</label>
+                <select id="trackSelect">
+                    <option value="400">0-400m (Viertel Meile)</option>
+                    <option value="1000">0-1000m (1 km)</option>
+                    <option value="100">0-100 km/h Sprint</option>
+                </select>
+            </div>
+        </div>
+        <div class="mode-toggle-row">
+            <button class="mode-chip active" id="modeSingle" onclick="setMode('single')">🏍️ Einzel</button>
+            <button class="mode-chip" id="modeCompare" onclick="setMode('compare')">⚔️ Vergleich</button>
+            <button class="mode-chip" id="modeManual" onclick="setMode('manual')">🎮 Manuell</button>
+            <span style="margin-left:0.5rem;"></span>
+            <div class="toggle-group">
+                <span class="toggle-label">TC</span>
+                <button class="toggle-btn on" id="tcToggle" onclick="toggleTC()">AN</button>
+            </div>
+            <div class="toggle-group">
+                <span class="toggle-label">ABS</span>
+                <button class="toggle-btn on" id="absToggle" onclick="toggleABS()">AN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RACE TRACK CANVAS -->
+    <div class="race-track-section">
+        <div class="track-canvas-wrap">
+            <canvas id="trackCanvas" height="120"></canvas>
+        </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls-section">
+        <h2>🎮 Controls</h2>
+        <div class="controls-row">
+            <div class="throttle-wrap">
+                <div class="throttle-label">
+                    <span>Gas-Griff (Throttle)</span>
+                    <span id="throttleVal">0%</span>
+                </div>
+                <input type="range" class="throttle-slider" id="throttleSlider" min="0" max="100" value="0" oninput="updateThrottle(this.value)">
+            </div>
+            <div class="shift-btns" id="shiftBtnsWrap">
+                <button class="shift-btn shift-down" id="shiftDownBtn" onclick="shiftDown()" disabled>▼ RUNTER</button>
+                <button class="shift-btn shift-up" id="shiftUpBtn" onclick="shiftUp()" disabled>▲ RAUF</button>
+            </div>
+        </div>
+        <div class="race-ctrl-btns">
+            <button class="race-start-btn" id="raceStartBtn" onclick="startRace()">🏁 START!</button>
+            <button class="race-stop-btn" id="raceStopBtn" onclick="stopRace()" style="display:none;">⬛ STOP</button>
+            <button class="race-stop-btn" onclick="resetRace()" style="border-color:#444;color:#666;">🔄 Reset</button>
+        </div>
+    </div>
+
+    <!-- SINGLE MODE DASHBOARD -->
+    <div id="singleDashboard">
+        <div class="dashboard">
+            <!-- GAUGES -->
+            <div class="gauges-panel">
+                <h2>📊 Instrumente</h2>
+                <div class="gauges-row">
+                    <div class="gauge-wrap">
+                        <canvas class="gauge-canvas" id="rpmGauge" width="140" height="140"></canvas>
+                        <div class="gauge-label">RPM</div>
+                    </div>
+                    <div class="gauge-wrap">
+                        <canvas class="gauge-canvas" id="speedGauge" width="140" height="140"></canvas>
+                        <div class="gauge-label">km/h</div>
+                    </div>
+                </div>
+                <div class="rpm-bar-section">
+                    <div class="rpm-bar-bg">
+                        <div class="rpm-bar-fill" id="rpmBarFill" style="width:0%"></div>
+                    </div>
+                    <div class="rpm-zone-labels">
+                        <span>0</span><span>3k</span><span>6k</span><span>9k</span><span>12k</span><span>15k+</span>
+                    </div>
+                    <div class="shift-indicator normal" id="shiftIndicator">—</div>
+                </div>
+            </div>
+
+            <!-- LIVE STATS -->
+            <div class="live-stats">
+                <h2>⚡ Live-Daten</h2>
+                <div class="stats-grid">
+                    <div class="gear-display">
+                        <div class="gear-number" id="gearDisplay">N</div>
+                        <div class="gear-label">Gang</div>
+                    </div>
+                    <div class="stat-box highlight">
+                        <div class="stat-val" id="speedDisplay">0</div>
+                        <div class="stat-lbl">km/h</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val" id="rpmDisplay">0</div>
+                        <div class="stat-lbl">RPM</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val" id="timeDisplay">0.00</div>
+                        <div class="stat-lbl">Zeit (s)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val" id="distDisplay">0</div>
+                        <div class="stat-lbl">Meter</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val" id="accelDisplay">0</div>
+                        <div class="stat-lbl">m/s²</div>
+                    </div>
+                    <div class="stat-box highlight">
+                        <div class="stat-val" id="time100Display">—</div>
+                        <div class="stat-lbl">0-100 km/h</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val" id="powerDisplay">0</div>
+                        <div class="stat-lbl">PS aktuell</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMPARE MODE -->
+    <div id="compareDashboard" style="display:none;">
+        <div class="compare-grid">
+            <div class="compare-bike-panel" id="comp1Panel">
+                <h3 id="comp1Name">Bike 1</h3>
+                <div class="compare-stat"><span>Speed</span><span id="comp1Speed">0 km/h</span></div>
+                <div class="compare-stat"><span>RPM</span><span id="comp1Rpm">0</span></div>
+                <div class="compare-stat"><span>Gang</span><span id="comp1Gear">N</span></div>
+                <div class="compare-stat"><span>Zeit</span><span id="comp1Time">0.00s</span></div>
+                <div class="compare-stat"><span>Distanz</span><span id="comp1Dist">0m</span></div>
+                <div class="compare-stat"><span>0-100 km/h</span><span id="comp1T100">—</span></div>
+            </div>
+            <div class="compare-bike-panel" id="comp2Panel">
+                <h3 id="comp2Name">Bike 2</h3>
+                <div class="compare-stat"><span>Speed</span><span id="comp2Speed">0 km/h</span></div>
+                <div class="compare-stat"><span>RPM</span><span id="comp2Rpm">0</span></div>
+                <div class="compare-stat"><span>Gang</span><span id="comp2Gear">N</span></div>
+                <div class="compare-stat"><span>Zeit</span><span id="comp2Time">0.00s</span></div>
+                <div class="compare-stat"><span>Distanz</span><span id="comp2Dist">0m</span></div>
+                <div class="compare-stat"><span>0-100 km/h</span><span id="comp2T100">—</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SPLITS -->
+    <div class="splits-section">
+        <h2>⏱️ Zwischenzeiten</h2>
+        <table class="splits-table">
+            <thead>
+                <tr><th>Distanz</th><th>Zeit (Bike 1)</th><th id="split2Header" style="display:none">Zeit (Bike 2)</th></tr>
+            </thead>
+            <tbody id="splitsBody">
+                <tr><td colspan="3" style="color:#333;text-align:center;padding:1rem;">Noch kein Rennen gefahren</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- VELOCITY GRAPH -->
+    <div class="graph-section">
+        <h2>📈 Geschwindigkeitsverlauf</h2>
+        <canvas id="velCanvas" height="160"></canvas>
+    </div>
+
+    <!-- RECORDS -->
+    <div class="records-section">
+        <h2>🏆 Rekorde (localStorage)</h2>
+        <div class="record-list" id="recordList">
+            <div style="color:#333;font-size:0.85rem;">Noch keine Rennen gefahren</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// BIKE DATA WITH PHYSICS
+// ==========================================
+const RACE_BIKES = {
+    h2:         { name:'Kawasaki Ninja H2',       ps:231, torque:141, weight:216, vmax:300, redline:14000, idleRpm:1200, gears:6, accel:3.0 },
+    zx10r:      { name:'Kawasaki ZX-10R',          ps:203, torque:115, weight:186, vmax:299, redline:14000, idleRpm:1200, gears:6, accel:2.9 },
+    zh2:        { name:'Kawasaki Z H2',             ps:200, torque:137, weight:239, vmax:290, redline:11000, idleRpm:1100, gears:6, accel:3.2 },
+    h2sx:       { name:'Kawasaki H2 SX',            ps:200, torque:137, weight:240, vmax:299, redline:13000, idleRpm:1200, gears:6, accel:3.1 },
+    hybrid1200: { name:'Kawasaki Ninja Hybrid',     ps:220, torque:220, weight:227, vmax:280, redline:12000, idleRpm:800,  gears:6, accel:3.2 },
+    zx6r:       { name:'Kawasaki ZX-6R',            ps:130, torque:71,  weight:193, vmax:260, redline:15000, idleRpm:1500, gears:6, accel:3.5 },
+    z900:       { name:'Kawasaki Z900',              ps:125, torque:99,  weight:193, vmax:248, redline:11500, idleRpm:1100, gears:6, accel:3.4 },
+    versys1000: { name:'Kawasaki Versys 1000',       ps:120, torque:102, weight:235, vmax:220, redline:10000, idleRpm:1000, gears:6, accel:3.9 },
+    ninja650:   { name:'Kawasaki Ninja 650',         ps:68,  torque:64,  weight:172, vmax:200, redline:9000,  idleRpm:900,  gears:6, accel:4.5 },
+    z650:       { name:'Kawasaki Z650',              ps:68,  torque:64,  weight:168, vmax:190, redline:9000,  idleRpm:900,  gears:6, accel:4.2 },
+    ninja400:   { name:'Kawasaki Ninja 400',         ps:45,  torque:38,  weight:168, vmax:190, redline:10000, idleRpm:1200, gears:6, accel:4.8 },
+    zx25r:      { name:'Kawasaki ZX-25R',            ps:51,  torque:23,  weight:182, vmax:215, redline:17000, idleRpm:2000, gears:6, accel:5.0 },
+    eliminator400:{name:'Kawasaki Eliminator 400',  ps:45,  torque:43,  weight:176, vmax:165, redline:8000,  idleRpm:900,  gears:6, accel:5.5 },
+    w800:       { name:'Kawasaki W800',              ps:48,  torque:63,  weight:202, vmax:170, redline:7000,  idleRpm:800,  gears:5, accel:6.0 },
+    klx300:     { name:'Kawasaki KLX 300',           ps:27,  torque:26,  weight:137, vmax:137, redline:9500,  idleRpm:1400, gears:6, accel:7.5 },
+    kx450:      { name:'Kawasaki KX 450',            ps:62,  torque:54,  weight:110, vmax:150, redline:11000, idleRpm:1800, gears:5, accel:3.8 },
+    samurai:    { name:'Kawasaki Samurai',            ps:31,  torque:25,  weight:145, vmax:160, redline:8000,  idleRpm:1200, gears:5, accel:0   }
+};
+
+// Gear ratios (typical sport bike progression)
+const GEAR_RATIOS = [0, 3.2, 2.1, 1.6, 1.28, 1.05, 0.88]; // 0=neutral,1-6
+const FINAL_DRIVE = 2.8;
+const WHEEL_CIRC = 2.0; // meters
+
+// Physics state
+let simState = {
+    running: false,
+    time: 0,
+    dist: 0,
+    speed: 0,     // m/s
+    rpm: 0,
+    gear: 0,       // 0=neutral
+    throttle: 0,  // 0-1
+    t100: null,
+    reached100: false,
+    velHistory: [],
+    splits: {},
+    splitTargets: [50, 100, 200, 400, 1000],
+    mode: 'single',
+    tcOn: true,
+    absOn: true
+};
+
+let sim2State = { ...JSON.parse(JSON.stringify(simState)) };
+let simAnimId = null;
+let simLastT = null;
+let currentBike1 = 'zx10r';
+let currentBike2 = 'z900';
+let raceMode = 'single';
+
+// Records from localStorage
+let records = JSON.parse(localStorage.getItem('kawasaki_records') || '{}');
+
+// ==========================================
+// POPULATE SELECTS
+// ==========================================
+function populateSelects() {
+    const options = Object.keys(RACE_BIKES).map(k =>
+        `<option value="${k}">${RACE_BIKES[k].name}</option>`
+    ).join('');
+    document.getElementById('bike1Select').innerHTML = options;
+    document.getElementById('bike2Select').innerHTML = options;
+    document.getElementById('bike1Select').value = 'zx10r';
+    document.getElementById('bike2Select').value = 'z900';
+}
+populateSelects();
+
+function updateBike1() { currentBike1 = document.getElementById('bike1Select').value; resetRace(); }
+function updateBike2() { currentBike2 = document.getElementById('bike2Select').value; resetRace(); }
+
+function setMode(mode) {
+    raceMode = mode;
+    ['single','compare','manual'].forEach(m => {
+        document.getElementById('mode' + m.charAt(0).toUpperCase() + m.slice(1)).classList.toggle('active', m === mode);
+    });
+    document.getElementById('bike2SelectWrap').style.display = mode === 'compare' ? '' : 'none';
+    document.getElementById('singleDashboard').style.display = mode === 'compare' ? 'none' : '';
+    document.getElementById('compareDashboard').style.display = mode === 'compare' ? '' : 'none';
+    document.getElementById('shiftBtnsWrap').style.display = mode === 'manual' ? '' : 'none';
+    document.getElementById('split2Header').style.display = mode === 'compare' ? '' : 'none';
+    resetRace();
+}
+
+function toggleTC() {
+    simState.tcOn = !simState.tcOn;
+    const btn = document.getElementById('tcToggle');
+    btn.textContent = simState.tcOn ? 'AN' : 'AUS';
+    btn.className = 'toggle-btn' + (simState.tcOn ? ' on' : '');
+}
+function toggleABS() {
+    simState.absOn = !simState.absOn;
+    const btn = document.getElementById('absToggle');
+    btn.textContent = simState.absOn ? 'AN' : 'AUS';
+    btn.className = 'toggle-btn' + (simState.absOn ? ' on' : '');
+}
+
+// ==========================================
+// PHYSICS ENGINE
+// ==========================================
+function getPowerAtRpm(bike, rpm, gear) {
+    if (gear === 0 || rpm <= bike.idleRpm) return 0;
+    // Simple power curve: peaks around 80% of redline
+    const peakRpm = bike.redline * 0.8;
+    const normalized = rpm / peakRpm;
+    let powerFactor;
+    if (normalized < 0.3) powerFactor = normalized / 0.3 * 0.6; // build up
+    else if (normalized < 0.7) powerFactor = 0.6 + (normalized - 0.3) / 0.4 * 0.4; // mid power
+    else if (normalized <= 1.0) powerFactor = 1.0; // peak zone
+    else powerFactor = Math.max(0, 1.0 - (normalized - 1.0) * 2); // drop off above redline
+    return bike.ps * powerFactor;
+}
+
+function getSpeedFromRpm(rpm, gear) {
+    if (gear === 0 || rpm <= 0) return 0;
+    const ratio = GEAR_RATIOS[gear] * FINAL_DRIVE;
+    // RPM → wheel RPM → m/s
+    const wheelRpm = rpm / ratio;
+    return (wheelRpm * WHEEL_CIRC) / 60; // m/s
+}
+
+function getRpmFromSpeed(speedMs, gear) {
+    if (gear === 0) return 0;
+    const ratio = GEAR_RATIOS[gear] * FINAL_DRIVE;
+    const wheelRpm = (speedMs * 60) / WHEEL_CIRC;
+    return wheelRpm * ratio;
+}
+
+function getAeroDrag(speedMs, bike) {
+    // F_drag = 0.5 * Cd * A * rho * v^2
+    // Simplified: drag coefficient relative to weight
+    const Cd = 0.35;
+    const rho = 1.2;
+    const A = 0.35; // frontal area m²
+    return 0.5 * Cd * A * rho * speedMs * speedMs;
+}
+
+function stepPhysics(state, bike, dt, manual) {
+    if (!state.running) return;
+
+    const throttle = state.throttle;
+    const gear = state.gear;
+
+    // Auto-shift (not manual)
+    if (!manual && gear > 0) {
+        const rpm = state.rpm;
+        if (rpm > bike.redline * 0.92 && gear < bike.gears) {
+            state.gear++;
+        } else if (rpm < bike.idleRpm * 1.5 && gear > 1 && state.speed > 0) {
+            state.gear--;
+        }
+    }
+
+    // If in neutral and throttle applied, engage gear 1
+    if (gear === 0 && throttle > 0.1 && !manual) {
+        state.gear = 1;
+    }
+
+    const currentGear = state.gear;
+    const powerW = getPowerAtRpm(bike, state.rpm, currentGear) * 735.5 * throttle; // PS → W
+    const forceThrust = currentGear > 0 && state.speed >= 0 ? powerW / Math.max(state.speed, 1) : 0;
+    const dragForce = getAeroDrag(state.speed, bike);
+    const rollingResistance = bike.weight * 9.81 * 0.015;
+
+    // Traction control: limit if wheelspin (low speed high power)
+    let effectiveThrust = forceThrust;
+    if (state.tcOn && state.speed < 8 && forceThrust > bike.weight * 3) {
+        effectiveThrust = bike.weight * 3;
+    }
+
+    const netForce = effectiveThrust - dragForce - rollingResistance;
+    const accelMs2 = netForce / bike.weight;
+
+    state.speed = Math.max(0, Math.min(state.speed + accelMs2 * dt, bike.vmax / 3.6));
+    state.dist += state.speed * dt;
+    state.time += dt;
+
+    // Update RPM based on current speed and gear
+    if (currentGear > 0) {
+        state.rpm = Math.max(bike.idleRpm, Math.min(getRpmFromSpeed(state.speed, currentGear), bike.redline * 1.05));
+    } else {
+        state.rpm = bike.idleRpm + throttle * 3000;
+    }
+
+    // 0-100 check
+    const speedKmh = state.speed * 3.6;
+    if (!state.reached100 && speedKmh >= 100) {
+        state.t100 = state.time;
+        state.reached100 = true;
+    }
+
+    // Splits
+    state.splitTargets.forEach(target => {
+        if (!state.splits[target] && state.dist >= target) {
+            state.splits[target] = state.time;
+        }
+    });
+
+    // Velocity history
+    state.velHistory.push({ t: state.time, v: speedKmh });
+    if (state.velHistory.length > 500) state.velHistory.shift();
+
+    // Check finish
+    const trackDist = parseInt(document.getElementById('trackSelect').value);
+    if (trackDist === 100) {
+        // 0-100 mode: stop at 100 km/h
+        if (state.reached100) finishRace(state, bike);
+    } else {
+        if (state.dist >= trackDist) finishRace(state, bike);
+    }
+
+    return accelMs2;
+}
+
+// ==========================================
+// RACE LOOP
+// ==========================================
+function raceLoop(ts) {
+    if (!simState.running) return;
+    if (simLastT === null) simLastT = ts;
+    const dt = Math.min((ts - simLastT) / 1000, 0.05); // cap at 50ms
+    simLastT = ts;
+
+    const bike1 = RACE_BIKES[currentBike1];
+    const accel = stepPhysics(simState, bike1, dt, raceMode === 'manual');
+
+    if (raceMode === 'compare') {
+        const bike2 = RACE_BIKES[currentBike2];
+        stepPhysics(sim2State, bike2, dt, false);
+    }
+
+    updateUI(accel);
+    drawTrack();
+    drawVelocityGraph();
+
+    if (simState.running) {
+        simAnimId = requestAnimationFrame(raceLoop);
+    }
+}
+
+// ==========================================
+// UI UPDATES
+// ==========================================
+function updateUI(accel) {
+    const bike = RACE_BIKES[currentBike1];
+    const speedKmh = simState.speed * 3.6;
+    const rpm = simState.rpm;
+
+    if (raceMode !== 'compare') {
+        // Gauges
+        drawGauge('rpmGauge', rpm, bike.redline, rpm > bike.redline * 0.9 ? '#ff0044' : rpm > bike.redline * 0.75 ? '#ff6600' : '#00eaff', rpm.toFixed(0));
+        drawGauge('speedGauge', speedKmh, bike.vmax, '#39ff14', speedKmh.toFixed(0));
+
+        // Stat boxes
+        document.getElementById('speedDisplay').textContent = speedKmh.toFixed(0);
+        document.getElementById('rpmDisplay').textContent = rpm.toFixed(0);
+        document.getElementById('gearDisplay').textContent = simState.gear === 0 ? 'N' : simState.gear;
+        document.getElementById('timeDisplay').textContent = simState.time.toFixed(2);
+        document.getElementById('distDisplay').textContent = simState.dist.toFixed(0);
+        document.getElementById('accelDisplay').textContent = (accel || 0).toFixed(1);
+        document.getElementById('time100Display').textContent = simState.t100 ? simState.t100.toFixed(2) + 's' : '—';
+        document.getElementById('powerDisplay').textContent = getPowerAtRpm(bike, rpm, simState.gear).toFixed(0);
+
+        // RPM bar
+        const rpmPct = (rpm / bike.redline) * 100;
+        const rpmBar = document.getElementById('rpmBarFill');
+        rpmBar.style.width = rpmPct + '%';
+        if (rpmPct > 90) { rpmBar.style.background = 'linear-gradient(90deg,#ff0044,#ff4466)'; }
+        else if (rpmPct > 75) { rpmBar.style.background = 'linear-gradient(90deg,#ff6600,#ffaa00)'; }
+        else { rpmBar.style.background = 'linear-gradient(90deg,#00eaff,#39ff14)'; }
+
+        // Shift indicator
+        const si = document.getElementById('shiftIndicator');
+        if (rpmPct > 90) { si.className = 'shift-indicator redline'; si.textContent = '🔴 REDLINE — SHIFT UP!'; showShiftWarning(); }
+        else if (rpmPct > 75) { si.className = 'shift-indicator warn'; si.textContent = '⚠️ Hochschalten empfohlen'; }
+        else if (rpmPct > 50) { si.className = 'shift-indicator ready'; si.textContent = '✅ Powerband — optimal'; }
+        else { si.className = 'shift-indicator normal'; si.textContent = '—'; }
+
+        // Body grid animation
+        document.getElementById('bodyEl').classList.toggle('moving', speedKmh > 10);
+    }
+
+    // Compare mode
+    if (raceMode === 'compare') {
+        const b2 = RACE_BIKES[currentBike2];
+        const s1 = simState, s2 = sim2State;
+        const sp1 = s1.speed * 3.6, sp2 = s2.speed * 3.6;
+
+        document.getElementById('comp1Name').textContent = RACE_BIKES[currentBike1].name;
+        document.getElementById('comp2Name').textContent = RACE_BIKES[currentBike2].name;
+
+        document.getElementById('comp1Speed').textContent = sp1.toFixed(0) + ' km/h';
+        document.getElementById('comp1Rpm').textContent = s1.rpm.toFixed(0);
+        document.getElementById('comp1Gear').textContent = s1.gear === 0 ? 'N' : s1.gear;
+        document.getElementById('comp1Time').textContent = s1.time.toFixed(2) + 's';
+        document.getElementById('comp1Dist').textContent = s1.dist.toFixed(0) + 'm';
+        document.getElementById('comp1T100').textContent = s1.t100 ? s1.t100.toFixed(2) + 's' : '—';
+
+        document.getElementById('comp2Speed').textContent = sp2.toFixed(0) + ' km/h';
+        document.getElementById('comp2Rpm').textContent = s2.rpm.toFixed(0);
+        document.getElementById('comp2Gear').textContent = s2.gear === 0 ? 'N' : s2.gear;
+        document.getElementById('comp2Time').textContent = s2.time.toFixed(2) + 's';
+        document.getElementById('comp2Dist').textContent = s2.dist.toFixed(0) + 'm';
+        document.getElementById('comp2T100').textContent = s2.t100 ? s2.t100.toFixed(2) + 's' : '—';
+
+        // Highlight leader
+        const leader1 = s1.dist >= s2.dist;
+        document.getElementById('comp1Speed').className = leader1 ? 'compare-leading' : '';
+        document.getElementById('comp2Speed').className = !leader1 ? 'compare-leading' : '';
+    }
+}
+
+// ==========================================
+// CIRCULAR GAUGE
+// ==========================================
+function drawGauge(canvasId, value, max, color, label) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W/2, cy = H/2, r = W/2 - 12;
+    ctx.clearRect(0, 0, W, H);
+
+    // Background arc
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI * 0.75, Math.PI * 2.25);
+    ctx.strokeStyle = '#1a1a1a';
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Value arc
+    const pct = Math.min(value / max, 1);
+    const endAngle = Math.PI * 0.75 + pct * Math.PI * 1.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, Math.PI * 0.75, endAngle);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 12;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Value text
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${W * 0.18}px 'Segoe UI',sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, cx, cy);
+}
+
+// Draw initial gauges
+drawGauge('rpmGauge', 0, 14000, '#00eaff', '0');
+drawGauge('speedGauge', 0, 300, '#39ff14', '0');
+
+// ==========================================
+// TRACK CANVAS
+// ==========================================
+function drawTrack() {
+    const canvas = document.getElementById('trackCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const trackLen = parseInt(document.getElementById('trackSelect').value);
+
+    // Track background
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, 0, W, H);
+
+    // Road
+    const roadY = H * 0.35;
+    const roadH = H * 0.3;
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(0, roadY, W, roadH);
+    // Road lines
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([20, 15]);
+    ctx.beginPath();
+    ctx.moveTo(0, roadY + roadH/2);
+    ctx.lineTo(W, roadY + roadH/2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Distance markers
+    const markers = [100, 200, 400, 1000].filter(m => m <= trackLen);
+    markers.forEach(m => {
+        const x = (m / trackLen) * W;
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, roadY);
+        ctx.lineTo(x, roadY + roadH);
+        ctx.stroke();
+        ctx.fillStyle = '#444';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(m + 'm', x, roadY - 4);
+    });
+
+    // Finish line
+    const finX = W - 4;
+    ctx.strokeStyle = '#39ff14';
+    ctx.lineWidth = 3;
+    ctx.shadowColor = '#39ff14';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.moveTo(finX, roadY - 5);
+    ctx.lineTo(finX, roadY + roadH + 5);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#39ff14';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('🏁 FINISH', finX - 2, roadY - 8);
+
+    // Bike 1
+    const b1x = Math.min((simState.dist / trackLen) * W, W - 20);
+    drawBikeMarker(ctx, b1x, roadY + roadH/2, '#39ff14', '1');
+
+    // Bike 2
+    if (raceMode === 'compare') {
+        const b2x = Math.min((sim2State.dist / trackLen) * W, W - 20);
+        drawBikeMarker(ctx, b2x, roadY + roadH/2, '#00eaff', '2');
+    }
+}
+
+function drawBikeMarker(ctx, x, y, color, label) {
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 10;
+    ctx.font = '22px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🏍️', x, y);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(label, x, y - 14);
+}
+drawTrack();
+
+// ==========================================
+// VELOCITY GRAPH
+// ==========================================
+function drawVelocityGraph() {
+    const canvas = document.getElementById('velCanvas');
+    canvas.width = canvas.offsetWidth;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, W, H);
+
+    const hist1 = simState.velHistory;
+    const hist2 = raceMode === 'compare' ? sim2State.velHistory : [];
+
+    function drawLine(hist, color) {
+        if (hist.length < 2) return;
+        const maxT = Math.max(...hist.map(h=>h.t), 10);
+        const maxV = Math.max(...hist.map(h=>h.v), 50);
+        ctx.beginPath();
+        hist.forEach((pt, i) => {
+            const x = (pt.t / maxT) * (W - 20) + 10;
+            const y = H - (pt.v / maxV) * (H - 20) - 10;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 6;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
+
+    // Grid
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 1;
+    [0, 25, 50, 75, 100].forEach(pct => {
+        const y = H - (pct/100) * (H - 20) - 10;
+        ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W-10, y); ctx.stroke();
+    });
+
+    drawLine(hist1, '#39ff14');
+    if (raceMode === 'compare') drawLine(hist2, '#00eaff');
+
+    // Labels
+    ctx.fillStyle = '#444';
+    ctx.font = '10px sans-serif';
+    ctx.fillText('km/h', 12, 16);
+    ctx.fillText('Zeit →', W - 40, H - 4);
+}
+
+// ==========================================
+// SPLITS TABLE
+// ==========================================
+function updateSplits() {
+    const tbody = document.getElementById('splitsBody');
+    const splits = [50, 100, 200, 400, 1000];
+    const trackLen = parseInt(document.getElementById('trackSelect').value);
+    let html = '';
+    splits.filter(s => s <= trackLen).forEach(d => {
+        const t1 = simState.splits[d];
+        const t2 = sim2State.splits[d];
+        const col2 = raceMode === 'compare' && t2 !== undefined ? `<td class="split-time">${t2.toFixed(3)}s</td>` : (raceMode === 'compare' ? '<td>—</td>' : '');
+        html += `<tr><td>${d}m</td><td class="split-time">${t1 !== undefined ? t1.toFixed(3)+'s' : '—'}</td>${col2}</tr>`;
+    });
+    tbody.innerHTML = html || '<tr><td colspan="3" style="color:#333;text-align:center;padding:1rem;">Noch kein Rennen</td></tr>';
+}
+
+// ==========================================
+// CONTROLS
+// ==========================================
+function updateThrottle(val) {
+    simState.throttle = val / 100;
+    sim2State.throttle = val / 100;
+    document.getElementById('throttleVal').textContent = val + '%';
+    if (!simState.running && val > 10) startRace();
+}
+
+function shiftUp() {
+    const bike = RACE_BIKES[currentBike1];
+    if (simState.gear < bike.gears) simState.gear++;
+}
+function shiftDown() {
+    if (simState.gear > 1) simState.gear--;
+    else if (simState.gear === 1 && simState.speed < 0.5) simState.gear = 0;
+}
+
+let shiftWarnTimeout = null;
+function showShiftWarning() {
+    const w = document.getElementById('shiftWarning');
+    w.classList.add('show');
+    clearTimeout(shiftWarnTimeout);
+    shiftWarnTimeout = setTimeout(() => w.classList.remove('show'), 800);
+}
+
+// ==========================================
+// RACE LIFECYCLE
+// ==========================================
+function resetSimState(state) {
+    Object.assign(state, {
+        running: false, time: 0, dist: 0, speed: 0, rpm: 0, gear: 0,
+        throttle: 0, t100: null, reached100: false,
+        velHistory: [], splits: {},
+        splitTargets: [50, 100, 200, 400, 1000],
+        tcOn: simState.tcOn, absOn: simState.absOn
+    });
+}
+
+function startRace() {
+    if (simState.running) return;
+    simState.running = true;
+    sim2State.running = raceMode === 'compare';
+    simState.gear = raceMode === 'manual' ? 0 : 1;
+    sim2State.gear = 1;
+    simLastT = null;
+
+    document.getElementById('raceStartBtn').style.display = 'none';
+    document.getElementById('raceStopBtn').style.display = '';
+    if (raceMode === 'manual') {
+        document.getElementById('shiftUpBtn').disabled = false;
+        document.getElementById('shiftDownBtn').disabled = false;
+    }
+
+    simAnimId = requestAnimationFrame(raceLoop);
+}
+
+function stopRace() {
+    simState.running = false;
+    sim2State.running = false;
+    if (simAnimId) cancelAnimationFrame(simAnimId);
+    document.getElementById('raceStartBtn').style.display = '';
+    document.getElementById('raceStopBtn').style.display = 'none';
+    document.getElementById('shiftUpBtn').disabled = true;
+    document.getElementById('shiftDownBtn').disabled = true;
+    document.getElementById('bodyEl').classList.remove('moving');
+    updateSplits();
+}
+
+function resetRace() {
+    stopRace();
+    resetSimState(simState);
+    resetSimState(sim2State);
+    document.getElementById('throttleSlider').value = 0;
+    document.getElementById('throttleVal').textContent = '0%';
+    drawGauge('rpmGauge', 0, 14000, '#00eaff', '0');
+    drawGauge('speedGauge', 0, 300, '#39ff14', '0');
+    if (document.getElementById('speedDisplay')) {
+        ['speedDisplay','rpmDisplay','timeDisplay','distDisplay','accelDisplay'].forEach(id => {
+            const el = document.getElementById(id); if(el) el.textContent = '0';
+        });
+        document.getElementById('gearDisplay').textContent = 'N';
+        document.getElementById('time100Display').textContent = '—';
+        document.getElementById('powerDisplay').textContent = '0';
+        document.getElementById('rpmBarFill').style.width = '0%';
+        document.getElementById('shiftIndicator').className = 'shift-indicator normal';
+        document.getElementById('shiftIndicator').textContent = '—';
+    }
+    drawTrack();
+    drawVelocityGraph();
+    updateSplits();
+}
+
+function finishRace(state, bike) {
+    state.running = false;
+    if (raceMode !== 'compare' || (state === simState && !sim2State.running)) {
+        stopRace();
+    }
+
+    // Save record
+    const bikeKey = state === simState ? currentBike1 : currentBike2;
+    if (state.t100) {
+        const best = records[bikeKey] || Infinity;
+        if (state.t100 < best) {
+            records[bikeKey] = state.t100;
+            localStorage.setItem('kawasaki_records', JSON.stringify(records));
+            updateRecordDisplay();
+        }
+    }
+    updateSplits();
+}
+
+function updateRecordDisplay() {
+    const list = document.getElementById('recordList');
+    const keys = Object.keys(records);
+    if (keys.length === 0) {
+        list.innerHTML = '<div style="color:#333;font-size:0.85rem;">Noch keine Rennen gefahren</div>';
+        return;
+    }
+    list.innerHTML = keys.map(k => {
+        const bike = RACE_BIKES[k];
+        return `<div class="record-item">
+            <div class="rec-bike">${bike ? bike.name : k}</div>
+            <div class="rec-val">${records[k].toFixed(2)}s</div>
+            <div class="rec-lbl">0-100 km/h Rekord</div>
+        </div>`;
+    }).join('');
+}
+updateRecordDisplay();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+    if (!simState.running) return;
+    if (e.code === 'ArrowUp' || e.code === 'Space') {
+        e.preventDefault();
+        const cur = parseInt(document.getElementById('throttleSlider').value);
+        document.getElementById('throttleSlider').value = Math.min(100, cur + 10);
+        updateThrottle(document.getElementById('throttleSlider').value);
+    }
+    if (e.code === 'ArrowDown') {
+        e.preventDefault();
+        const cur = parseInt(document.getElementById('throttleSlider').value);
+        document.getElementById('throttleSlider').value = Math.max(0, cur - 10);
+        updateThrottle(document.getElementById('throttleSlider').value);
+    }
+    if (e.code === 'KeyQ' && raceMode === 'manual') shiftUp();
+    if (e.code === 'KeyA' && raceMode === 'manual') shiftDown();
+});
+
+// Check URL param for pre-selected bike
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const bikeParam = params.get('bike');
+    if (bikeParam && RACE_BIKES[bikeParam]) {
+        currentBike1 = bikeParam;
+        const sel = document.getElementById('bike1Select');
+        if (sel) sel.value = bikeParam;
+    }
+})();
+
+// Initial draw
+drawTrack();
+</script>
+</body>
+</html>
