@@ -1,0 +1,1101 @@
+/* ============================================================
+   SOUNDCHECK PAGE — Cyberpunk Audio Player Styles
+   ============================================================ */
+
+/* ============================================================
+   1. PAGE LAYOUT
+   ============================================================ */
+main#soundcheckMain {
+  padding: 24px;
+}
+
+/* ============================================================
+   2. INTRO SECTION
+   ============================================================ */
+.sc-intro {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: var(--cp-bg-panel, #0D1233);
+  border: var(--cp-border-cyan, 2px solid #00FFE0);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: var(--cp-glow-cyan, 0 0 20px rgba(0,255,224,0.3));
+  flex-wrap: wrap;
+}
+
+.sc-intro-text {
+  flex: 1;
+  min-width: 240px;
+}
+
+.sc-intro-text p {
+  color: var(--cp-text, #C0D8FF);
+  font-family: var(--cp-font-mono, monospace);
+  line-height: 1.6;
+  margin: 12px 0;
+}
+
+.sc-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.sc-badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 4px;
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.badge-stock {
+  background: rgba(0,255,224,0.12);
+  border: 1px solid #00FFE0;
+  color: #00FFE0;
+  box-shadow: 0 0 8px rgba(0,255,224,0.4);
+}
+
+.badge-racing {
+  background: rgba(255,0,110,0.12);
+  border: 1px solid #FF006E;
+  color: #FF006E;
+  box-shadow: 0 0 8px rgba(255,0,110,0.4);
+}
+
+.badge-custom {
+  background: rgba(255,215,0,0.12);
+  border: 1px solid #FFD700;
+  color: #FFD700;
+  box-shadow: 0 0 8px rgba(255,215,0,0.4);
+}
+
+/* Demo visualizer */
+.sc-visualizer-demo {
+  text-align: center;
+}
+
+.sc-visualizer-demo canvas {
+  border: 1px solid var(--cp-cyan, #00FFE0);
+  border-radius: 6px;
+  display: block;
+  margin: 0 auto;
+}
+
+.sc-demo-label {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.65em;
+  color: var(--cp-text-muted, #5A7098);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-top: 8px;
+}
+
+/* ============================================================
+   3. A/B COMPARE PANEL
+   ============================================================ */
+.sc-compare-panel {
+  background: var(--cp-bg-card, #10163A);
+  border: 1px solid var(--cp-cyan, #00FFE0);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sc-compare-panel h3 {
+  font-family: var(--cp-font-heading, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cp-cyan, #00FFE0);
+  font-size: 0.85em;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.sc-compare-slots {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.sc-compare-slot {
+  flex: 1;
+  min-width: 140px;
+  background: var(--cp-bg-glass, rgba(10,14,39,0.75));
+  border: 1px dashed var(--cp-cyan-dim, rgba(0,255,224,0.3));
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.slot-label {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.7em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cp-cyan, #00FFE0);
+}
+
+.slot-info {
+  font-family: var(--cp-font-mono, monospace);
+  font-size: 0.8em;
+  color: var(--cp-text, #C0D8FF);
+}
+
+.sc-vs {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 1.4em;
+  font-weight: 900;
+  color: var(--cp-magenta, #FF006E);
+  text-shadow: 0 0 12px var(--cp-magenta, #FF006E);
+}
+
+.mini-eq {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 20px;
+  margin-top: 4px;
+}
+
+.mini-eq .meq-bar {
+  width: 3px;
+  background: var(--cp-cyan, #00FFE0);
+  border-radius: 1px;
+  animation: eqPulse 0.3s ease-in-out infinite alternate;
+}
+
+@keyframes eqPulse {
+  from { transform: scaleY(0.2); }
+  to   { transform: scaleY(1); }
+}
+
+.btn-ab-play {
+  background: transparent;
+  border: 2px solid var(--cp-cyan, #00FFE0);
+  color: var(--cp-cyan, #00FFE0);
+  font-family: var(--cp-font-heading, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8em;
+  box-shadow: 0 0 10px rgba(0,255,224,0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-ab-play:hover:not(:disabled),
+.btn-ab-play.playing {
+  background: var(--cp-cyan, #00FFE0);
+  color: #0A0E27;
+  box-shadow: var(--cp-glow-cyan, 0 0 20px rgba(0,255,224,0.6));
+}
+
+.btn-ab-play:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-ab-clear {
+  background: transparent;
+  border: 1px solid var(--cp-magenta, #FF006E);
+  color: var(--cp-magenta, #FF006E);
+  font-family: var(--cp-font-mono, monospace);
+  font-size: 0.75em;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-ab-clear:hover {
+  background: var(--cp-magenta, #FF006E);
+  color: white;
+}
+
+/* ============================================================
+   4. BIKES SECTION + GRID
+   ============================================================ */
+.sc-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.sc-filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sc-filter-btn {
+  background: transparent;
+  border: 1px solid var(--cp-cyan-dim, rgba(0,255,224,0.3));
+  color: var(--cp-text-muted, #5A7098);
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.7em;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.sc-filter-btn.active,
+.sc-filter-btn:hover {
+  border-color: var(--cp-cyan, #00FFE0);
+  color: var(--cp-cyan, #00FFE0);
+  box-shadow: 0 0 8px rgba(0,255,224,0.3);
+}
+
+.sc-bikes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+
+/* ============================================================
+   5. BIKE SOUND CARD
+   ============================================================ */
+.sc-bike-card {
+  background: var(--cp-bg-glass, rgba(10,14,39,0.75));
+  border: 1px solid var(--cp-cyan, #00FFE0);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 20px rgba(0,255,224,0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sc-bike-card:hover {
+  border-color: var(--cp-magenta, #FF006E);
+  box-shadow: 0 0 30px rgba(255,0,110,0.3), 0 16px 40px rgba(0,0,0,0.4);
+  transform: translateY(-4px);
+}
+
+.sc-bike-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sc-bike-icon {
+  font-size: 2em;
+  line-height: 1;
+}
+
+.sc-bike-info {
+  flex: 1;
+}
+
+.sc-bike-name {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cp-cyan, #00FFE0);
+  text-shadow: 0 0 8px rgba(0,255,224,0.6);
+  margin: 0 0 4px;
+}
+
+.sc-bike-meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sc-chip {
+  display: inline-block;
+  background: var(--cp-bg-card, #10163A);
+  border: 1px solid var(--cp-cyan-dim, rgba(0,255,224,0.3));
+  color: var(--cp-text-muted, #5A7098);
+  font-family: var(--cp-font-mono, monospace);
+  font-size: 0.68em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sc-chip.chip-category {
+  border-color: var(--cp-magenta, #FF006E);
+  color: var(--cp-magenta, #FF006E);
+}
+
+/* Favorite indicator on card */
+.sc-bike-fav-indicator {
+  color: var(--cp-magenta, #FF006E);
+  font-size: 1.1em;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 2px;
+}
+
+/* ============================================================
+   6. EXHAUST SOUND ROWS
+   ============================================================ */
+.sc-exhaust-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sc-exhaust-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--cp-bg-card, #10163A);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.sc-exhaust-row:hover,
+.sc-exhaust-row.active {
+  border-color: var(--cp-cyan, #00FFE0);
+  box-shadow: 0 0 10px rgba(0,255,224,0.2);
+}
+
+.sc-exhaust-row.playing {
+  border-color: var(--cp-magenta, #FF006E);
+  box-shadow: 0 0 12px rgba(255,0,110,0.3);
+  animation: borderPulse 1.5s ease-in-out infinite;
+}
+
+.sc-exhaust-type {
+  min-width: 80px;
+}
+
+.sc-exhaust-label {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.68em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.label-stock  { color: #00FFE0; }
+.label-racing { color: #FF006E; }
+.label-custom { color: #FFD700; }
+
+.sc-exhaust-name {
+  font-family: var(--cp-font-mono, monospace);
+  font-size: 0.72em;
+  color: var(--cp-text, #C0D8FF);
+  flex: 1;
+}
+
+.sc-exhaust-db {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.7em;
+  color: var(--cp-yellow, #FFD700);
+  text-shadow: 0 0 6px rgba(255,215,0,0.5);
+  min-width: 45px;
+  text-align: right;
+}
+
+/* DB bar visualization */
+.sc-db-bar {
+  width: 50px;
+  height: 6px;
+  background: var(--cp-bg, #0A0E27);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sc-db-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--cp-cyan, #00FFE0), var(--cp-magenta, #FF006E));
+  box-shadow: 0 0 6px rgba(0,255,224,0.5);
+  transition: width 0.4s ease;
+}
+
+/* Play button */
+.sc-play-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid var(--cp-cyan, #00FFE0);
+  color: var(--cp-cyan, #00FFE0);
+  font-size: 0.85em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.sc-play-btn:hover {
+  background: var(--cp-cyan, #00FFE0);
+  color: #0A0E27;
+  box-shadow: 0 0 12px rgba(0,255,224,0.6);
+}
+
+.sc-play-btn.playing {
+  background: var(--cp-magenta, #FF006E);
+  border-color: var(--cp-magenta, #FF006E);
+  color: white;
+  box-shadow: 0 0 12px rgba(255,0,110,0.6);
+  animation: neonFlicker 2s infinite;
+}
+
+/* Mini waveform inside card row */
+.sc-mini-wave {
+  display: flex;
+  align-items: center;
+  gap: 1.5px;
+  height: 20px;
+}
+
+.sc-mini-wave-bar {
+  width: 2px;
+  background: var(--cp-cyan, #00FFE0);
+  border-radius: 1px;
+  opacity: 0.6;
+}
+
+/* ============================================================
+   7. FAVORITES SECTION
+   ============================================================ */
+.sc-favorites-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--cp-cyan-dim, rgba(0,255,224,0.2));
+}
+
+.sc-favorites-section h2 {
+  margin-bottom: 16px;
+}
+
+.sc-favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.sc-fav-item {
+  background: var(--cp-bg-card, #10163A);
+  border: 1px solid var(--cp-magenta, #FF006E);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sc-fav-item:hover {
+  box-shadow: 0 0 15px rgba(255,0,110,0.4);
+  transform: translateY(-2px);
+}
+
+.sc-fav-play {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--cp-magenta, #FF006E);
+  border: none;
+  color: white;
+  font-size: 1em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(255,0,110,0.5);
+}
+
+.sc-fav-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.sc-fav-bike {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.75em;
+  color: var(--cp-cyan, #00FFE0);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sc-fav-type {
+  font-size: 0.68em;
+  color: var(--cp-text-muted, #5A7098);
+  font-family: var(--cp-font-mono, monospace);
+}
+
+.sc-fav-remove {
+  background: none;
+  border: none;
+  color: var(--cp-magenta, #FF006E);
+  cursor: pointer;
+  font-size: 1em;
+  padding: 2px;
+}
+
+.btn-clear-favorites {
+  background: transparent;
+  border: 1px solid var(--cp-magenta, #FF006E);
+  color: var(--cp-magenta, #FF006E);
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 8px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-clear-favorites:hover {
+  background: var(--cp-magenta, #FF006E);
+  color: white;
+}
+
+/* ============================================================
+   8. AUDIO PLAYER MODAL
+   ============================================================ */
+.sc-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 1000;
+  backdrop-filter: blur(6px);
+}
+
+.sc-player-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: 1001;
+  background: var(--cp-bg-panel, #0D1233);
+  border: 2px solid var(--cp-cyan, #00FFE0);
+  border-radius: 14px;
+  box-shadow:
+    0 0 40px rgba(0, 255, 224, 0.4),
+    0 0 80px rgba(0, 255, 224, 0.15),
+    0 40px 80px rgba(0, 0, 0, 0.8);
+  animation: modalEnter 0.35s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes modalEnter {
+  from { transform: translate(-50%, -50%) scale(0.88); opacity: 0; }
+  to   { transform: translate(-50%, -50%) scale(1);    opacity: 1; }
+}
+
+.sc-player-modal-content {
+  padding: 24px;
+}
+
+.sc-player-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.sc-player-subtitle {
+  font-family: var(--cp-font-mono, monospace);
+  font-size: 0.8em;
+  color: var(--cp-magenta, #FF006E);
+  text-shadow: 0 0 8px rgba(255,0,110,0.6);
+  margin: 4px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.sc-player-close {
+  background: none;
+  border: 1px solid var(--cp-magenta, #FF006E);
+  color: var(--cp-magenta, #FF006E);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1em;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sc-player-close:hover {
+  background: var(--cp-magenta, #FF006E);
+  color: white;
+  box-shadow: 0 0 14px rgba(255,0,110,0.6);
+}
+
+/* ============================================================
+   9. SPECTRUM ANALYZER
+   ============================================================ */
+.sc-spectrum {
+  width: 100%;
+  height: 120px;
+  border: 1px solid var(--cp-cyan-dim, rgba(0,255,224,0.2));
+  border-radius: 8px;
+  background: var(--cp-bg, #0A0E27);
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   10. WAVEFORM
+   ============================================================ */
+.sc-waveform {
+  width: 100%;
+  height: 60px;
+  border: 1px solid rgba(255, 0, 110, 0.2);
+  border-radius: 6px;
+  background: var(--cp-bg, #0A0E27);
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+   11. TIMELINE + CONTROLS
+   ============================================================ */
+.sc-timeline-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.sc-time {
+  font-family: var(--cp-font-mono, monospace);
+  font-size: 0.75em;
+  color: var(--cp-cyan, #00FFE0);
+  min-width: 35px;
+  text-align: center;
+}
+
+.sc-timeline {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(90deg, var(--cp-cyan, #00FFE0) var(--timeline-fill, 0%), rgba(0,255,224,0.15) var(--timeline-fill, 0%));
+  border-radius: 2px;
+  cursor: pointer;
+  outline: none;
+}
+
+.sc-timeline::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--cp-cyan, #00FFE0);
+  box-shadow: 0 0 8px rgba(0,255,224,0.8);
+  cursor: pointer;
+}
+
+.sc-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.sc-ctrl-btn {
+  background: transparent;
+  border: 1px solid var(--cp-cyan, #00FFE0);
+  color: var(--cp-cyan, #00FFE0);
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sc-ctrl-btn:hover {
+  background: var(--cp-cyan, #00FFE0);
+  color: #0A0E27;
+  box-shadow: 0 0 12px rgba(0,255,224,0.5);
+}
+
+.sc-ctrl-play {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border-width: 2px;
+  font-size: 1.2em;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sc-ctrl-play.playing {
+  background: var(--cp-magenta, #FF006E);
+  border-color: var(--cp-magenta, #FF006E);
+  color: white;
+  box-shadow: 0 0 20px rgba(255,0,110,0.6);
+}
+
+.sc-volume-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sc-volume-icon {
+  font-size: 0.9em;
+}
+
+.sc-volume {
+  width: 80px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(0,255,224,0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  outline: none;
+}
+
+.sc-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--cp-cyan, #00FFE0);
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(0,255,224,0.7);
+}
+
+/* ============================================================
+   12. METADATA
+   ============================================================ */
+.sc-metadata-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--cp-bg-card, #10163A);
+  border-radius: 6px;
+  border: 1px solid var(--cp-cyan-dim, rgba(0,255,224,0.15));
+}
+
+.sc-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 80px;
+}
+
+.sc-meta-label {
+  font-family: var(--cp-font-mono, monospace);
+  font-size: 0.62em;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cp-text-muted, #5A7098);
+}
+
+.sc-meta-value {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.82em;
+  color: var(--cp-yellow, #FFD700);
+  text-shadow: 0 0 6px rgba(255,215,0,0.5);
+  font-weight: 600;
+}
+
+/* ============================================================
+   13. EXHAUST TABS
+   ============================================================ */
+.sc-exhaust-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.sc-exhaust-tab {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px 14px;
+  background: var(--cp-bg-card, #10163A);
+  border: 1px solid var(--cp-cyan-dim, rgba(0,255,224,0.25));
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.sc-exhaust-tab:hover {
+  border-color: var(--cp-cyan, #00FFE0);
+  box-shadow: 0 0 10px rgba(0,255,224,0.25);
+}
+
+.sc-exhaust-tab.active.tab-stock {
+  border-color: #00FFE0;
+  box-shadow: 0 0 15px rgba(0,255,224,0.4);
+}
+
+.sc-exhaust-tab.active.tab-racing {
+  border-color: #FF006E;
+  box-shadow: 0 0 15px rgba(255,0,110,0.4);
+}
+
+.sc-exhaust-tab.active.tab-custom {
+  border-color: #FFD700;
+  box-shadow: 0 0 15px rgba(255,215,0,0.4);
+}
+
+.tab-type-label {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.tab-stock  .tab-type-label  { color: #00FFE0; }
+.tab-racing .tab-type-label { color: #FF006E; }
+.tab-custom .tab-type-label { color: #FFD700; }
+
+.tab-brand {
+  font-family: var(--cp-font-mono, monospace);
+  font-size: 0.68em;
+  color: var(--cp-text-muted, #5A7098);
+}
+
+.tab-db {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.75em;
+  color: var(--cp-yellow, #FFD700);
+}
+
+/* ============================================================
+   14. EQUALIZER
+   ============================================================ */
+.sc-equalizer {
+  margin-bottom: 16px;
+}
+
+.eq-label {
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.65em;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--cp-text-muted, #5A7098);
+  margin-bottom: 6px;
+}
+
+.eq-bars {
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  height: 48px;
+  padding: 0 4px;
+}
+
+.eq-bar {
+  flex: 1;
+  background: linear-gradient(180deg, var(--cp-magenta, #FF006E) 0%, var(--cp-cyan, #00FFE0) 100%);
+  border-radius: 2px 2px 0 0;
+  transform-origin: bottom;
+  transition: height 0.08s ease;
+  will-change: height;
+  min-height: 2px;
+}
+
+/* ============================================================
+   15. PLAYER ACTIONS
+   ============================================================ */
+.sc-player-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sc-btn-favorite,
+.sc-btn-compare-a,
+.sc-btn-compare-b {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-family: var(--cp-font-heading, monospace);
+  font-size: 0.72em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.sc-btn-favorite {
+  background: transparent;
+  border: 1px solid var(--cp-magenta, #FF006E);
+  color: var(--cp-magenta, #FF006E);
+}
+
+.sc-btn-favorite:hover,
+.sc-btn-favorite.active {
+  background: var(--cp-magenta, #FF006E);
+  color: white;
+  box-shadow: 0 0 14px rgba(255,0,110,0.5);
+}
+
+.sc-btn-favorite.active {
+  content: '♥ SAVED';
+}
+
+.sc-btn-compare-a {
+  background: transparent;
+  border: 1px solid var(--cp-cyan, #00FFE0);
+  color: var(--cp-cyan, #00FFE0);
+}
+
+.sc-btn-compare-a:hover {
+  background: var(--cp-cyan, #00FFE0);
+  color: #0A0E27;
+  box-shadow: 0 0 12px rgba(0,255,224,0.5);
+}
+
+.sc-btn-compare-b {
+  background: transparent;
+  border: 1px solid var(--cp-yellow, #FFD700);
+  color: var(--cp-yellow, #FFD700);
+}
+
+.sc-btn-compare-b:hover {
+  background: var(--cp-yellow, #FFD700);
+  color: #0A0E27;
+  box-shadow: 0 0 12px rgba(255,215,0,0.5);
+}
+
+/* ============================================================
+   16. DARK MODE COMPATIBILITY
+   ============================================================ */
+body.dark-mode .sc-bike-card {
+  background: rgba(13, 18, 51, 0.9);
+}
+
+body.dark-mode .sc-compare-panel {
+  background: rgba(13, 18, 51, 0.8);
+}
+
+body.dark-mode .sc-intro {
+  background: rgba(13, 18, 51, 0.9);
+}
+
+/* ============================================================
+   17. MOBILE RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+  .sc-intro {
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .sc-bikes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sc-compare-slots {
+    flex-direction: column;
+  }
+
+  .sc-player-modal {
+    width: 96%;
+    top: 2%;
+    left: 2%;
+    transform: none;
+    max-height: 95vh;
+  }
+
+  @keyframes modalEnter {
+    from { transform: none; opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+
+  .sc-spectrum {
+    height: 80px;
+  }
+
+  .sc-controls {
+    gap: 8px;
+  }
+
+  .sc-ctrl-btn:not(.sc-ctrl-play) {
+    padding: 6px 10px;
+    font-size: 0.65em;
+  }
+
+  .sc-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sc-exhaust-tabs {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .sc-player-modal-content {
+    padding: 16px;
+  }
+
+  .sc-metadata-row {
+    gap: 8px;
+  }
+
+  .sc-player-actions {
+    flex-direction: column;
+  }
+}
