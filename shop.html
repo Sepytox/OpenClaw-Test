@@ -593,6 +593,9 @@ function filterCat(cat) {
     document.querySelectorAll('.cat-tab').forEach(el => el.classList.remove('active'));
     event.target.classList.add('active');
     renderParts();
+    // Show count
+    const count = PARTS.filter(p => cat === 'all' || p.cat === cat).length;
+    event.target.setAttribute('title', count + ' Parts in dieser Kategorie');
 }
 
 // ==========================================
