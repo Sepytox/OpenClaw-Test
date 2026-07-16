@@ -6,6 +6,13 @@
     <title>Kawasaki Aftermarket Shop — Tuning & Parts</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="cyberpunk.css">
+    <link rel="stylesheet" href="themes.css">
+    <script>
+        (function() {
+            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <style>
         :root {
             --neon-green: #39ff14;
@@ -311,13 +318,61 @@
         .combo-meta { display:flex;gap:1rem;font-size:0.75rem; }
         .combo-price { color: var(--neon-orange); font-weight: 700; }
         .combo-gains { color: var(--neon-green); }
+    
+    /* === THEME OVERRIDE: Apply CSS variables to page-specific elements === */
+    body { background-color: var(--bg-primary) !important; color: var(--text-primary) !important; }
+    .site-nav {
+        background: var(--nav-bg) !important;
+        border-bottom: 1px solid var(--nav-border) !important;
+        box-shadow: var(--nav-shadow) !important;
+    }
+    .site-nav .brand { color: var(--accent-primary) !important; text-shadow: var(--glow-text) !important; }
+    .site-nav a { color: var(--text-muted) !important; }
+    .site-nav a:hover, .site-nav a.active {
+        color: var(--accent-primary) !important;
+        background: rgba(0,255,224,0.08) !important;
+    }
+    [data-theme="light-professional"] .site-nav a:hover,
+    [data-theme="light-professional"] .site-nav a.active {
+        background: rgba(0,61,122,0.08) !important;
+    }
+    [data-theme="dark-professional"] .site-nav a:hover,
+    [data-theme="dark-professional"] .site-nav a.active {
+        background: rgba(59,130,246,0.1) !important;
+    }
+    /* Card backgrounds */
+    .part-card, .quiz-card, .option-card, .result-card, .bike-card,
+    .wheel-result, .dashboard-panel, .sc-bike-card, .bike-selector-section,
+    .race-result, .race-stats-panel, .shop-hero, .live-specs-bar,
+    .cart-panel, .category-panel {
+        background: var(--card-bg) !important;
+        border-color: var(--card-border) !important;
+        color: var(--text-primary) !important;
+        box-shadow: var(--shadow-card) !important;
+    }
+    /* Input/select elements */
+    select, input[type="text"], input[type="search"], input[type="email"], textarea {
+        background: var(--input-bg) !important;
+        border-color: var(--input-border) !important;
+        color: var(--input-text) !important;
+    }
+    select:focus, input:focus, textarea:focus {
+        border-color: var(--input-border-focus) !important;
+        box-shadow: var(--focus-ring) !important;
+    }
+    /* Text colors */
+    h1, h2, h3 { color: var(--text-primary) !important; }
+    p, li, span, label { color: inherit; }
+    /* Accent elements stay accent */
+    .neon-text, [class*="neon-"] { color: var(--accent-primary) !important; }
+
     </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav class="site-nav">
-    <a href="index.html" class="brand">🏍️ Kawasaki</a>
+<nav class="site-nav vc-nav">
+    <a href="index.html" class="brand vc-nav-brand">🏍️ Kawasaki</a>
     <a href="index.html">🏠 Home</a>
     <a href="index.html#motorcycles">🏍️ Motorcycles</a>
     <a href="soundcheck.html">🔊 SoundCheck</a>
@@ -794,5 +849,6 @@ init();
 })();
 updateLiveSpecs();
 </script>
+    <script src="settings.js"></script>
 </body>
 </html>
