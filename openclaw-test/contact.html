@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kontaktiere Vrooooom — Fragen, Verbesserungsvorschläge oder Korrekturen zu Kawasaki-Daten? Schreib uns!">
+    <meta property="og:title" content="Contact — Vrooooom">
+    <meta property="og:description" content="Hast du Fragen oder Vorschläge? Wir freuen uns auf deine Nachricht!">
+    <meta property="og:type" content="website">
+    <title>Contact — Vrooooom</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="landing.css">
+    <script>
+        (function() {
+            try {
+                if (localStorage.getItem('darkMode') === 'true') {
+                    document.body && document.body.classList.add('dark-mode');
+                }
+            } catch(e) {}
+        })();
+    </script>
+</head>
+<body>
+    <!-- SKIP TO MAIN CONTENT (Keyboard Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+    <!-- TOP NAVBAR -->
+    <nav class="top-navbar" aria-label="Main Navigation">
+        <div class="nav-brand">
+            <a href="index.html" class="nav-logo" aria-label="Vrooooom Home">🏍️ Vrooooom</a>
+        </div>
+        <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+        <ul class="nav-links" id="navLinks" role="list">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="motorcycles.html" class="nav-link">Motorcycles</a></li>
+            <li><a href="about.html" class="nav-link">About</a></li>
+            <li><a href="contact.html" class="nav-link nav-link-active" aria-current="page">Contact</a></li>
+        </ul>
+        <div class="nav-controls">
+            <button class="theme-toggle nav-theme-btn" id="themeToggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
+        </div>
+    </nav>
+
+    <!-- PAGE HERO -->
+    <section class="page-hero">
+        <p class="hero-tagline">💬 We Love Hearing From You</p>
+        <h1 class="page-hero-title">Get In <span style="color:var(--red)">Touch</span></h1>
+        <p class="page-hero-subtitle">Questions, suggestions, corrections or just want to talk bikes? Drop us a message.</p>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <div class="page-content" id="main-content">
+        <div class="contact-grid">
+
+            <!-- Contact Info -->
+            <div>
+                <h2 class="section-title" style="font-size:1.4rem;margin-bottom:1.5rem">Contact Info</h2>
+                <div class="contact-info-card">
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon">📧</div>
+                        <div>
+                            <div class="contact-info-label">Email</div>
+                            <div class="contact-info-value">hello@vrooooom.bikes</div>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon">🌐</div>
+                        <div>
+                            <div class="contact-info-label">Website</div>
+                            <div class="contact-info-value">vrooooom.bikes</div>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon">📍</div>
+                        <div>
+                            <div class="contact-info-label">Location</div>
+                            <div class="contact-info-value">Internet, Worldwide 🌍</div>
+                        </div>
+                    </div>
+                    <div class="contact-info-item">
+                        <div class="contact-info-icon">⏱️</div>
+                        <div>
+                            <div class="contact-info-label">Response Time</div>
+                            <div class="contact-info-value">Usually within 48 hours</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ -->
+                <h2 class="section-title" style="font-size:1.3rem;margin-top:2.5rem;margin-bottom:1.25rem">FAQ</h2>
+                <div style="display:flex;flex-direction:column;gap:1rem;">
+                    <details class="faq-item" style="background:var(--white);border-radius:var(--radius);border:1px solid var(--mid-grey);padding:1rem 1.25rem;">
+                        <summary style="cursor:pointer;font-weight:600;color:var(--text-dark);list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                            Is this an official Kawasaki site?
+                            <span style="color:var(--red);font-size:1.2rem">+</span>
+                        </summary>
+                        <p style="font-size:0.9rem;color:var(--text-muted);margin-top:0.75rem;line-height:1.65">No — Vrooooom is an independent fan site. We are not affiliated with Kawasaki Heavy Industries in any way.</p>
+                    </details>
+                    <details class="faq-item" style="background:var(--white);border-radius:var(--radius);border:1px solid var(--mid-grey);padding:1rem 1.25rem;">
+                        <summary style="cursor:pointer;font-weight:600;color:var(--text-dark);list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                            I found a spec error — how do I report it?
+                            <span style="color:var(--red);font-size:1.2rem">+</span>
+                        </summary>
+                        <p style="font-size:0.9rem;color:var(--text-muted);margin-top:0.75rem;line-height:1.65">Use the form on this page! Select "Correction / Data Error" as the topic and describe the issue. We appreciate every report.</p>
+                    </details>
+                    <details class="faq-item" style="background:var(--white);border-radius:var(--radius);border:1px solid var(--mid-grey);padding:1rem 1.25rem;">
+                        <summary style="cursor:pointer;font-weight:600;color:var(--text-dark);list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                            Can I request a new bike model?
+                            <span style="color:var(--red);font-size:1.2rem">+</span>
+                        </summary>
+                        <p style="font-size:0.9rem;color:var(--text-muted);margin-top:0.75rem;line-height:1.65">Absolutely! Send us a message with the model name and any specs you know. We'll do the research and add it to the lineup.</p>
+                    </details>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="contact-form-card">
+                <h2 class="form-title">Send a Message</h2>
+                <form id="contactForm" novalidate>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="firstName">First Name *</label>
+                            <input
+                                type="text"
+                                id="firstName"
+                                name="firstName"
+                                class="form-input"
+                                placeholder="Max"
+                                required
+                                autocomplete="given-name"
+                                aria-required="true"
+                                aria-describedby="firstNameHint"
+                            >
+                            <span id="firstNameHint" class="sr-only">Bitte Vornamen eingeben</span>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="lastName">Last Name</label>
+                            <input
+                                type="text"
+                                id="lastName"
+                                name="lastName"
+                                class="form-input"
+                                placeholder="Mustermann"
+                                autocomplete="family-name"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address *</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            class="form-input"
+                            placeholder="max@example.de"
+                            required
+                            autocomplete="email"
+                            aria-required="true"
+                            aria-describedby="emailHint"
+                        >
+                        <span id="emailHint" class="sr-only">Bitte gültige E-Mail-Adresse eingeben</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="topic">Topic</label>
+                        <select id="topic" name="topic" class="form-select">
+                            <option value="">Select a topic…</option>
+                            <option value="general">General Question</option>
+                            <option value="correction">Correction / Data Error</option>
+                            <option value="request">Model Request</option>
+                            <option value="feedback">Feedback / Suggestion</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="message">Message *</label>
+                        <textarea
+                            id="message"
+                            name="message"
+                            class="form-textarea"
+                            placeholder="Tell us what's on your mind…"
+                            required
+                            aria-required="true"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-group" style="display:flex;align-items:center;gap:0.6rem">
+                        <input type="checkbox" id="newsletter" name="newsletter" style="width:16px;height:16px;accent-color:var(--red);cursor:pointer">
+                        <label for="newsletter" style="font-size:0.88rem;color:var(--text-muted);cursor:pointer">Subscribe to occasional Kawasaki news &amp; site updates</label>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        Send Message 🚀
+                    </button>
+
+                    <div class="form-success" id="formSuccess" role="alert">
+                        ✅ Message sent! Thanks for reaching out — we'll get back to you soon.
+                    </div>
+                    <div id="formError" style="display:none;background:rgba(230,57,70,.10);border:1.5px solid var(--red);border-radius:10px;padding:1rem;text-align:center;color:var(--red);font-weight:600;margin-top:1rem;" role="alert">
+                        ⚠️ Please fill in all required fields.
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SITE FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="footer-logo">🏍️ Vrooooom</span>
+                <p class="footer-tagline">Fast, Classic &amp; Legendary</p>
+            </div>
+            <nav class="footer-nav" aria-label="Footer Navigation">
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="motorcycles.html" class="footer-link">Motorcycles</a>
+                <a href="about.html" class="footer-link">About</a>
+                <a href="contact.html" class="footer-link">Contact</a>
+            </nav>
+            <p class="footer-copy">&copy; 2024 Vrooooom. Fan site &mdash; not affiliated with Kawasaki.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Safe localStorage wrapper
+        var safeStorage = (function() {
+            function get(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
+            function set(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+            return { get: get, set: set };
+        })();
+
+        // Dark mode
+        (function() {
+            if (safeStorage.get('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+                var btn = document.getElementById('themeToggle');
+                if (btn) btn.textContent = '☀️';
+            }
+        })();
+
+        function toggleDarkMode() {
+            var isDark = document.body.classList.toggle('dark-mode');
+            safeStorage.set('darkMode', isDark);
+            var btn = document.getElementById('themeToggle');
+            if (btn) btn.textContent = isDark ? '☀️' : '🌓';
+        }
+
+        // Hamburger
+        var hamburger = document.getElementById('navHamburger');
+        var navLinks = document.getElementById('navLinks');
+        if (hamburger && navLinks) {
+            hamburger.addEventListener('click', function() {
+                var expanded = navLinks.classList.toggle('nav-links-open');
+                hamburger.setAttribute('aria-expanded', expanded);
+            });
+            // Close menu when a nav link is clicked
+            navLinks.querySelectorAll('.nav-link').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    navLinks.classList.remove('nav-links-open');
+                    hamburger.setAttribute('aria-expanded', 'false');
+                });
+            });
+        }
+
+        // Form submission (demo — no backend)
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var firstName = document.getElementById('firstName').value.trim();
+            var email = document.getElementById('email').value.trim();
+            var message = document.getElementById('message').value.trim();
+            var errorEl = document.getElementById('formError');
+            var successEl = document.getElementById('formSuccess');
+            var submitBtn = document.getElementById('submitBtn');
+
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            if (!firstName || !email || !message) {
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            // Simulate send
+            submitBtn.disabled = true;
+            submitBtn.setAttribute('aria-busy', 'true');
+            submitBtn.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span> Sending…';
+
+            setTimeout(function() {
+                submitBtn.style.display = 'none';
+                submitBtn.setAttribute('aria-busy', 'false');
+                successEl.style.display = 'block';
+                document.getElementById('contactForm').reset();
+            }, 800);
+        });
+
+        // Ripple effect on .btn elements
+        document.querySelectorAll('.btn, .btn-submit').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                var ripple = document.createElement('span');
+                ripple.className = 'btn-ripple';
+                var rect = btn.getBoundingClientRect();
+                ripple.style.left = (e.clientX - rect.left) + 'px';
+                ripple.style.top = (e.clientY - rect.top) + 'px';
+                btn.appendChild(ripple);
+                setTimeout(function() { ripple.remove(); }, 600);
+            });
+        });
+
+        // FAQ chevron toggle
+        document.querySelectorAll('.faq-item').forEach(function(item) {
+            item.addEventListener('toggle', function() {
+                var span = item.querySelector('summary span');
+                if (span) span.textContent = item.open ? '−' : '+';
+            });
+        });
+    </script>
+</body>
+</html>

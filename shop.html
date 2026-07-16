@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kawasaki Aftermarket Shop — Tuning & Parts</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="cyberpunk.css">
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --neon-cyan: #00eaff;
+            --neon-purple: #bf00ff;
+            --neon-orange: #ff6600;
+            --dark-bg: #080808;
+            --card-bg: #0e0e0e;
+            --border: #1e1e1e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+        /* NAV */
+        .site-nav {
+            background: rgba(8,8,8,0.97);
+            border-bottom: 1px solid var(--neon-orange);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(255,102,0,0.15);
+        }
+        .site-nav .brand { font-size:1.2rem;font-weight:700;color:var(--neon-green);text-decoration:none;text-shadow:0 0 10px var(--neon-green);margin-right:1rem; }
+        .site-nav a { color:#777;text-decoration:none;padding:0.3rem 0.6rem;border-radius:4px;font-size:0.85rem;transition:color 0.2s,background 0.2s; }
+        .site-nav a:hover,.site-nav a.active { color:var(--neon-green);background:rgba(57,255,20,0.08); }
+
+        /* PAGE */
+        .shop-page { max-width:1200px;margin:0 auto;padding:1.5rem 1rem 4rem; }
+        .page-header { margin-bottom:2rem; }
+        .page-header h1 { font-size:clamp(1.8rem,5vw,3rem);color:var(--neon-orange);text-shadow:0 0 20px var(--neon-orange);letter-spacing:3px;margin-bottom:0.3rem; }
+        .page-header p { color:#666;font-size:0.9rem; }
+
+        /* BIKE SELECTOR */
+        .shop-hero {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .shop-bike-info { flex: 1; min-width: 200px; }
+        .shop-bike-icon { font-size: 3rem; margin-bottom: 0.3rem; }
+        .shop-bike-name { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 0.2rem; }
+        .shop-bike-sub { color: #777; font-size: 0.9rem; }
+        .shop-bike-selector select {
+            padding: 0.7rem 1rem; background: #050505; border: 1px solid #2a2a2a;
+            color: #e0e0e0; border-radius: 8px; font-size: 0.95rem; cursor: pointer;
+            appearance: none; outline: none; min-width: 250px;
+        }
+        .shop-bike-selector select:focus { border-color: var(--neon-orange); }
+        .shop-bike-selector label { display:block;font-size:0.75rem;color:#555;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:1px; }
+
+        /* LIVE SPECS */
+        .live-specs-bar {
+            background: #050505;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .live-spec {
+            text-align: center;
+            flex: 1;
+            min-width: 90px;
+        }
+        .live-spec .spec-val {
+            font-size: 1.4rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+        .live-spec .spec-val.improved { color: var(--neon-green); }
+        .live-spec .spec-val.base { color: var(--neon-cyan); }
+        .live-spec .spec-delta { font-size: 0.75rem; color: var(--neon-green); margin-top: 0.1rem; }
+        .live-spec .spec-delta.zero { color: #444; }
+        .live-spec .spec-lbl { font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+        .spec-divider { width: 1px; height: 40px; background: var(--border); }
+
+        /* CART SIDEBAR LAYOUT */
+        .shop-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 1.5rem;
+            align-items: start;
+        }
+        @media (max-width: 850px) { .shop-layout { grid-template-columns: 1fr; } }
+
+        /* PARTS MAIN */
+        .parts-main {}
+
+        /* CATEGORY TABS */
+        .cat-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+        }
+        .cat-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: #777;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .cat-tab:hover { border-color: #444; color: #ccc; }
+        .cat-tab.active { border-color: var(--neon-orange); color: var(--neon-orange); background: rgba(255,102,0,0.06); }
+
+        /* PARTS GRID */
+        .parts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+        @media (max-width: 600px) { .parts-grid { grid-template-columns: 1fr; } }
+
+        /* PART CARD */
+        .part-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.2s;
+            position: relative;
+            cursor: pointer;
+        }
+        .part-card:hover { border-color: #333; }
+        .part-card.selected {
+            border-color: var(--neon-orange);
+            background: rgba(255,102,0,0.04);
+            box-shadow: 0 0 20px rgba(255,102,0,0.1);
+        }
+        .part-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+        .part-checkbox {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            background: transparent;
+            flex-shrink: 0;
+            margin-top: 2px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.15s;
+        }
+        .part-checkbox.checked {
+            background: var(--neon-orange);
+            border-color: var(--neon-orange);
+        }
+        .part-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .part-name { font-size: 0.92rem; font-weight: 700; color: #fff; flex: 1; }
+        .part-brand { font-size: 0.72rem; color: #888; }
+        .part-price { font-size: 1.1rem; font-weight: 800; color: var(--neon-orange); }
+        .part-desc { font-size: 0.78rem; color: #666; margin-bottom: 0.6rem; line-height: 1.4; }
+        .part-gains {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+        }
+        .gain-chip {
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .gain-ps { background: rgba(57,255,20,0.1); color: var(--neon-green); border: 1px solid rgba(57,255,20,0.2); }
+        .gain-weight { background: rgba(0,234,255,0.1); color: var(--neon-cyan); border: 1px solid rgba(0,234,255,0.2); }
+        .gain-accel { background: rgba(255,102,0,0.1); color: var(--neon-orange); border: 1px solid rgba(255,102,0,0.2); }
+
+        /* RATING */
+        .part-rating { display:flex;align-items:center;gap:0.3rem;font-size:0.72rem; }
+        .stars { color: #f59e0b; letter-spacing: -1px; }
+        .rating-label { color: #555; }
+        .popular-badge {
+            position: absolute;
+            top: 0.5rem; right: 0.5rem;
+            background: var(--neon-orange);
+            color: #000;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        /* CART / CONFIGURATOR */
+        .configurator {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            position: sticky;
+            top: 80px;
+        }
+        .configurator h2 { font-size:0.8rem;color:#555;text-transform:uppercase;letter-spacing:2px;margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border); }
+
+        .cart-items { margin-bottom: 1.25rem; min-height: 60px; }
+        .cart-empty { color: #444; font-size: 0.85rem; text-align: center; padding: 1.5rem 0; }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #111;
+            gap: 0.5rem;
+        }
+        .cart-item:last-child { border-bottom: none; }
+        .cart-item-name { font-size: 0.8rem; color: #ccc; flex: 1; }
+        .cart-item-price { font-size: 0.82rem; color: var(--neon-orange); font-weight: 600; white-space: nowrap; }
+        .cart-item-remove {
+            background: none; border: none; color: #444; cursor: pointer;
+            font-size: 0.9rem; padding: 0; line-height: 1;
+            transition: color 0.2s;
+        }
+        .cart-item-remove:hover { color: #ff0044; }
+
+        /* TOTALS */
+        .cart-totals { border-top: 1px solid var(--border); padding-top: 1rem; margin-bottom: 1rem; }
+        .cart-total-row { display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.4rem;color:#888; }
+        .cart-total-final { display:flex;justify-content:space-between;font-size:1.1rem;font-weight:800;color:#fff;margin-top:0.5rem; }
+        .cart-total-final .price { color: var(--neon-orange); }
+
+        /* SAVINGS */
+        .cart-savings {
+            background: rgba(57,255,20,0.06);
+            border: 1px solid rgba(57,255,20,0.15);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .savings-row { display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:0.2rem; }
+        .savings-val { font-weight:700; }
+        .savings-val.ps { color: var(--neon-green); }
+        .savings-val.weight { color: var(--neon-cyan); }
+        .savings-val.accel { color: var(--neon-orange); }
+
+        /* CART BUTTONS */
+        .cart-btns { display:flex;flex-direction:column;gap:0.6rem; }
+        .cart-btn {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            border: none;
+        }
+        .cart-btn-primary { background: var(--neon-orange); color: #000; box-shadow: 0 0 15px rgba(255,102,0,0.3); }
+        .cart-btn-primary:hover { box-shadow: 0 0 25px rgba(255,102,0,0.6); }
+        .cart-btn-outline { background: transparent; border: 1px solid #333; color: #888; }
+        .cart-btn-outline:hover { border-color: #888; color: #fff; }
+
+        /* COMBOS */
+        .combos-section { margin-top: 2rem; }
+        .combos-section h2 { font-size:0.75rem;color:#444;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem; }
+        .combo-card {
+            background: #050505;
+            border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .combo-card:hover { border-color: #333; }
+        .combo-title { font-size: 0.9rem; font-weight: 700; color: #ddd; margin-bottom: 0.25rem; }
+        .combo-desc { font-size: 0.78rem; color: #666; margin-bottom: 0.5rem; }
+        .combo-meta { display:flex;gap:1rem;font-size:0.75rem; }
+        .combo-price { color: var(--neon-orange); font-weight: 700; }
+        .combo-gains { color: var(--neon-green); }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav">
+    <a href="index.html" class="brand">🏍️ Kawasaki</a>
+    <a href="index.html">🏠 Home</a>
+    <a href="index.html#motorcycles">🏍️ Motorcycles</a>
+    <a href="soundcheck.html">🔊 SoundCheck</a>
+    <a href="race.html">🏁 Racing Sim</a>
+    <a href="shop.html" class="active">🔧 Aftermarket</a>
+    <a href="quiz.html">🎯 Quiz</a>
+    <a href="wheel.html">🎡 Wheel</a>
+</nav>
+
+<div class="shop-page">
+    <div class="page-header">
+        <h1>🔧 AFTERMARKET SHOP</h1>
+        <p>Tuning-Parts & Upgrades für dein Kawasaki — Live-Konfigurator</p>
+    </div>
+
+    <!-- HERO SELECTOR -->
+    <div class="shop-hero">
+        <div class="shop-bike-info">
+            <div class="shop-bike-icon" id="heroBikeIcon">🏆</div>
+            <div class="shop-bike-name" id="heroBikeName">Kawasaki Ninja ZX-10R</div>
+            <div class="shop-bike-sub" id="heroBikeSub">203 PS • 299 km/h • 186 kg • Preis ab €20.400</div>
+        </div>
+        <div class="shop-bike-selector">
+            <label>Motorrad wählen</label>
+            <select id="bikeSelect" onchange="selectBike()">
+                <!-- filled by JS -->
+            </select>
+        </div>
+    </div>
+
+    <!-- LIVE SPECS BAR -->
+    <div class="live-specs-bar">
+        <div class="live-spec">
+            <div class="spec-val base" id="specPS">203</div>
+            <div class="spec-delta zero" id="deltaPS">+0 PS</div>
+            <div class="spec-lbl">Leistung</div>
+        </div>
+        <div class="spec-divider"></div>
+        <div class="live-spec">
+            <div class="spec-val base" id="specWeight">186</div>
+            <div class="spec-delta zero" id="deltaWeight">±0 kg</div>
+            <div class="spec-lbl">Gewicht kg</div>
+        </div>
+        <div class="spec-divider"></div>
+        <div class="live-spec">
+            <div class="spec-val base" id="specAccel">2.9</div>
+            <div class="spec-delta zero" id="deltaAccel">±0.0s</div>
+            <div class="spec-lbl">0-100 km/h</div>
+        </div>
+        <div class="spec-divider"></div>
+        <div class="live-spec">
+            <div class="spec-val base" id="specTorque">115</div>
+            <div class="spec-delta zero" id="deltaTorque">+0 Nm</div>
+            <div class="spec-lbl">Drehmoment Nm</div>
+        </div>
+        <div class="spec-divider"></div>
+        <div class="live-spec">
+            <div class="spec-val" style="color:var(--neon-orange)" id="specTotal">€0</div>
+            <div class="spec-delta zero" id="deltaTotal">Parts</div>
+            <div class="spec-lbl">Upgrade-Kosten</div>
+        </div>
+    </div>
+
+    <div class="shop-layout">
+        <!-- PARTS MAIN -->
+        <div class="parts-main">
+            <!-- CATEGORY TABS -->
+            <div class="cat-tabs">
+                <button class="cat-tab active" onclick="filterCat('all')">🔧 Alle</button>
+                <button class="cat-tab" onclick="filterCat('exhaust')">🔊 Auspuff</button>
+                <button class="cat-tab" onclick="filterCat('performance')">🏎️ Performance</button>
+                <button class="cat-tab" onclick="filterCat('wheels')">🎯 Räder</button>
+                <button class="cat-tab" onclick="filterCat('suspension')">🛡️ Fahrwerk</button>
+                <button class="cat-tab" onclick="filterCat('electronics')">💡 Elektronik</button>
+                <button class="cat-tab" onclick="filterCat('chassis')">🏍️ Chassis</button>
+            </div>
+
+            <!-- PARTS GRID -->
+            <div class="parts-grid" id="partsGrid">
+                <!-- filled by JS -->
+            </div>
+
+            <!-- POPULAR COMBOS -->
+            <div class="combos-section">
+                <h2>🔥 Beliebte Kombinationen</h2>
+                <div class="combo-card" onclick="applyCombo('track')">
+                    <div class="combo-title">🏁 Track-Day Paket</div>
+                    <div class="combo-desc">Akrapovic Auspuff + ECU-Remap + Öhlins Gabel — ideal für Rennstrecke</div>
+                    <div class="combo-meta">
+                        <span class="combo-price">~€3.200</span>
+                        <span class="combo-gains">+23 PS / -8kg / -0.4s 0-100</span>
+                    </div>
+                </div>
+                <div class="combo-card" onclick="applyCombo('performance')">
+                    <div class="combo-title">⚡ Performance Upgrade</div>
+                    <div class="combo-desc">ECU-Remap + Quickshifter + Yoshimura Auspuff — mehr Power, schneller schalten</div>
+                    <div class="combo-meta">
+                        <span class="combo-price">~€2.500</span>
+                        <span class="combo-gains">+23 PS / -5kg / -0.3s 0-100</span>
+                    </div>
+                </div>
+                <div class="combo-card" onclick="applyCombo('light')">
+                    <div class="combo-title">⚖️ Gewichts-Optimierung</div>
+                    <div class="combo-desc">Carbon Räder + Carbon Verkleidung + Marchesini — leichter & agiler</div>
+                    <div class="combo-meta">
+                        <span class="combo-price">~€4.600</span>
+                        <span class="combo-gains">+0 PS / -12kg / bessere Balance</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONFIGURATOR SIDEBAR -->
+        <div class="configurator">
+            <h2>🛒 Konfigurator</h2>
+            <div class="cart-items" id="cartItems">
+                <div class="cart-empty">Noch keine Parts gewählt</div>
+            </div>
+
+            <div class="cart-totals">
+                <div class="cart-total-row"><span>Parts</span><span id="cartCount">0 ausgewählt</span></div>
+                <div class="cart-total-final"><span>Gesamt</span><span class="price" id="cartTotal">€0</span></div>
+            </div>
+
+            <div class="cart-savings" id="cartSavings" style="display:none;">
+                <div class="savings-row"><span>Leistungs-Gewinn</span><span class="savings-val ps" id="savPS">+0 PS</span></div>
+                <div class="savings-row"><span>Gewichts-Ersparnis</span><span class="savings-val weight" id="savWeight">±0 kg</span></div>
+                <div class="savings-row"><span>0-100 Verbesserung</span><span class="savings-val accel" id="savAccel">±0.0s</span></div>
+            </div>
+
+            <div class="cart-btns">
+                <button class="cart-btn cart-btn-primary" onclick="saveConfig()">💾 Konfiguration speichern</button>
+                <button class="cart-btn cart-btn-outline" onclick="loadConfig()">📂 Laden</button>
+                <button class="cart-btn cart-btn-outline" onclick="clearCart()">🗑️ Alles entfernen</button>
+                <button class="cart-btn cart-btn-outline" onclick="shareConfig()">📤 Teilen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// BIKE DATA
+// ==========================================
+const SHOP_BIKES = {
+    zx10r:      { name:'Kawasaki Ninja ZX-10R', icon:'🏆', sub:'203 PS • 299 km/h • 186 kg • ab €20.400', ps:203, weight:186, accel:2.9, torque:115, price:20400 },
+    h2:         { name:'Kawasaki Ninja H2',      icon:'⚡', sub:'231 PS • 300 km/h • 216 kg • ab €33.000', ps:231, weight:216, accel:3.0, torque:141, price:33000 },
+    zh2:        { name:'Kawasaki Z H2',           icon:'👹', sub:'200 PS • 290 km/h • 239 kg • ab €22.900', ps:200, weight:239, accel:3.2, torque:137, price:22900 },
+    h2sx:       { name:'Kawasaki H2 SX',          icon:'🚀', sub:'200 PS • 299 km/h • 240 kg • ab €25.500', ps:200, weight:240, accel:3.1, torque:137, price:25500 },
+    zx6r:       { name:'Kawasaki ZX-6R',          icon:'🔥', sub:'130 PS • 260 km/h • 193 kg • ab €12.900', ps:130, weight:193, accel:3.5, torque:71,  price:12900 },
+    z900:       { name:'Kawasaki Z900',            icon:'💪', sub:'125 PS • 248 km/h • 193 kg • ab €10.200', ps:125, weight:193, accel:3.4, torque:99,  price:10200 },
+    versys1000: { name:'Kawasaki Versys 1000',     icon:'🌍', sub:'120 PS • 220 km/h • 235 kg • ab €13.500', ps:120, weight:235, accel:3.9, torque:102, price:13500 },
+    ninja650:   { name:'Kawasaki Ninja 650',       icon:'🎯', sub:'68 PS • 200 km/h • 172 kg • ab €8.200',  ps:68,  weight:172, accel:4.5, torque:64,  price:8200  },
+    z650:       { name:'Kawasaki Z650',            icon:'🟢', sub:'68 PS • 190 km/h • 168 kg • ab €7.700',  ps:68,  weight:168, accel:4.2, torque:64,  price:7700  },
+    ninja400:   { name:'Kawasaki Ninja 400',       icon:'🏍️', sub:'45 PS • 190 km/h • 168 kg • ab €6.500',  ps:45,  weight:168, accel:4.8, torque:38,  price:6500  },
+    zx25r:      { name:'Kawasaki ZX-25R',          icon:'🎆', sub:'51 PS • 215 km/h • 182 kg • ab €9.800',  ps:51,  weight:182, accel:5.0, torque:23,  price:9800  },
+    eliminator400:{name:'Kawasaki Eliminator 400', icon:'😎', sub:'45 PS • 165 km/h • 176 kg • ab €6.700',  ps:45,  weight:176, accel:5.5, torque:43,  price:6700  },
+    w800:       { name:'Kawasaki W800',            icon:'🕰️', sub:'48 PS • 170 km/h • 202 kg • ab €10.500', ps:48,  weight:202, accel:6.0, torque:63,  price:10500 },
+    klx300:     { name:'Kawasaki KLX 300',         icon:'⛰️', sub:'27 PS • 137 km/h • 137 kg • ab €6.200',  ps:27,  weight:137, accel:7.5, torque:26,  price:6200  },
+    kx450:      { name:'Kawasaki KX 450',          icon:'🏟️', sub:'62 PS • 150 km/h • 110 kg • ab €9.500',  ps:62,  weight:110, accel:3.8, torque:54,  price:9500  }
+};
+
+// ==========================================
+// PARTS DATA
+// ==========================================
+const PARTS = [
+    // EXHAUST
+    { id:'akrapovic-slip', cat:'exhaust', name:'Akrapovic Slip-On', brand:'Akrapovic', price:899, psGain:5, weightSave:3, accelGain:0.1, torqueGain:4, desc:'Titan Slip-On mit markanter Sound-Steigerung. E-Prüfzeichen.', rating:5, popular:true, stars:'★★★★★' },
+    { id:'yoshimura-race', cat:'exhaust', name:'Yoshimura Race', brand:'Yoshimura', price:1200, psGain:8, weightSave:5, accelGain:0.15, torqueGain:6, desc:'Volle Rennauspuff-Anlage aus Edelstahl. Nur für Trackday.', rating:4.5, stars:'★★★★½' },
+    { id:'arrow-full', cat:'exhaust', name:'Arrow Full Exhaust', brand:'Arrow', price:1400, psGain:10, weightSave:6, accelGain:0.2, torqueGain:8, desc:'Komplettanlage mit Titan-Collector und Carbon-Endtopf.', rating:5, stars:'★★★★★' },
+    { id:'sc-project', cat:'exhaust', name:'SC Project SC1-R', brand:'SC Project', price:1150, psGain:7, weightSave:4, accelGain:0.12, torqueGain:5, desc:'MotoGP-inspiriert. Extreme Optik, echter Rennklang.', rating:4.5, stars:'★★★★½' },
+
+    // PERFORMANCE
+    { id:'ecu-remap', cat:'performance', name:'ECU-Remap', brand:'Kawasaki Racing', price:300, psGain:15, weightSave:0, accelGain:0.3, torqueGain:10, desc:'Optimierte Kennfelder für mehr Leistung in allen Bereichen.', rating:5, popular:true, stars:'★★★★★' },
+    { id:'downpipes', cat:'performance', name:'Akrapovic Downpipes', brand:'Akrapovic', price:450, psGain:3, weightSave:1, accelGain:0.05, torqueGain:3, desc:'Freier Auspufffluss, bessere Motoreffizienz.', rating:4, stars:'★★★★☆' },
+    { id:'abs-off', cat:'performance', name:'ABS-Deaktivierung', brand:'Kawasaki Pro', price:200, psGain:0, weightSave:0, accelGain:0.15, torqueGain:0, desc:'ABS für Rennstrecken-Einsatz deaktivieren. Nur Track!', rating:3.5, stars:'★★★½☆' },
+    { id:'quickshifter', cat:'electronics', name:'Quickshifter UP/DOWN', brand:'Kawasaki OEM', price:600, psGain:0, weightSave:0, accelGain:0.2, torqueGain:0, desc:'Gangwechsel ohne Kupplung — Up und Down. Sofort spürbar.', rating:5, popular:true, stars:'★★★★★' },
+
+    // WHEELS
+    { id:'carbon-wheels', cat:'wheels', name:'Carbon Räder', brand:'BST', price:1800, psGain:0, weightSave:4, accelGain:0.25, torqueGain:0, desc:'Ungesprungene Masse -4kg. Massiv besser im Handling.', rating:5, stars:'★★★★★' },
+    { id:'marchesini', cat:'wheels', name:'Marchesini Räder', brand:'Marchesini', price:1500, psGain:0, weightSave:3, accelGain:0.2, torqueGain:0, desc:'MotoGP-Aluminium-Schmiederäder. Leicht & steif.', rating:5, popular:true, stars:'★★★★★' },
+    { id:'oz-racing', cat:'wheels', name:'OZ Racing Räder', brand:'OZ', price:1200, psGain:0, weightSave:2, accelGain:0.15, torqueGain:0, desc:'Sportliche Optik mit Gewichtsvorteil.', rating:4, stars:'★★★★☆' },
+
+    // SUSPENSION
+    { id:'ohlins-fork', cat:'suspension', name:'Öhlins Gabelfedern', brand:'Öhlins', price:2000, psGain:0, weightSave:1, accelGain:0.1, torqueGain:0, desc:'Semi-aktives Fahrwerk — NIX30 Gabelfedern. Perfekte Balance.', rating:5, stars:'★★★★★' },
+    { id:'brake-pads', cat:'suspension', name:'Brembo Racing Beläge', brand:'Brembo', price:250, psGain:0, weightSave:0, accelGain:0.05, torqueGain:0, desc:'Sinterte Beläge für extreme Rennstrecken-Bremskraft.', rating:4.5, stars:'★★★★½' },
+    { id:'braided-lines', cat:'suspension', name:'Stahlflex Bremsleitungen', brand:'Venhill', price:400, psGain:0, weightSave:0, accelGain:0.08, torqueGain:0, desc:'Besseres Bremsgefühl, kürzerer Bremsweg. Pflicht!', rating:4.5, popular:true, stars:'★★★★½' },
+    { id:'ohlins-shock', cat:'suspension', name:'Öhlins TTX GP Federbein', brand:'Öhlins', price:1400, psGain:0, weightSave:0.5, accelGain:0.08, torqueGain:0, desc:'MotoGP-Federbein für perfekte Traktion aus Kurven.', rating:5, stars:'★★★★★' },
+
+    // CHASSIS
+    { id:'carbon-fairing', cat:'chassis', name:'Carbonfiber Verkleidung', brand:'Lightech', price:1600, psGain:0, weightSave:8, accelGain:0.35, torqueGain:0, desc:'Vollcarbon-Body -8kg. Extreme Optik & Gewicht.', rating:4.5, stars:'★★★★½' },
+    { id:'windscreen', cat:'chassis', name:'Racing Windschutzscheibe', brand:'Zero Gravity', price:180, psGain:2, weightSave:0.5, accelGain:0.03, torqueGain:0, desc:'Verbesserte Aerodynamik, weniger Widerstand.', rating:4, stars:'★★★★☆' },
+    { id:'handlebar', cat:'chassis', name:'Custom Lenker', brand:'LSL', price:150, psGain:0, weightSave:0.3, accelGain:0, torqueGain:0, desc:'Ergonomie-Verbesserung, kürzere Reaktionszeit.', rating:4, stars:'★★★★☆' },
+
+    // ELECTRONICS
+    { id:'tc-upgrade', cat:'electronics', name:'Traction Control Upgrade', brand:'Kawasaki KQS', price:400, psGain:0, weightSave:0, accelGain:0.1, torqueGain:0, desc:'IMU-basiertes TC mit Lean-Angle-Sensor. 3 Modi.', rating:5, stars:'★★★★★' },
+    { id:'telemetry', cat:'electronics', name:'Race-Telemetrie-Box', brand:'Aim Sports', price:800, psGain:0, weightSave:0, accelGain:0, torqueGain:0, desc:'GPS + G-Sensor + Lap Timer. Daten-Analyse pur.', rating:4.5, popular:true, stars:'★★★★½' },
+    { id:'powercommander', cat:'electronics', name:'Power Commander V', brand:'Dynojet', price:380, psGain:8, weightSave:0, accelGain:0.15, torqueGain:6, desc:'Fuel-Mapping-Tuning für bestehende Mods. Must-have.', rating:5, stars:'★★★★★' }
+];
+
+// State
+let currentBike = 'zx10r';
+let selectedParts = new Set();
+let currentCat = 'all';
+
+// ==========================================
+// INIT
+// ==========================================
+function init() {
+    // Populate bike select
+    const sel = document.getElementById('bikeSelect');
+    sel.innerHTML = Object.keys(SHOP_BIKES).map(k =>
+        `<option value="${k}">${SHOP_BIKES[k].icon} ${SHOP_BIKES[k].name}</option>`
+    ).join('');
+    sel.value = 'zx10r';
+    renderParts();
+    updateHero();
+}
+
+function selectBike() {
+    currentBike = document.getElementById('bikeSelect').value;
+    selectedParts.clear();
+    updateHero();
+    renderParts();
+    updateCart();
+    updateLiveSpecs();
+}
+
+function updateHero() {
+    const bike = SHOP_BIKES[currentBike];
+    document.getElementById('heroBikeIcon').textContent = bike.icon;
+    document.getElementById('heroBikeName').textContent = bike.name;
+    document.getElementById('heroBikeSub').textContent = bike.sub;
+}
+
+// ==========================================
+// PARTS RENDERING
+// ==========================================
+function renderParts() {
+    const grid = document.getElementById('partsGrid');
+    const visible = PARTS.filter(p => currentCat === 'all' || p.cat === currentCat);
+
+    grid.innerHTML = visible.map(part => {
+        const sel = selectedParts.has(part.id);
+        const gains = [];
+        if (part.psGain > 0) gains.push(`<span class="gain-chip gain-ps">+${part.psGain} PS</span>`);
+        if (part.weightSave > 0) gains.push(`<span class="gain-chip gain-weight">-${part.weightSave} kg</span>`);
+        if (part.accelGain > 0) gains.push(`<span class="gain-chip gain-accel">-${part.accelGain.toFixed(2)}s</span>`);
+        if (part.torqueGain > 0) gains.push(`<span class="gain-chip gain-ps">+${part.torqueGain} Nm</span>`);
+        return `
+        <div class="part-card ${sel ? 'selected' : ''}" id="card_${part.id}" onclick="togglePart('${part.id}')">
+            ${part.popular ? '<div class="popular-badge">⭐ Beliebt</div>' : ''}
+            <div class="part-card-header">
+                <div class="part-checkbox ${sel ? 'checked' : ''}" id="chk_${part.id}"></div>
+                <div>
+                    <div class="part-name">${part.name}</div>
+                    <div class="part-brand">${part.brand}</div>
+                </div>
+                <div class="part-price">€${part.price.toLocaleString('de-DE')}</div>
+            </div>
+            <div class="part-desc">${part.desc}</div>
+            <div class="part-gains">${gains.join('')}</div>
+            <div class="part-rating">
+                <span class="stars">${part.stars}</span>
+                <span class="rating-label">${part.rating}/5</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function filterCat(cat) {
+    currentCat = cat;
+    document.querySelectorAll('.cat-tab').forEach(el => el.classList.remove('active'));
+    event.target.classList.add('active');
+    renderParts();
+    // Show count
+    const count = PARTS.filter(p => cat === 'all' || p.cat === cat).length;
+    event.target.setAttribute('title', count + ' Parts in dieser Kategorie');
+}
+
+// ==========================================
+// TOGGLE PART
+// ==========================================
+function togglePart(partId) {
+    if (selectedParts.has(partId)) {
+        selectedParts.delete(partId);
+    } else {
+        selectedParts.add(partId);
+    }
+    // Update card visual
+    const card = document.getElementById('card_' + partId);
+    const chk = document.getElementById('chk_' + partId);
+    if (card) card.classList.toggle('selected', selectedParts.has(partId));
+    if (chk) chk.classList.toggle('checked', selectedParts.has(partId));
+
+    updateCart();
+    updateLiveSpecs();
+}
+
+function removePart(partId) {
+    selectedParts.delete(partId);
+    renderParts();
+    updateCart();
+    updateLiveSpecs();
+}
+
+// ==========================================
+// CART UPDATE
+// ==========================================
+function updateCart() {
+    const items = document.getElementById('cartItems');
+    const selected = PARTS.filter(p => selectedParts.has(p.id));
+
+    if (selected.length === 0) {
+        items.innerHTML = '<div class="cart-empty">Noch keine Parts gewählt</div>';
+        document.getElementById('cartSavings').style.display = 'none';
+    } else {
+        items.innerHTML = selected.map(p => `
+            <div class="cart-item">
+                <span class="cart-item-name">${p.name}</span>
+                <span class="cart-item-price">€${p.price.toLocaleString('de-DE')}</span>
+                <button class="cart-item-remove" onclick="event.stopPropagation();removePart('${p.id}')" title="Entfernen">✕</button>
+            </div>
+        `).join('');
+        document.getElementById('cartSavings').style.display = 'block';
+    }
+
+    const total = selected.reduce((s, p) => s + p.price, 0);
+    document.getElementById('cartCount').textContent = selected.length + ' Part' + (selected.length !== 1 ? 's' : '');
+    document.getElementById('cartTotal').textContent = '€' + total.toLocaleString('de-DE');
+}
+
+// ==========================================
+// LIVE SPEC UPDATE
+// ==========================================
+function updateLiveSpecs() {
+    const bike = SHOP_BIKES[currentBike];
+    const selected = PARTS.filter(p => selectedParts.has(p.id));
+
+    const totalPS = selected.reduce((s, p) => s + p.psGain, 0);
+    const totalWeight = selected.reduce((s, p) => s - p.weightSave, 0);
+    const totalAccel = selected.reduce((s, p) => s - p.accelGain, 0);
+    const totalTorque = selected.reduce((s, p) => s + p.torqueGain, 0);
+    const totalCost = selected.reduce((s, p) => s + p.price, 0);
+
+    const newPS = bike.ps + totalPS;
+    const newWeight = Math.max(0, bike.weight + totalWeight);
+    const newAccel = Math.max(0, bike.accel + totalAccel);
+    const newTorque = bike.torque + totalTorque;
+
+    document.getElementById('specPS').textContent = newPS;
+    document.getElementById('specWeight').textContent = newWeight.toFixed(0);
+    document.getElementById('specAccel').textContent = newAccel.toFixed(1);
+    document.getElementById('specTorque').textContent = newTorque;
+    document.getElementById('specTotal').textContent = totalCost > 0 ? '€' + totalCost.toLocaleString('de-DE') : '€0';
+
+    // Deltas
+    setDelta('deltaPS', totalPS, '+', ' PS');
+    setDelta('deltaWeight', totalWeight, '', ' kg');
+    setDelta('deltaAccel', totalAccel, '', 's');
+    setDelta('deltaTorque', totalTorque, '+', ' Nm');
+    document.getElementById('deltaTotal').textContent = selected.length + ' Parts';
+
+    // Color classes
+    document.getElementById('specPS').className = 'spec-val ' + (totalPS > 0 ? 'improved' : 'base');
+    document.getElementById('specAccel').className = 'spec-val ' + (totalAccel < 0 ? 'improved' : 'base');
+
+    // Savings
+    if (selected.length > 0) {
+        document.getElementById('savPS').textContent = (totalPS >= 0 ? '+' : '') + totalPS + ' PS';
+        document.getElementById('savWeight').textContent = totalWeight > 0 ? '+' + totalWeight + ' kg' : totalWeight + ' kg';
+        document.getElementById('savAccel').textContent = (totalAccel >= 0 ? '+' : '') + totalAccel.toFixed(2) + 's';
+    }
+}
+
+function setDelta(id, val, prefix, suffix) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (val === 0) { el.textContent = '±0' + suffix; el.className = 'spec-delta zero'; return; }
+    el.textContent = (val > 0 ? prefix || '+' : '') + (typeof val === 'number' ? val.toFixed(val % 1 === 0 ? 0 : 1) : val) + suffix;
+    el.className = 'spec-delta';
+    el.style.color = val > 0 ? 'var(--neon-green)' : (id.includes('Accel') ? 'var(--neon-green)' : 'var(--neon-cyan)');
+}
+
+// ==========================================
+// COMBOS
+// ==========================================
+const COMBO_PARTS = {
+    track: ['akrapovic-slip', 'ecu-remap', 'ohlins-fork'],
+    performance: ['ecu-remap', 'quickshifter', 'yoshimura-race'],
+    light: ['carbon-wheels', 'carbon-fairing', 'marchesini']
+};
+
+function applyCombo(comboKey) {
+    const parts = COMBO_PARTS[comboKey];
+    // Clear and apply combo (clean slate)
+    selectedParts.clear();
+    parts.forEach(id => selectedParts.add(id));
+    currentCat = 'all';
+    document.querySelectorAll('.cat-tab').forEach(el => el.classList.remove('active'));
+    document.querySelector('.cat-tab').classList.add('active');
+    renderParts();
+    updateCart();
+    updateLiveSpecs();
+    // Scroll to specs bar
+    document.querySelector('.live-specs-bar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ==========================================
+// SAVE/LOAD
+// ==========================================
+function saveConfig() {
+    const selected = PARTS.filter(p => selectedParts.has(p.id));
+    const totalPS = selected.reduce((s, p) => s + p.psGain, 0);
+    const totalCost = selected.reduce((s, p) => s + p.price, 0);
+    const config = {
+        bike: currentBike,
+        parts: [...selectedParts],
+        savedAt: new Date().toISOString(),
+        summary: { parts: selected.length, totalPS, totalCost }
+    };
+    localStorage.setItem('kawasaki_shop_config', JSON.stringify(config));
+    const btn = event.target;
+    btn.textContent = '✅ Gespeichert!';
+    setTimeout(() => { btn.textContent = '💾 Konfiguration speichern'; }, 2000);
+}
+
+function loadConfig() {
+    const saved = localStorage.getItem('kawasaki_shop_config');
+    if (!saved) { alert('Keine gespeicherte Konfiguration gefunden.'); return; }
+    const config = JSON.parse(saved);
+    currentBike = config.bike || 'zx10r';
+    document.getElementById('bikeSelect').value = currentBike;
+    selectedParts = new Set(config.parts || []);
+    updateHero();
+    renderParts();
+    updateCart();
+    updateLiveSpecs();
+}
+
+function clearCart() {
+    selectedParts.clear();
+    renderParts();
+    updateCart();
+    updateLiveSpecs();
+}
+
+function shareConfig() {
+    const bike = SHOP_BIKES[currentBike];
+    const selected = PARTS.filter(p => selectedParts.has(p.id));
+    const total = selected.reduce((s, p) => s + p.price, 0);
+    const totalPS = selected.reduce((s, p) => s + p.psGain, 0);
+    const text = `Meine ${bike.name} Aftermarket-Konfiguration:\n${selected.map(p => '• ' + p.name + ' (€' + p.price + ')').join('\n')}\nGesamt: €${total} | +${totalPS} PS\n${window.location.href}`;
+    if (navigator.share) {
+        navigator.share({ title: 'Kawasaki Aftermarket Config', text });
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => alert('📋 Konfiguration kopiert!'));
+    } else {
+        prompt('Konfiguration:', text);
+    }
+}
+
+// Start
+init();
+// Check URL param for pre-selected bike
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const bikeParam = params.get('bike');
+    if (bikeParam && SHOP_BIKES[bikeParam]) {
+        currentBike = bikeParam;
+        document.getElementById('bikeSelect').value = bikeParam;
+        updateHero();
+    }
+})();
+updateLiveSpecs();
+</script>
+</body>
+</html>

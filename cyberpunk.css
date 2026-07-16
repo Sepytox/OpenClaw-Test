@@ -1,0 +1,937 @@
+/* ============================================================
+   CYBERPUNK DESIGN SYSTEM — Vrooooom Motorrad Website
+   Neon Cyan #00FFE0 | Neon Magenta #FF006E | Dark #0A0E27
+   ============================================================ */
+
+/* --- Google Fonts: Orbitron (futuristic) --- */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap');
+
+/* ============================================================
+   1. CSS CUSTOM PROPERTIES — Cyberpunk Token System
+   ============================================================ */
+:root {
+  /* Neon Colors */
+  --cp-cyan:       #00FFE0;
+  --cp-cyan-dim:   rgba(0, 255, 224, 0.2);
+  --cp-cyan-mid:   rgba(0, 255, 224, 0.5);
+  --cp-magenta:    #FF006E;
+  --cp-magenta-dim:rgba(255, 0, 110, 0.2);
+  --cp-yellow:     #FFD700;
+  --cp-yellow-dim: rgba(255, 215, 0, 0.2);
+
+  /* Backgrounds */
+  --cp-bg:         #0A0E27;
+  --cp-bg-panel:   #0D1233;
+  --cp-bg-card:    #10163A;
+  --cp-bg-glass:   rgba(10, 14, 39, 0.75);
+
+  /* Grid line color */
+  --cp-grid:       rgba(0, 255, 224, 0.12);
+
+  /* Text */
+  --cp-text:       #C0D8FF;
+  --cp-text-muted: #5A7098;
+
+  /* Glows */
+  --cp-glow-cyan:    0 0 8px #00FFE0, 0 0 20px rgba(0,255,224,0.5), 0 0 40px rgba(0,255,224,0.2);
+  --cp-glow-magenta: 0 0 8px #FF006E, 0 0 20px rgba(255,0,110,0.5), 0 0 40px rgba(255,0,110,0.2);
+  --cp-glow-yellow:  0 0 8px #FFD700, 0 0 20px rgba(255,215,0,0.5);
+
+  /* Typography */
+  --cp-font-heading: 'Orbitron', 'Space Mono', monospace;
+  --cp-font-mono:    'Space Mono', 'Courier New', monospace;
+
+  /* Borders */
+  --cp-border-cyan:    2px solid #00FFE0;
+  --cp-border-magenta: 2px solid #FF006E;
+  --cp-border-yellow:  2px solid #FFD700;
+
+  /* Transitions */
+  --cp-trans: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* Scroll progress bar height */
+  --scroll-progress: 0%;
+}
+
+/* ============================================================
+   2. GLOBAL CYBERPUNK BODY OVERRIDE
+   ============================================================ */
+body.cyberpunk-mode {
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: var(--cp-font-mono);
+}
+
+/* Cyberpunk grid background overlay */
+body.cyberpunk-mode::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--cp-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cp-grid) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Scanlines overlay */
+body.cyberpunk-mode::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.07) 2px,
+    rgba(0, 0, 0, 0.07) 4px
+  );
+}
+
+body.cyberpunk-mode .container {
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================================
+   3. SCROLL PROGRESS BAR
+   ============================================================ */
+.scroll-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 4px;
+  width: var(--scroll-progress);
+  background: linear-gradient(90deg, var(--cp-cyan), var(--cp-magenta), var(--cp-yellow));
+  box-shadow: var(--cp-glow-cyan);
+  z-index: 9999;
+  transition: width 0.05s linear;
+  will-change: width;
+}
+
+/* ============================================================
+   4. CYBERPUNK HEADER
+   ============================================================ */
+body.cyberpunk-mode header {
+  background: var(--cp-bg-panel);
+  border: var(--cp-border-cyan);
+  box-shadow: var(--cp-glow-cyan), inset 0 0 40px rgba(0, 255, 224, 0.05);
+  position: relative;
+  overflow: visible;
+}
+
+body.cyberpunk-mode header::before {
+  background: linear-gradient(90deg, var(--cp-cyan), var(--cp-magenta), var(--cp-yellow), var(--cp-cyan));
+  background-size: 300% 100%;
+  animation: rainbowBorder 3s linear infinite;
+  height: 3px;
+}
+
+body.cyberpunk-mode header h1 {
+  font-family: var(--cp-font-heading);
+  color: var(--cp-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  text-shadow: var(--cp-glow-cyan);
+  animation: glitch-main 6s infinite;
+}
+
+body.cyberpunk-mode .subtitle {
+  color: var(--cp-magenta);
+  font-family: var(--cp-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 10px var(--cp-magenta);
+  font-size: 0.9em;
+}
+
+/* ============================================================
+   5. CYBERPUNK NAVIGATION
+   ============================================================ */
+body.cyberpunk-mode .main-nav {
+  gap: 12px;
+}
+
+body.cyberpunk-mode .nav-btn {
+  background: transparent;
+  border: 1px solid var(--cp-cyan);
+  color: var(--cp-cyan);
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75em;
+  transition: var(--cp-trans);
+  position: relative;
+  overflow: hidden;
+}
+
+body.cyberpunk-mode .nav-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--cp-cyan);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: -1;
+}
+
+body.cyberpunk-mode .nav-btn:hover::before,
+body.cyberpunk-mode .nav-btn-active::before {
+  transform: translateX(0);
+}
+
+body.cyberpunk-mode .nav-btn:hover,
+body.cyberpunk-mode .nav-btn-active {
+  color: var(--cp-bg);
+  box-shadow: var(--cp-glow-cyan);
+}
+
+/* ============================================================
+   6. CYBERPUNK MAIN / CARDS
+   ============================================================ */
+body.cyberpunk-mode main {
+  background: var(--cp-bg-card);
+  border: 1px solid var(--cp-cyan-dim);
+  box-shadow: 0 0 60px rgba(0, 255, 224, 0.08);
+  color: var(--cp-text);
+}
+
+body.cyberpunk-mode .fact-card {
+  background: var(--cp-bg-glass);
+  border: 1px solid var(--cp-cyan);
+  box-shadow: 0 0 20px var(--cp-cyan-dim), inset 0 0 20px rgba(0, 255, 224, 0.03);
+  backdrop-filter: blur(10px);
+  transition: var(--cp-trans);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Holographic shimmer on cards */
+body.cyberpunk-mode .fact-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(0, 255, 224, 0.05) 50%,
+    transparent 70%
+  );
+  transform: rotate(45deg) translateY(-100%);
+  transition: transform 0.5s ease;
+  pointer-events: none;
+}
+
+body.cyberpunk-mode .fact-card:hover::before {
+  transform: rotate(45deg) translateY(100%);
+}
+
+body.cyberpunk-mode .fact-card:hover {
+  border-color: var(--cp-magenta);
+  box-shadow: var(--cp-glow-magenta), 0 20px 60px rgba(0, 0, 0, 0.5);
+  transform: translateY(-6px) scale(1.02);
+}
+
+body.cyberpunk-mode .fact-name {
+  font-family: var(--cp-font-heading);
+  color: var(--cp-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 10px var(--cp-cyan);
+  font-size: 0.9em;
+}
+
+body.cyberpunk-mode .fact-category {
+  background: var(--cp-magenta-dim);
+  border: 1px solid var(--cp-magenta);
+  color: var(--cp-magenta);
+  text-shadow: 0 0 6px var(--cp-magenta);
+}
+
+body.cyberpunk-mode .fact-ps {
+  color: var(--cp-yellow);
+  text-shadow: var(--cp-glow-yellow);
+  font-family: var(--cp-font-heading);
+}
+
+/* ============================================================
+   7. CYBERPUNK BUTTONS
+   ============================================================ */
+body.cyberpunk-mode .btn-modal,
+body.cyberpunk-mode .btn-compare,
+body.cyberpunk-mode .btn-race,
+body.cyberpunk-mode .btn-race-from-bar {
+  background: transparent;
+  border: var(--cp-border-cyan);
+  color: var(--cp-cyan);
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7em;
+  box-shadow: 0 0 10px var(--cp-cyan-dim);
+  transition: var(--cp-trans);
+  position: relative;
+  overflow: hidden;
+}
+
+body.cyberpunk-mode .btn-modal:hover,
+body.cyberpunk-mode .btn-compare:hover,
+body.cyberpunk-mode .btn-race:hover,
+body.cyberpunk-mode .btn-race-from-bar:hover {
+  background: var(--cp-cyan);
+  color: var(--cp-bg);
+  box-shadow: var(--cp-glow-cyan);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   8. CYBERPUNK SEARCH / FILTER SECTION
+   ============================================================ */
+body.cyberpunk-mode .search-filter-section {
+  background: var(--cp-bg-panel);
+  border: 1px solid var(--cp-cyan-dim);
+  box-shadow: inset 0 0 30px rgba(0, 255, 224, 0.05);
+}
+
+body.cyberpunk-mode .search-input,
+body.cyberpunk-mode .filter-select {
+  background: var(--cp-bg);
+  border: 1px solid var(--cp-cyan);
+  color: var(--cp-cyan);
+  font-family: var(--cp-font-mono);
+  transition: var(--cp-trans);
+}
+
+body.cyberpunk-mode .search-input:focus,
+body.cyberpunk-mode .filter-select:focus {
+  box-shadow: var(--cp-glow-cyan);
+  outline: none;
+}
+
+body.cyberpunk-mode .filter-label {
+  color: var(--cp-text-muted);
+  font-family: var(--cp-font-mono);
+  text-transform: uppercase;
+  font-size: 0.75em;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   9. CYBERPUNK INTRO / SECTIONS
+   ============================================================ */
+body.cyberpunk-mode .intro h2,
+body.cyberpunk-mode .section-heading,
+body.cyberpunk-mode h2,
+body.cyberpunk-mode h3 {
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cp-cyan);
+  text-shadow: var(--cp-glow-cyan);
+}
+
+body.cyberpunk-mode .intro p {
+  color: var(--cp-text);
+  font-family: var(--cp-font-mono);
+}
+
+/* ============================================================
+   10. CYBERPUNK MODAL
+   ============================================================ */
+body.cyberpunk-mode .modal-content {
+  background: var(--cp-bg-panel);
+  border: var(--cp-border-cyan);
+  box-shadow: var(--cp-glow-cyan), 0 40px 80px rgba(0, 0, 0, 0.8);
+  color: var(--cp-text);
+}
+
+body.cyberpunk-mode .modal-header {
+  background: var(--cp-bg-card);
+  border-bottom: 1px solid var(--cp-cyan);
+}
+
+body.cyberpunk-mode .modal-header h2 {
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cp-cyan);
+  text-shadow: var(--cp-glow-cyan);
+}
+
+body.cyberpunk-mode .modal-close {
+  color: var(--cp-magenta);
+  border-color: var(--cp-magenta);
+}
+
+body.cyberpunk-mode .modal-close:hover {
+  background: var(--cp-magenta);
+  color: white;
+  box-shadow: var(--cp-glow-magenta);
+}
+
+/* ============================================================
+   11. CYBERPUNK FOOTER
+   ============================================================ */
+body.cyberpunk-mode footer {
+  background: var(--cp-bg-panel);
+  border-top: var(--cp-border-cyan);
+  color: var(--cp-text-muted);
+  font-family: var(--cp-font-mono);
+  font-size: 0.8em;
+}
+
+/* ============================================================
+   12. GLITCH ANIMATION KEYFRAMES
+   ============================================================ */
+
+/* Main glitch for headings */
+@keyframes glitch-main {
+  0%, 92%, 100% {
+    text-shadow: var(--cp-glow-cyan);
+    transform: none;
+    clip-path: none;
+  }
+  93% {
+    text-shadow: -3px 0 var(--cp-magenta), 3px 0 var(--cp-cyan);
+    transform: skewX(-2deg) translateX(3px);
+  }
+  94% {
+    text-shadow: 3px 0 var(--cp-magenta), -3px 0 var(--cp-yellow);
+    transform: skewX(2deg) translateX(-3px);
+  }
+  95% {
+    text-shadow: var(--cp-glow-cyan);
+    transform: none;
+  }
+  96% {
+    text-shadow: -2px 0 var(--cp-yellow), 2px 0 var(--cp-magenta);
+    transform: skewX(-1deg) translateX(2px);
+  }
+  97% {
+    text-shadow: var(--cp-glow-cyan);
+    transform: none;
+  }
+}
+
+/* Glitch for subheadings */
+@keyframes glitch-sub {
+  0%, 88%, 100% {
+    text-shadow: 0 0 10px var(--cp-magenta);
+    transform: none;
+  }
+  90% {
+    text-shadow: -2px 0 var(--cp-cyan), 2px 0 var(--cp-magenta);
+    transform: skewX(1deg);
+  }
+  91% {
+    text-shadow: 0 0 10px var(--cp-magenta);
+    transform: none;
+  }
+}
+
+/* Float animation for cards */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* Pulse border */
+@keyframes borderPulse {
+  0%, 100% { border-color: var(--cp-cyan); box-shadow: 0 0 10px var(--cp-cyan-dim); }
+  50%       { border-color: var(--cp-magenta); box-shadow: 0 0 20px var(--cp-magenta-dim); }
+}
+
+/* Neon flicker */
+@keyframes neonFlicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+  20%, 24%, 55% { opacity: 0.7; }
+}
+
+/* Typing cursor */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ============================================================
+   13. CYBERPUNK GLITCH CLASSES (applied to headings)
+   ============================================================ */
+.cyberpunk-heading {
+  font-family: var(--cp-font-heading) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  animation: glitch-main 6s infinite;
+  position: relative;
+}
+
+.cyberpunk-heading-magenta {
+  font-family: var(--cp-font-heading) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: var(--cp-magenta) !important;
+  text-shadow: var(--cp-glow-magenta) !important;
+  animation: glitch-sub 5s infinite;
+}
+
+/* Glitch data-text pseudo overlay */
+.glitch-text {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.glitch-text::before {
+  color: var(--cp-magenta);
+  animation: glitch-before 5s infinite;
+  clip-path: polygon(0 30%, 100% 30%, 100% 50%, 0 50%);
+}
+
+.glitch-text::after {
+  color: var(--cp-cyan);
+  animation: glitch-after 5s infinite;
+  clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+}
+
+@keyframes glitch-before {
+  0%, 90%, 100% { transform: none; opacity: 0; }
+  92% { transform: translateX(-3px); opacity: 0.8; }
+  94% { transform: translateX(3px); opacity: 0; }
+}
+
+@keyframes glitch-after {
+  0%, 90%, 100% { transform: none; opacity: 0; }
+  93% { transform: translateX(3px); opacity: 0.8; }
+  95% { transform: translateX(-3px); opacity: 0; }
+}
+
+/* ============================================================
+   14. FLOATING CARD CLASS
+   ============================================================ */
+.float-card {
+  animation: float 4s ease-in-out infinite;
+}
+
+.float-card:nth-child(2n) {
+  animation-delay: 0.8s;
+  animation-duration: 4.5s;
+}
+
+.float-card:nth-child(3n) {
+  animation-delay: 1.6s;
+  animation-duration: 5s;
+}
+
+/* ============================================================
+   15. SCROLL REVEAL CLASSES
+   ============================================================ */
+
+/* Base hidden state */
+.sr-hidden {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+/* Fade in */
+.sr-fade {
+  opacity: 0;
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.sr-fade.sr-visible {
+  opacity: 1;
+  transform: none !important;
+}
+
+/* Slide from left */
+.sr-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.sr-left.sr-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Slide from right */
+.sr-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.sr-right.sr-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Scale up */
+.sr-scale {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.sr-scale.sr-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Slide from bottom */
+.sr-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.sr-up.sr-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered delay utility classes */
+.sr-delay-1 { transition-delay: 0.1s; }
+.sr-delay-2 { transition-delay: 0.2s; }
+.sr-delay-3 { transition-delay: 0.3s; }
+.sr-delay-4 { transition-delay: 0.4s; }
+.sr-delay-5 { transition-delay: 0.5s; }
+.sr-delay-6 { transition-delay: 0.6s; }
+
+/* ============================================================
+   16. 3D TILT CARD EFFECT (JS-controlled via inline vars)
+   ============================================================ */
+.tilt-card {
+  transform-style: preserve-3d;
+  transform: perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.15s ease;
+  will-change: transform;
+}
+
+/* ============================================================
+   17. CYBERPUNK COMPARE BAR / RACE SECTION
+   ============================================================ */
+body.cyberpunk-mode .compare-bar {
+  background: var(--cp-bg-panel);
+  border: var(--cp-border-cyan);
+  box-shadow: var(--cp-glow-cyan);
+}
+
+body.cyberpunk-mode .race-card {
+  background: var(--cp-bg-glass);
+  border: 1px solid var(--cp-cyan);
+  box-shadow: 0 0 20px var(--cp-cyan-dim);
+}
+
+/* ============================================================
+   18. CYBERPUNK THEME TOGGLE BUTTON
+   ============================================================ */
+body.cyberpunk-mode .theme-toggle {
+  border-color: var(--cp-cyan);
+  color: var(--cp-cyan);
+  font-family: var(--cp-font-mono);
+  box-shadow: 0 0 10px var(--cp-cyan-dim);
+}
+
+body.cyberpunk-mode .theme-toggle:hover {
+  background: var(--cp-cyan);
+  color: var(--cp-bg);
+  box-shadow: var(--cp-glow-cyan);
+}
+
+/* Cyberpunk toggle button */
+.cyberpunk-toggle {
+  background: transparent;
+  border: 1px solid var(--cp-magenta);
+  color: var(--cp-magenta);
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7em;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--cp-magenta-dim);
+  transition: var(--cp-trans);
+  flex-shrink: 0;
+}
+
+.cyberpunk-toggle:hover,
+.cyberpunk-toggle.active {
+  background: var(--cp-magenta);
+  color: white;
+  box-shadow: var(--cp-glow-magenta);
+}
+
+/* ============================================================
+   19. NEON DIVIDER CIRCUIT LINES
+   ============================================================ */
+.cp-divider {
+  position: relative;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cp-cyan), transparent);
+  margin: 32px 0;
+  overflow: visible;
+}
+
+.cp-divider::before {
+  content: '◆';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--cp-cyan);
+  font-size: 0.8em;
+  background: var(--cp-bg-card);
+  padding: 0 8px;
+  text-shadow: var(--cp-glow-cyan);
+}
+
+/* ============================================================
+   20. HEAR THIS BIKE BUTTON (added to motorcycle cards)
+   ============================================================ */
+.btn-hear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--cp-magenta);
+  color: var(--cp-magenta);
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.65em;
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 0 8px var(--cp-magenta-dim);
+  transition: var(--cp-trans);
+}
+
+.btn-hear:hover {
+  background: var(--cp-magenta);
+  color: white;
+  box-shadow: var(--cp-glow-magenta);
+  text-decoration: none;
+}
+
+/* ============================================================
+   21. MOBILE RESPONSIVE CYBERPUNK
+   ============================================================ */
+@media (max-width: 768px) {
+  :root {
+    --cp-glow-cyan: 0 0 6px #00FFE0, 0 0 12px rgba(0,255,224,0.4);
+    --cp-glow-magenta: 0 0 6px #FF006E, 0 0 12px rgba(255,0,110,0.4);
+  }
+
+  body.cyberpunk-mode header h1 {
+    font-size: 1.8em;
+    letter-spacing: 0.06em;
+  }
+
+  body.cyberpunk-mode .nav-btn {
+    font-size: 0.65em;
+    padding: 6px 10px;
+  }
+
+  .scroll-progress-bar {
+    height: 3px;
+  }
+}
+
+@media (max-width: 480px) {
+  body.cyberpunk-mode header h1 {
+    font-size: 1.4em;
+  }
+
+  body.cyberpunk-mode .subtitle {
+    font-size: 0.75em;
+    letter-spacing: 0.08em;
+  }
+}
+
+/* ============================================================
+   22. ADDITIONAL SCROLL ANIMATION STYLES
+   ============================================================ */
+
+/* Text reveal (clip-path) for headings */
+.text-reveal {
+  display: inline-block;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Parallax hero — used in JS */
+header {
+  transform-origin: top center;
+  transition: transform 0.1s ease;
+}
+
+/* Neon Pulse border keyframe */
+@keyframes neonPulseBorder {
+  0%, 100% {
+    box-shadow: 0 0 8px var(--cp-cyan), 0 0 20px rgba(0,255,224,0.3);
+    border-color: var(--cp-cyan);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--cp-magenta), 0 0 30px rgba(255,0,110,0.3);
+    border-color: var(--cp-magenta);
+  }
+}
+
+body.cyberpunk-mode .neon-pulse {
+  animation: neonPulseBorder 2.5s ease-in-out infinite;
+}
+
+/* Staggered entrance for grid children */
+.facts > .fact-card {
+  transition-property: opacity, transform;
+  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  transition-duration: 0.7s;
+}
+
+/* Scale entrance state */
+.sr-scale:not(.sr-visible) {
+  transform: scale(0.85);
+}
+
+/* Ensure visible state overrides */
+.sr-visible {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+}
+
+/* ============================================================
+   23. 3D TILT ENHANCE + FLOATING CARDS — ADDITIONAL STYLES
+   ============================================================ */
+
+/* Perspective wrapper for 3D tilt depth */
+.facts {
+  perspective: 1500px;
+}
+
+/* Motorcycle image zoom/rotate on scroll */
+body.cyberpunk-mode .fact-img {
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-origin: center center;
+}
+
+body.cyberpunk-mode .fact-card:hover .fact-img {
+  transform: scale(1.08) rotate(-1.5deg);
+}
+
+/* Levitation shadow sync with float animation */
+@keyframes floatShadow {
+  0%, 100% { box-shadow: 0 0 20px var(--cp-cyan-dim), 0 10px 30px rgba(0,0,0,0.3); }
+  50%       { box-shadow: 0 0 30px var(--cp-cyan-mid), 0 25px 50px rgba(0,0,0,0.5); }
+}
+
+body.cyberpunk-mode .float-card {
+  animation: float 4s ease-in-out infinite, floatShadow 4s ease-in-out infinite;
+}
+
+body.cyberpunk-mode .float-card:nth-child(2n) {
+  animation-delay: 0.8s;
+}
+
+body.cyberpunk-mode .float-card:nth-child(3n) {
+  animation-delay: 1.6s;
+}
+
+/* ============================================================
+   24. SCROLL PROGRESS BAR — NEON ANIMATED STYLES
+   ============================================================ */
+
+/* Additional animated glow on progress bar */
+.scroll-progress-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  width: 20px;
+  height: 8px;
+  background: var(--cp-cyan);
+  border-radius: 50%;
+  box-shadow: var(--cp-glow-cyan);
+  filter: blur(2px);
+}
+
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+.scroll-progress-bar {
+  animation: progressPulse 1.5s ease-in-out infinite;
+}
+
+/* ============================================================
+   25. FUTURISTIC TYPOGRAPHY — ORBITRON ALL-CAPS SYSTEM
+   ============================================================ */
+
+body.cyberpunk-mode {
+  font-family: var(--cp-font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* All headings: Orbitron + ALL CAPS + letter spacing */
+body.cyberpunk-mode h1 {
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 900;
+  color: var(--cp-cyan);
+  text-shadow: 0 0 20px var(--cp-cyan), 0 0 40px var(--cp-magenta);
+}
+
+body.cyberpunk-mode h2 {
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--cp-cyan);
+  text-shadow: var(--cp-glow-cyan);
+}
+
+body.cyberpunk-mode h3 {
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--cp-magenta);
+  text-shadow: 0 0 10px var(--cp-magenta);
+}
+
+/* Code/monospace elements */
+body.cyberpunk-mode code,
+body.cyberpunk-mode pre,
+body.cyberpunk-mode .spec-value,
+body.cyberpunk-mode .price {
+  font-family: var(--cp-font-mono);
+  color: var(--cp-yellow);
+  text-shadow: var(--cp-glow-yellow);
+}
+
+/* Labels uppercase */
+body.cyberpunk-mode .spec-label,
+body.cyberpunk-mode .stat-label,
+body.cyberpunk-mode label {
+  font-family: var(--cp-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75em;
+  color: var(--cp-text-muted);
+}

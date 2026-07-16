@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Alle Kawasaki-Motorräder im Überblick: 17+ Modelle filtern, vergleichen und Favoriten speichern.">
+    <meta property="og:title" content="Motorcycles — Vrooooom">
+    <meta property="og:description" content="Entdecke die komplette Kawasaki-Palette: Sport, Naked, Cruiser, Adventure, Off-Road und Klassiker.">
+    <meta property="og:type" content="website">
+    <title>Motorcycles — Vrooooom</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="landing.css">
+    <script>
+        // Apply saved preferences immediately to avoid flash of wrong theme/language
+        (function() {
+            try {
+                if (localStorage.getItem('darkMode') === 'true') {
+                    document.documentElement.classList.add('dark-mode-pending');
+                    document.body && document.body.classList.add('dark-mode');
+                }
+                if (!localStorage.getItem('language')) {
+                    localStorage.setItem('language', 'en');
+                }
+            } catch(e) { /* private browsing / storage blocked */ }
+        })();
+    </script>
+</head>
+<body>
+    <!-- SKIP TO MAIN CONTENT (Keyboard Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
+    <!-- TOP NAVBAR -->
+    <nav class="top-navbar" aria-label="Main Navigation">
+        <div class="nav-brand">
+            <a href="index.html" class="nav-logo" aria-label="Vrooooom Home">🏍️ Vrooooom</a>
+        </div>
+        <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+        <ul class="nav-links" id="navLinks" role="list">
+            <li><a href="index.html" class="nav-link">Home</a></li>
+            <li><a href="motorcycles.html" class="nav-link nav-link-active" aria-current="page">Motorcycles</a></li>
+            <li><a href="about.html" class="nav-link">About</a></li>
+            <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+        <div class="nav-controls">
+            <div class="lang-switcher" id="langSwitcher" role="group" aria-label="Language switcher" style="display:flex;gap:0.25rem;">
+                <button class="lang-btn active" id="btnEn" onclick="setLanguage('en')" aria-label="Switch to English" title="English" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:6px;padding:.3rem .6rem;cursor:pointer;font-size:.85rem;transition:all .3s ease">🇬🇧 EN</button>
+                <button class="lang-btn" id="btnDe" onclick="setLanguage('de')" aria-label="Auf Deutsch wechseln" title="Deutsch" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:6px;padding:.3rem .6rem;cursor:pointer;font-size:.85rem;transition:all .3s ease">🇩🇪 DE</button>
+            </div>
+            <button class="theme-toggle nav-theme-btn" id="themeToggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
+        </div>
+    </nav>
+    <div class="container">
+
+        <main id="main-content">
+            <!-- INTRO -->
+            <section class="intro">
+                <h2 data-i18n="aboutTitle">About Kawasaki</h2>
+                <p data-i18n="aboutText">Kawasaki is one of the oldest and most renowned motorcycle manufacturers in the world. Known for performance, innovation, and reliability for over 100 years.</p>
+            </section>
+
+            <!-- SEARCH & FILTER -->
+            <section class="search-filter-section" aria-label="Search and Filter">
+                <div class="search-bar-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="search" id="searchInput" class="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Search motorcycles..." aria-label="Search motorcycle by name">
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label" for="filterCategory" data-i18n="filterCategory">Category:</label>
+                        <select id="filterCategory" class="filter-select" aria-label="Filter by category">
+                            <option value="" data-i18n="filterAll">All</option>
+                            <option value="Sport" data-i18n="catSport">Sport</option>
+                            <option value="Naked" data-i18n="catNaked">Naked</option>
+                            <option value="Cruiser" data-i18n="catCruiser">Cruiser</option>
+                            <option value="Adventure" data-i18n="catAdventure">Adventure</option>
+                            <option value="Off-Road" data-i18n="catOffRoad">Off-Road</option>
+                            <option value="Classic" data-i18n="catClassic">Classic</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="filterLicense" data-i18n="filterLicense">License:</label>
+                        <select id="filterLicense" class="filter-select" aria-label="Filter by license class">
+                            <option value="" data-i18n="filterAll">All</option>
+                            <option value="A2">A2 (≤48 PS)</option>
+                            <option value="A">A</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" for="filterSort" data-i18n="filterSort">Sort:</label>
+                        <select id="filterSort" class="filter-select" aria-label="Sort motorcycles">
+                            <option value="default" data-i18n="sortDefault">Default</option>
+                            <option value="name-asc" data-i18n="sortNameAZ">Name A→Z</option>
+                            <option value="name-desc" data-i18n="sortNameZA">Name Z→A</option>
+                            <option value="ps-desc" data-i18n="sortPsHigh">Power ↓</option>
+                            <option value="ps-asc" data-i18n="sortPsLow">Power ↑</option>
+                            <option value="price-asc" data-i18n="sortPriceLow">Price ↑</option>
+                            <option value="price-desc" data-i18n="sortPriceHigh">Price ↓</option>
+                            <option value="vmax-desc" data-i18n="sortVmaxHigh">Speed ↓</option>
+                        </select>
+                    </div>
+                    <button id="clearFiltersBtn" class="btn-clear-filter" aria-label="Reset filters">
+                        <span>✕</span> <span data-i18n="clearFilters">Clear Filters</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- BIKES GRID -->
+            <section class="facts" id="bikesGrid" aria-label="Kawasaki Motorcycles"></section>
+
+            <div class="no-results" id="noResults" hidden aria-live="polite">
+                <p data-i18n="noResults">😔 No motorcycles found. Try different search terms or filters.</p>
+            </div>
+
+            <!-- QUICK FACTS -->
+            <section class="quick-facts-section">
+                <h2 class="section-title" data-i18n="quickFactsTitle">⚡ Quick Facts</h2>
+                <div class="quick-facts">
+                    <div class="fact-card">
+                        <h3 data-i18n="fastestTitle">⚡ Fastest Kawasaki</h3>
+                        <p><strong>Kawasaki Ninja H2</strong></p>
+                        <p data-i18n="fastestDesc">Top speed over <strong>300 km/h</strong> with a supercharged engine delivering 231 HP.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h3 data-i18n="slowestTitle">🐢 Most Accessible</h3>
+                        <p><strong>Kawasaki KLX 110</strong></p>
+                        <p data-i18n="slowestDesc">Perfect for beginners. Only 113cc and <strong>~90 km/h</strong> — safe and reliable.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h3 data-i18n="newestTitle">🆕 Latest Model</h3>
+                        <p><strong>Kawasaki Ninja 1200 Hybrid (2026)</strong></p>
+                        <p data-i18n="newestDesc">Hybrid technology combining electric and petrol for maximum efficiency.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h3 data-i18n="oldestTitle">⏰ A Legend</h3>
+                        <p><strong>Kawasaki Samurai (1960s)</strong></p>
+                        <p data-i18n="oldestDesc">Classic design and robust engineering still appreciated today.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="closing">
+                <h2 data-i18n="closingTitle">Kawasaki — Tradition Meets the Future</h2>
+                <p data-i18n="closingText">From classic models to high-tech superbikes — Kawasaki remains one of the top destinations for motorcycle enthusiasts worldwide.</p>
+            </section>
+        </main>
+
+        <!-- Footer moved to site-footer below -->
+    </div>
+
+    <!-- STICKY COMPARE BAR -->
+    <div class="compare-bar" id="compareBar" hidden aria-label="Compare selected motorcycles">
+        <div class="compare-bar-inner">
+            <span class="compare-bar-label">⚖️ <span id="compareCount">0</span>/2 ausgewählt</span>
+            <div class="compare-bar-bikes" id="compareBarBikes"></div>
+            <div class="compare-bar-actions">
+                <button class="compare-btn" id="compareNowBtn" disabled>Vergleichen →</button>
+                <button class="compare-close-btn" id="compareClearBtn" aria-label="Vergleich leeren">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BIKE DETAIL MODAL -->
+    <div class="modal-overlay" id="bikeModal" role="dialog" aria-modal="true" aria-labelledby="modalBikeTitle" aria-hidden="true">
+        <div class="modal-content">
+            <button class="modal-close" id="modalCloseBtn" aria-label="Close modal">&times;</button>
+            <div class="modal-header" id="modalHeaderBg">
+                <img id="modalBikeImg" src="" alt="" loading="lazy" decoding="async" style="width:100%;max-height:220px;object-fit:cover;border-radius:6px;margin-bottom:0.75rem;display:none" onerror="this.style.display='none'">
+                <div class="modal-icon-large" id="modalBikeIcon">🏍️</div>
+                <h2 id="modalBikeTitle">Motorcycle</h2>
+                <p class="modal-subtitle" id="modalBikeSubtitle"></p>
+                <div class="modal-badges" id="modalBadges"></div>
+            </div>
+            <div class="modal-body">
+                <p class="modal-blurb" id="modalBlurb"></p>
+
+                <div class="specs-grid" id="modalSpecsGrid"></div>
+
+                <details class="extended-specs">
+                    <summary data-i18n="extendedSpecs">🔧 Extended Specifications</summary>
+                    <div class="specs-grid" id="modalExtendedGrid"></div>
+                </details>
+
+                <div class="modal-actions">
+                    <a class="btn-youtube" id="modalYoutubeBtn" target="_blank" rel="noopener noreferrer" aria-label="Open YouTube video">
+                        ▶ YouTube
+                    </a>
+                    <button class="btn-modal-fav" id="modalFavBtn" aria-label="Add to favorites">
+                        🤍 <span data-i18n="favorite">Favorite</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        /* ==========================================
+           i18n — Internationalisation System
+           Supports: English (default) and German
+        ========================================== */
+        var translations = {
+            en: {
+                pageTitle:      'Vrooooom - Kawasaki Motorcycles',
+                subtitle:       'Fast, Classic & Legendary',
+                aboutTitle:     'About Kawasaki',
+                aboutText:      'Kawasaki is one of the oldest and most renowned motorcycle manufacturers in the world. Known for performance, innovation, and reliability for over 100 years. Explore our collection of iconic models — from beginner bikes to extreme superbikes.',
+                // Search & filter
+                searchPlaceholder: 'Search motorcycles...',
+                filterCategory: 'Category:',
+                filterLicense:  'License:',
+                filterSort:     'Sort:',
+                filterAll:      'All',
+                catSport:       'Sport',
+                catNaked:       'Naked',
+                catCruiser:     'Cruiser',
+                catAdventure:   'Adventure',
+                catOffRoad:     'Off-Road',
+                catClassic:     'Classic',
+                sortDefault:    'Default',
+                sortNameAZ:     'Name A→Z',
+                sortNameZA:     'Name Z→A',
+                sortPsHigh:     'Power ↓',
+                sortPsLow:      'Power ↑',
+                sortPriceLow:   'Price ↑',
+                sortPriceHigh:  'Price ↓',
+                sortVmaxHigh:   'Top Speed ↓',
+                clearFilters:   'Clear Filters',
+                noResults:      '😔 No motorcycles found. Try different search terms or filters.',
+                // Card
+                specsHint:      '🔍 View Specs',
+                favorite:       'Favorite',
+                // Modal
+                extendedSpecs:  '🔧 Extended Specifications',
+                specsCategory:  'Category',
+                specsEngine:    'Engine',
+                specsPower:     'Power',
+                specsTorque:    'Torque',
+                specsWeight:    'Weight',
+                specsVmax:      'Top Speed',
+                specs0100:      '0–100 km/h',
+                specsYear:      'Model Year',
+                specsPrice:     'Price (MSRP)',
+                specsCC:        'Displacement',
+                specsGearbox:   'Gearbox',
+                specsConsumption: 'Fuel Consumption',
+                specsTank:      'Fuel Tank',
+                specsSeatH:     'Seat Height',
+                specsBrakes:    'Brakes (Front/Rear)',
+                specsTires:     'Tires',
+                specsLicense:   'License Class',
+                // Quick facts
+                quickFactsTitle: '⚡ Quick Facts',
+                fastestTitle:   '⚡ Fastest Kawasaki',
+                fastestDesc:    'Top speed over <strong>300 km/h</strong> with a supercharged engine delivering 231 HP.',
+                slowestTitle:   '🐢 Most Accessible',
+                slowestDesc:    'Perfect for beginners. Only 113cc and <strong>~90 km/h</strong> — safe and reliable.',
+                newestTitle:    '🆕 Latest Model',
+                newestDesc:     'Hybrid technology combining electric and petrol for maximum efficiency.',
+                oldestTitle:    '⏰ A Legend',
+                oldestDesc:     'Classic design and robust engineering still appreciated today.',
+                // Closing
+                closingTitle:   'Kawasaki — Tradition Meets the Future',
+                closingText:    'From classic models to high-tech superbikes — Kawasaki remains one of the top destinations for motorcycle enthusiasts worldwide.',
+                footer:         '© 2026 Vrooooom Kawasaki | Test Website',
+                themeToggleLight: 'Switch to light mode',
+                themeToggleDark:  'Switch to dark mode'
+            },
+            de: {
+                pageTitle:      'Vrooooom - Kawasaki Motorräder',
+                subtitle:       'Schnell, Klassisch & Legendär',
+                aboutTitle:     'Über Kawasaki',
+                aboutText:      'Kawasaki ist einer der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren. Entdecke unsere Kollektion ikonischer Modelle — vom Einsteiger-Bike bis zum Extrem-Superbike.',
+                // Search & filter
+                searchPlaceholder: 'Motorräder suchen...',
+                filterCategory: 'Kategorie:',
+                filterLicense:  'Führerschein:',
+                filterSort:     'Sortierung:',
+                filterAll:      'Alle',
+                catSport:       'Sport',
+                catNaked:       'Naked',
+                catCruiser:     'Cruiser',
+                catAdventure:   'Adventure',
+                catOffRoad:     'Off-Road',
+                catClassic:     'Klassiker',
+                sortDefault:    'Standard',
+                sortNameAZ:     'Name A→Z',
+                sortNameZA:     'Name Z→A',
+                sortPsHigh:     'Leistung ↓',
+                sortPsLow:      'Leistung ↑',
+                sortPriceLow:   'Preis ↑',
+                sortPriceHigh:  'Preis ↓',
+                sortVmaxHigh:   'Vmax ↓',
+                clearFilters:   'Filter löschen',
+                noResults:      '😔 Keine Motorräder gefunden. Versuche andere Suchbegriffe oder Filter.',
+                // Card
+                specsHint:      '🔍 Specs anzeigen',
+                favorite:       'Favorit',
+                // Modal
+                extendedSpecs:  '🔧 Erweiterte Spezifikationen',
+                specsCategory:  'Kategorie',
+                specsEngine:    'Motor',
+                specsPower:     'Leistung',
+                specsTorque:    'Drehmoment',
+                specsWeight:    'Gewicht (trocken)',
+                specsVmax:      'Höchstgeschwindigkeit',
+                specs0100:      '0–100 km/h',
+                specsYear:      'Modelljahr',
+                specsPrice:     'Kaufpreis (UVP)',
+                specsCC:        'Hubraum',
+                specsGearbox:   'Getriebe',
+                specsConsumption: 'Verbrauch',
+                specsTank:      'Kraftstofftank',
+                specsSeatH:     'Sitzhöhe',
+                specsBrakes:    'Bremsen (vorn/hinten)',
+                specsTires:     'Reifen',
+                specsLicense:   'Führerscheinklasse',
+                // Quick facts
+                quickFactsTitle: '⚡ Schnellüberblick',
+                fastestTitle:   '⚡ Schnellstes Kawasaki',
+                fastestDesc:    'Über <strong>300 km/h</strong> Höchstgeschwindigkeit mit Kompressor-Motor und 231 PS.',
+                slowestTitle:   '🐢 Einsteiger-freundlich',
+                slowestDesc:    'Perfekt für Anfänger. Nur 113cc und <strong>~90 km/h</strong> — sicher und zuverlässig.',
+                newestTitle:    '🆕 Neuestes Modell',
+                newestDesc:     'Hybrid-Technologie verbindet Elektro- und Benzinantrieb für maximale Effizienz.',
+                oldestTitle:    '⏰ Eine Legende',
+                oldestDesc:     'Klassisches Design und robuste Technik, die bis heute geschätzt wird.',
+                // Closing
+                closingTitle:   'Kawasaki – Tradition trifft Zukunft',
+                closingText:    'Von klassischen Modellen bis zu High-Tech Superbikes – Kawasaki bleibt eine der Top-Adressen für Motorrad-Enthusiasten weltweit.',
+                footer:         '© 2026 Vrooooom Kawasaki | Test Website',
+                themeToggleLight: 'Zum hellen Modus wechseln',
+                themeToggleDark:  'Zum dunklen Modus wechseln'
+            }
+        };
+
+        var currentLang = 'en';
+
+        function t(key) {
+            var lang = translations[currentLang] || translations['en'];
+            return lang[key] !== undefined ? lang[key] : (translations['en'][key] || key);
+        }
+
+        function applyTranslations(lang) {
+            var tr = translations[lang];
+            if (!tr) return;
+            document.title = tr.pageTitle;
+            document.documentElement.setAttribute('lang', lang);
+            document.querySelectorAll('[data-i18n]').forEach(function(el) {
+                var key = el.getAttribute('data-i18n');
+                if (tr[key] !== undefined) el.innerHTML = tr[key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+                var key = el.getAttribute('data-i18n-placeholder');
+                if (tr[key] !== undefined) el.placeholder = tr[key];
+            });
+            var isDark = document.body.classList.contains('dark-mode');
+            updateToggleButton(isDark);
+            // Re-render cards to update language-sensitive content
+            renderCards();
+        }
+
+        function setLanguage(lang) {
+            if (!translations[lang]) return;
+            currentLang = lang;
+            safeStorage.set('language', lang);
+            document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+            document.getElementById('btnDe').classList.toggle('active', lang === 'de');
+            applyTranslations(lang);
+        }
+
+        /* ==========================================
+           Dark Mode Toggle
+        ========================================== */
+        function toggleDarkMode() {
+            var isDark = document.body.classList.toggle('dark-mode');
+            safeStorage.set('darkMode', isDark);
+            updateToggleButton(isDark);
+        }
+
+        function updateToggleButton(isDark) {
+            var btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            var tr = translations[currentLang] || translations['en'];
+            var label = isDark ? tr.themeToggleLight : tr.themeToggleDark;
+            btn.setAttribute('aria-label', label);
+            btn.title = isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+            btn.textContent = isDark ? '☀️' : '🌓';
+        }
+
+        /* ==========================================
+           Bike Database — 12 Kawasaki Models
+        ========================================== */
+        var BIKES = [
+            {
+                id: 'h2',
+                name: 'Kawasaki Ninja H2',
+                subtitle: { en: 'Supercharged Hypersport', de: 'Aufgeladener Hypersportler' },
+                icon: '⚡',
+                category: 'Sport',
+                license: 'A',
+                ps: 231, kw: 170, vmax: 300, weight: 216, torque: 141, year: 2015, price: 33000, accel: 3.0,
+                cc: 1340, consumption: 8.2, tank: 17, seatHeight: 82.5,
+                engine: { en: '1340cc Supercharged Inline-4, 4-Stroke', de: '1340cc Kompressor 4-Zylinder Reihenmotor, 4-Takt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Double disc 330mm / Disc 250mm', de: 'Doppelscheibe 330mm / Scheibe 250mm' },
+                tires: '120/70 ZR17 + 200/55 ZR17',
+                blurb: { en: 'With over 300 km/h the H2 is one of the fastest production motorcycles in the world. The supercharged engine delivers a massive 231 HP.', de: 'Mit über 300 km/h ist die H2 eines der schnellsten Serienmotorräder der Welt. Der Kompressor-Motor liefert gigantische 231 PS.' },
+                youtubeQuery: 'Kawasaki Ninja H2 Review',
+                g1: '0f2027', g2: '2c5364'
+            },
+            {
+                id: 'klx110',
+                name: 'Kawasaki KLX 110',
+                subtitle: { en: 'Beginner Dirt Bike', de: 'Einsteiger Dirt Bike' },
+                icon: '🐢',
+                category: 'Off-Road',
+                license: 'A2',
+                ps: 7, kw: 5.4, vmax: 90, weight: 76, torque: 8, year: 2008, price: 2800, accel: 0,
+                cc: 112, consumption: 2.5, tank: 3.8, seatHeight: 68,
+                engine: { en: '112cc Single-cylinder, 4-Stroke', de: '112cc Einzylinder, 4-Takt' },
+                transmission: { en: 'Semi-automatic (4-speed)', de: 'Halbautomatik (4-Gang)' },
+                brakes: { en: 'Drum / Drum', de: 'Trommel / Trommel' },
+                tires: '2.50-14 + 3.00-12',
+                blurb: { en: 'The perfect beginner dirt bike for children and newcomers. Safe, reliable, and easy to handle.', de: 'Die perfekte Einsteiger Dirt Bike für Kinder und Anfänger. Sicher, zuverlässig und einfach zu fahren.' },
+                youtubeQuery: 'Kawasaki KLX 110 Dirt Bike',
+                g1: '134e5e', g2: '71b280'
+            },
+            {
+                id: 'hybrid1200',
+                name: 'Kawasaki Ninja 1200 Hybrid',
+                subtitle: { en: 'Hybrid Innovation 2026', de: 'Hybrid-Innovation 2026' },
+                icon: '🆕',
+                category: 'Sport',
+                license: 'A',
+                ps: 220, kw: 162, vmax: 280, weight: 227, torque: 220, year: 2026, price: 35000, accel: 3.2,
+                cc: 1198, consumption: 5.4, tank: 19, seatHeight: 84,
+                engine: { en: '1200cc Hybrid (Petrol + Electric)', de: '1200cc Hybrid (Benzin + Elektro)' },
+                transmission: { en: 'Automatic (E-Assist)', de: 'Automatisch (E-Assist)' },
+                brakes: { en: 'Double disc, Brembo Monobloc / Disc (regenerative)', de: 'Doppelscheibe, Brembo Monobloc / Scheibe (regenerativ)' },
+                tires: '120/70 ZR17 + 190/55 ZR17',
+                blurb: { en: 'The latest innovation combining electric and petrol drive for maximum efficiency and performance.', de: 'Die neueste Innovation: Elektro und Benzin vereint für maximale Effizienz und Performance.' },
+                youtubeQuery: 'Kawasaki Ninja Hybrid 2026',
+                g1: '42275a', g2: '734b6d'
+            },
+            {
+                id: 'samurai',
+                name: 'Kawasaki Samurai (Replica)',
+                subtitle: { en: 'Classic from the 1960s', de: 'Klassiker der 1960er' },
+                icon: '⏰',
+                category: 'Classic',
+                license: 'A2',
+                ps: 31, kw: 23, vmax: 160, weight: 145, torque: 25, year: 1966, price: 8000, accel: 0,
+                cc: 247, consumption: 6.0, tank: 13, seatHeight: 78,
+                engine: { en: '250cc 2-Cylinder, 2-Stroke', de: '250cc 2-Zylinder, 2-Takt' },
+                transmission: { en: 'Manual (5-speed)', de: 'Manuell (5-Gang)' },
+                brakes: { en: 'Drum / Drum', de: 'Trommel / Trommel' },
+                tires: '3.00-18 + 3.25-18',
+                blurb: { en: 'The oldest Kawasaki model. Classic design and robust engineering still appreciated to this day.', de: 'Das älteste Kawasaki-Modell. Klassisches Design und robuste Technik, die bis heute geschätzt wird.' },
+                youtubeQuery: 'Kawasaki Samurai A1 1960s Classic',
+                g1: '4b1248', g2: 'f0c27b'
+            },
+            {
+                id: 'z650',
+                name: 'Kawasaki Z650',
+                subtitle: { en: 'Beginner Naked with Bite', de: 'Einsteiger-Naked mit Biss' },
+                icon: '🟢',
+                category: 'Naked',
+                license: 'A2',
+                ps: 68, kw: 50, vmax: 190, weight: 168, torque: 64, year: 2024, price: 7700, accel: 4.2,
+                cc: 649, consumption: 4.3, tank: 15, seatHeight: 79,
+                engine: { en: '649cc Parallel Twin, 4-Stroke', de: '649cc 2-Zylinder Reihenmotor, 4-Takt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Double disc 300mm / Disc 220mm', de: 'Doppelscheibe 300mm / Scheibe 220mm' },
+                tires: '120/70 ZR17 + 160/60 ZR17',
+                blurb: { en: 'The perfect beginner naked bike: light, agile, 68 HP — A2 restriction-ready. Best value starter!', de: 'Das perfekte Einsteiger-Naked: leicht, agil, 68 PS — A2-drosselbar. Bestes Preis-Leistungs-Verhältnis!' },
+                youtubeQuery: 'Kawasaki Z650 Review',
+                g1: '11998e', g2: '38ef7d'
+            },
+            {
+                id: 'ninja400',
+                name: 'Kawasaki Ninja 400',
+                subtitle: { en: 'Beginner Sportbike', de: 'Anfänger-Sportler' },
+                icon: '🏍️',
+                category: 'Sport',
+                license: 'A2',
+                ps: 45, kw: 33, vmax: 190, weight: 168, torque: 38, year: 2023, price: 6500, accel: 4.8,
+                cc: 399, consumption: 3.9, tank: 14, seatHeight: 78.5,
+                engine: { en: '399cc Parallel Twin, 4-Stroke', de: '399cc 2-Zylinder Reihenmotor, 4-Takt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Disc 310mm / Disc 220mm', de: 'Scheibe 310mm / Scheibe 220mm' },
+                tires: '110/70-17 + 150/60-17',
+                blurb: { en: 'Lightweight supersport looks with beginner-friendly 45 HP. Perfect for the A2 license.', de: 'Leichter Supersport-Look mit anfängerfreundlichen 45 PS. Ideal für den A2-Führerschein.' },
+                youtubeQuery: 'Kawasaki Ninja 400 Review',
+                g1: '1a2980', g2: '26d0ce'
+            },
+            {
+                id: 'zx10r',
+                name: 'Kawasaki Ninja ZX-10R',
+                subtitle: { en: 'Superbike World Champion', de: 'Superbike-Weltmeister' },
+                icon: '🏆',
+                category: 'Sport',
+                license: 'A',
+                ps: 203, kw: 149, vmax: 299, weight: 186, torque: 115, year: 2024, price: 20400, accel: 2.9,
+                cc: 998, consumption: 6.9, tank: 17, seatHeight: 83.5,
+                engine: { en: '998cc Inline-4, 4-Stroke', de: '998cc 4-Zylinder Reihenmotor, 4-Takt' },
+                transmission: { en: 'Manual (6-speed, Quickshifter)', de: 'Manuell (6-Gang, Quickshifter)' },
+                brakes: { en: 'Double disc 330mm, Brembo M50 / Disc 220mm', de: 'Doppelscheibe 330mm, Brembo M50 / Scheibe 220mm' },
+                tires: '120/70 ZR17 + 190/55 ZR17',
+                blurb: { en: 'The WSBK Championship bike: 203 HP, 299 km/h, race-track DNA for the road.', de: 'Das WSBK-Championship-Bike: 203 PS, 299 km/h, Rennstrecken-DNA für die Straße.' },
+                youtubeQuery: 'Kawasaki Ninja ZX-10R Review 2024',
+                g1: '0b8043', g2: '004d25'
+            },
+            {
+                id: 'versys1000',
+                name: 'Kawasaki Versys 1000',
+                subtitle: { en: 'Adventure Tourer', de: 'Abenteuer-Reisemaschine' },
+                icon: '🌍',
+                category: 'Adventure',
+                license: 'A',
+                ps: 120, kw: 88, vmax: 220, weight: 235, torque: 102, year: 2024, price: 13500, accel: 3.9,
+                cc: 1043, consumption: 5.6, tank: 21, seatHeight: 84,
+                engine: { en: '1043cc Inline-4, 4-Stroke', de: '1043cc 4-Zylinder Reihenmotor, 4-Takt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Double disc 310mm / Disc 250mm', de: 'Doppelscheibe 310mm / Scheibe 250mm' },
+                tires: '120/70 ZR17 + 180/55 ZR17',
+                blurb: { en: 'The all-rounder for long journeys: 120 HP, upright riding position, 21-liter tank for maximum range.', de: 'Der Alleskönner für lange Reisen: 120 PS, aufrechte Sitzposition, 21-Liter-Tank für maximale Reichweite.' },
+                youtubeQuery: 'Kawasaki Versys 1000 Review',
+                g1: '355c7d', g2: '6c5b7b'
+            },
+            {
+                id: 'w800',
+                name: 'Kawasaki W800',
+                subtitle: { en: 'Retro Classic', de: 'Retro-Klassiker' },
+                icon: '🕰️',
+                category: 'Classic',
+                license: 'A2',
+                ps: 48, kw: 35, vmax: 170, weight: 202, torque: 63, year: 2024, price: 10500, accel: 6.0,
+                cc: 773, consumption: 4.7, tank: 15, seatHeight: 79,
+                engine: { en: '773cc Parallel Twin, 4-Stroke, Air-cooled', de: '773cc 2-Zylinder Reihenmotor, 4-Takt, luftgekühlt' },
+                transmission: { en: 'Manual (5-speed)', de: 'Manuell (5-Gang)' },
+                brakes: { en: 'Disc 320mm / Disc 270mm', de: 'Scheibe 320mm / Scheibe 270mm' },
+                tires: '100/90-19 + 130/80-18',
+                blurb: { en: 'Timeless retro charm: air-cooled twin with 48 HP — perfectly A2-ready.', de: 'Zeitloser Retro-Charme: luftgekühlter Twin mit 48 PS — perfekt A2-tauglich.' },
+                youtubeQuery: 'Kawasaki W800 Review',
+                g1: '603813', g2: 'b29f94'
+            },
+            {
+                id: 'eliminator400',
+                name: 'Kawasaki Eliminator 400',
+                subtitle: { en: 'Modern Cruiser Classic', de: 'Moderner Cruiser-Klassiker' },
+                icon: '😎',
+                category: 'Cruiser',
+                license: 'A2',
+                ps: 45, kw: 33, vmax: 165, weight: 176, torque: 43, year: 2024, price: 6700, accel: 5.5,
+                cc: 451, consumption: 4.1, tank: 13, seatHeight: 73.5,
+                engine: { en: '451cc Parallel Twin, 4-Stroke', de: '451cc 2-Zylinder Reihenmotor, 4-Takt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Disc 310mm / Disc 240mm', de: 'Scheibe 310mm / Scheibe 240mm' },
+                tires: '130/70-18 + 150/80-16',
+                blurb: { en: 'Relaxed cruiser with extremely low seat height (73.5 cm) — ideal for smaller riders.', de: 'Entspannter Cruiser mit extrem niedriger Sitzhöhe (73,5 cm) — ideal für kleinere Fahrer.' },
+                youtubeQuery: 'Kawasaki Eliminator 400 Review',
+                g1: '870000', g2: '190a05'
+            },
+            {
+                id: 'z900',
+                name: 'Kawasaki Z900',
+                subtitle: { en: 'Aggressive Naked Powerhouse', de: 'Aggressiver Naked-Kraftprotz' },
+                icon: '💪',
+                category: 'Naked',
+                license: 'A',
+                ps: 125, kw: 92, vmax: 248, weight: 193, torque: 99, year: 2024, price: 10200, accel: 3.4,
+                cc: 948, consumption: 5.5, tank: 17, seatHeight: 79,
+                engine: { en: '948cc Inline-4, 4-Stroke', de: '948cc 4-Zylinder Reihenmotor, 4-Takt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Double disc 300mm / Disc 250mm', de: 'Doppelscheibe 300mm / Scheibe 250mm' },
+                tires: '120/70 ZR17 + 190/50 ZR17',
+                blurb: { en: 'The sharpest Kawasaki naked bike: 125 HP, 248 km/h, aggressive looks with superbike performance.', de: 'Die schärfste Kawasaki Naked: 125 PS, 248 km/h, aggressive Optik und Superbike-Performance.' },
+                youtubeQuery: 'Kawasaki Z900 Review 2024',
+                g1: '0d0d0d', g2: '00c853'
+            },
+            {
+                id: 'klx300',
+                name: 'Kawasaki KLX 300',
+                subtitle: { en: 'Dual-Sport Enduro', de: 'Dual-Sport Enduro' },
+                icon: '⛰️',
+                category: 'Off-Road',
+                license: 'A2',
+                ps: 27, kw: 20, vmax: 137, weight: 137, torque: 26, year: 2024, price: 6200, accel: 7.5,
+                cc: 292, consumption: 3.5, tank: 7.7, seatHeight: 89.5,
+                engine: { en: '292cc Single-cylinder, 4-Stroke', de: '292cc Einzylinder, 4-Takt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Disc 270mm / Disc 240mm', de: 'Scheibe 270mm / Scheibe 240mm' },
+                tires: '3.00-21 + 4.60-18',
+                blurb: { en: 'Lightweight enduro for trail and road: long suspension travel, goes almost anywhere.', de: 'Leichte Enduro für Trail und Straße: langer Federweg, geht fast überall durch.' },
+                youtubeQuery: 'Kawasaki KLX 300 Review',
+                g1: '2c3e50', g2: '4ca1af'
+            },
+            {
+                id: 'vulcan1700',
+                name: 'Kawasaki Vulcan 1700 Classic',
+                subtitle: { en: 'Heavyweight Cruiser', de: 'Heavyweight-Cruiser' },
+                icon: '🤠',
+                category: 'Cruiser',
+                license: 'A',
+                ps: 76, kw: 56, vmax: 180, weight: 346, torque: 143, year: 2023, price: 16900, accel: 5.8,
+                cc: 1700, consumption: 6.8, tank: 19, seatHeight: 72,
+                engine: { en: '1700cc V-Twin, 4-Stroke, Liquid-cooled', de: '1700cc V-Twin, 4-Takt, flüssigkekühlt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Double disc 300mm / Disc 300mm', de: 'Doppelscheibe 300mm / Scheibe 300mm' },
+                tires: '130/90B16 + 180/70B15',
+                blurb: { en: 'Old-school American cruiser soul in a Kawasaki body: 143 Nm torque, ultra-low 72 cm seat, and a thunderous 1700cc V-Twin.', de: 'Old-School-American-Cruiser-Seele im Kawasaki-Gewänd: 143 Nm Drehmoment, ultratiefe Sitzhöhe von 72 cm und ein donnernder 1700cc V-Twin.' },
+                youtubeQuery: 'Kawasaki Vulcan 1700 Classic Review',
+                g1: '3d0c02', g2: '8b4513'
+            },
+            {
+                id: 'versys650',
+                name: 'Kawasaki Versys 650',
+                subtitle: { en: 'Versatile Tourer A2', de: 'Vielseitiger Tourer A2' },
+                icon: '🗺️',
+                category: 'Adventure',
+                license: 'A2',
+                ps: 69, kw: 51, vmax: 198, weight: 196, torque: 65, year: 2024, price: 8200, accel: 4.5,
+                cc: 649, consumption: 4.6, tank: 21, seatHeight: 84,
+                engine: { en: '649cc Parallel Twin, 4-Stroke', de: '649cc 2-Zylinder Reihenmotor, 4-Takt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Double disc 300mm / Disc 220mm', de: 'Doppelscheibe 300mm / Scheibe 220mm' },
+                tires: '120/70 ZR17 + 160/60 ZR17',
+                blurb: { en: 'The perfect everyday adventure tourer: light enough for city use, capable enough for touring. A2 derestriction-ready with a massive 21-liter tank.', de: 'Der perfekte Alltagsabenteuerer: leicht genug für die Stadt, fähig genug für Touren. A2-drosselbar mit großem 21-Liter-Tank.' },
+                youtubeQuery: 'Kawasaki Versys 650 Review 2024',
+                g1: '355c7d', g2: '68a085'
+            },
+            {
+                id: 'kx250',
+                name: 'Kawasaki KX 250',
+                subtitle: { en: 'Motocross Champion', de: 'Motocross-Champion' },
+                icon: '🏆',
+                category: 'Off-Road',
+                license: 'A2',
+                ps: 49, kw: 36, vmax: 115, weight: 102, torque: 35, year: 2024, price: 9800, accel: 3.5,
+                cc: 249, consumption: 4.2, tank: 7.5, seatHeight: 96,
+                engine: { en: '249cc Single-cylinder, 4-Stroke, Liquid-cooled', de: '249cc Einzylinder, 4-Takt, flüssigkekühlt' },
+                transmission: { en: 'Manual (5-speed)', de: 'Manuell (5-Gang)' },
+                brakes: { en: 'Disc 270mm / Disc 240mm', de: 'Scheibe 270mm / Scheibe 240mm' },
+                tires: '80/100-21 + 100/90-19',
+                blurb: { en: 'Born on the motocross track: ultralight at 102 kg, race-spec suspension, and 49 HP to conquer jumps and berms.', de: 'Auf der Motocross-Strecke geboren: ultraleicht mit 102 kg, Rennsport-Fahrwerk und 49 PS für Sprünge und Steilkurven.' },
+                youtubeQuery: 'Kawasaki KX 250 Motocross Review 2024',
+                g1: '1a4731', g2: '6fcf97'
+            },
+            {
+                id: 'z1000',
+                name: 'Kawasaki Z1000',
+                subtitle: { en: 'Supernaked Beast', de: 'Supernaked-Bestie' },
+                icon: '💔',
+                category: 'Naked',
+                license: 'A',
+                ps: 142, kw: 104, vmax: 258, weight: 213, torque: 111, year: 2023, price: 13400, accel: 3.1,
+                cc: 1043, consumption: 6.4, tank: 15, seatHeight: 82,
+                engine: { en: '1043cc Inline-4, 4-Stroke, Liquid-cooled', de: '1043cc 4-Zylinder Reihenmotor, 4-Takt, flüssigkekühlt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Double disc 310mm Brembo / Disc 250mm', de: 'Doppelscheibe 310mm Brembo / Scheibe 250mm' },
+                tires: '120/70 ZR17 + 190/50 ZR17',
+                blurb: { en: 'Raw aggression meets street legalability: 142 HP, 258 km/h, and a design that turns heads everywhere.', de: 'Rohe Aggression trifft Straßenzulassung: 142 PS, 258 km/h und ein Design, das überall Blicke auf sich zieht.' },
+                youtubeQuery: 'Kawasaki Z1000 Review 2023',
+                g1: '0d0d0d', g2: '434343'
+            },
+            {
+                id: 'h2sx',
+                name: 'Kawasaki Ninja H2 SX SE',
+                subtitle: { en: 'Supercharged Sport Tourer', de: 'Supercharged Sport-Tourer' },
+                icon: '🚀',
+                category: 'Sport',
+                license: 'A',
+                ps: 200, kw: 147, vmax: 290, weight: 260, torque: 137, year: 2024, price: 28900, accel: 3.2,
+                cc: 998, consumption: 7.1, tank: 19, seatHeight: 82,
+                engine: { en: '998cc Supercharged Inline-4, 4-Stroke', de: '998cc Kompressor 4-Zylinder Reihenmotor, 4-Takt' },
+                transmission: { en: 'Manual (6-speed, Quickshifter)', de: 'Manuell (6-Gang, Quickshifter)' },
+                brakes: { en: 'Double disc 320mm Brembo / Disc 250mm (Semi-Integral)', de: 'Doppelscheibe 320mm Brembo / Scheibe 250mm (Semi-Integral)' },
+                tires: '120/70 ZR17 + 190/55 ZR17',
+                blurb: { en: 'A supercharged sports tourer that devours highways and mountain passes equally: 200 HP, full electronics suite, and room for passenger + luggage.', de: 'Ein supercharged Sport-Tourer, der Autobahnen und Passstraßen gleichermaßen verschlingt: 200 PS, volles Elektroniksystem und Platz für Sozius und Gepäck.' },
+                youtubeQuery: 'Kawasaki Ninja H2 SX SE Review 2024',
+                g1: '0f2027', g2: '1d3557'
+            },
+            {
+                id: 'zx6r',
+                name: 'Kawasaki Ninja ZX-6R',
+                subtitle: { en: 'Supersport 636cc Icon', de: 'Supersport 636cc Ikone' },
+                icon: '\uD83D\uDD25',
+                category: 'Sport',
+                license: 'A',
+                ps: 130, kw: 96, vmax: 270, weight: 193, torque: 70, year: 2024, price: 13500, accel: 3.3,
+                cc: 636, consumption: 6.8, tank: 17, seatHeight: 83,
+                engine: { en: '636cc Inline-4, 4-Stroke, Liquid-cooled, DOHC', de: '636cc 4-Zylinder Reihenmotor, 4-Takt, fl\u00fcssigkek\u00fchlt, DOHC' },
+                transmission: { en: 'Manual (6-speed, Quickshifter)', de: 'Manuell (6-Gang, Quickshifter)' },
+                brakes: { en: 'Double disc 310mm / Disc 220mm', de: 'Doppelscheibe 310mm / Scheibe 220mm' },
+                tires: '120/70 ZR17 + 180/55 ZR17',
+                blurb: { en: 'The iconic middleweight supersport: 636cc inline-four with 130 HP that dominates the class on both track and street.', de: 'Der ikonische Mittelklasse-Supersportler: 636cc Inline-Four mit 130 PS, der die Klasse auf Rennstrecke und Stra\u00dfe dominiert.' },
+                youtubeQuery: 'Kawasaki Ninja ZX-6R Review 2024',
+                img: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/2013_Kawasaki_ZX-6R.jpg',
+                g1: '1a0a2e', g2: '16213e'
+            },
+            {
+                id: 'klr650',
+                name: 'Kawasaki KLR 650',
+                subtitle: { en: 'Legendary Adventure Enduro', de: 'Legend\u00e4re Adventure-Enduro' },
+                icon: '\uD83C\uDF04',
+                category: 'Adventure',
+                license: 'A',
+                ps: 53, kw: 39, vmax: 177, weight: 193, torque: 59, year: 2023, price: 7900, accel: 5.2,
+                cc: 652, consumption: 5.2, tank: 23, seatHeight: 89,
+                engine: { en: '652cc Single-cylinder, 4-Stroke, DOHC, Liquid-cooled', de: '652cc Einzylinder, 4-Takt, DOHC, fl\u00fcssigkek\u00fchlt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Disc 300mm / Disc 240mm, ABS', de: 'Scheibe 300mm / Scheibe 240mm, ABS' },
+                tires: '90/90-21 + 130/80-17',
+                blurb: { en: 'The legendary adventure bike that goes anywhere: massive 23L tank, long suspension travel, and proven reliability for world travel.', de: 'Das legend\u00e4re Abenteuerrad, das \u00fcberall hinkommt: 23L-Tank, langer Federweg und bew\u00e4hrte Zuverl\u00e4ssigkeit f\u00fcr Weltreisen.' },
+                youtubeQuery: 'Kawasaki KLR 650 Review 2023',
+                img: 'https://upload.wikimedia.org/wikipedia/commons/0/01/Klr650.jpg',
+                g1: '2d5a27', g2: '1a3a14'
+            },
+            {
+                id: 'ninja650',
+                name: 'Kawasaki Ninja 650',
+                subtitle: { en: 'Sport-Tourer for Everyone', de: 'Sport-Tourer f\u00fcr Alle' },
+                icon: '\uD83D\uDFE3',
+                category: 'Sport',
+                license: 'A2',
+                ps: 68, kw: 50, vmax: 202, weight: 186, torque: 64, year: 2024, price: 8700, accel: 4.0,
+                cc: 649, consumption: 4.3, tank: 15, seatHeight: 79,
+                engine: { en: '649cc Parallel Twin, 4-Stroke, Liquid-cooled, DOHC', de: '649cc 2-Zylinder Reihenmotor, 4-Takt, fl\u00fcssigkek\u00fchlt, DOHC' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Dual disc 300mm / Disc 220mm', de: 'Doppelscheibe 300mm / Scheibe 220mm' },
+                tires: '120/70 ZR17 + 160/60 ZR17',
+                blurb: { en: 'Perfect blend of sport and touring: 68 HP Ninja with wind protection, passenger comfort, and A2-derestriction ready.', de: 'Perfekte Mischung aus Sport und Touring: 68 PS Ninja mit Windschutz, Soziuskomfort und A2-drosselbar.' },
+                youtubeQuery: 'Kawasaki Ninja 650 Review 2024',
+                img: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Kawasaki_Ninja650.jpg',
+                g1: '7b2d8b', g2: '4a148c'
+            },
+            {
+                id: 'z650rs',
+                name: 'Kawasaki Z650RS',
+                subtitle: { en: 'Retro Neo-Classic', de: 'Retro Neo-Klassiker' },
+                icon: '\uD83D\uDD7A',
+                category: 'Classic',
+                license: 'A2',
+                ps: 67, kw: 49, vmax: 195, weight: 174, torque: 64, year: 2024, price: 9100, accel: 4.3,
+                cc: 649, consumption: 4.4, tank: 15, seatHeight: 80,
+                engine: { en: '649cc Parallel Twin, 4-Stroke, Liquid-cooled', de: '649cc 2-Zylinder Reihenmotor, 4-Takt, fl\u00fcssigkek\u00fchlt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Disc 300mm / Disc 220mm', de: 'Scheibe 300mm / Scheibe 220mm' },
+                tires: '110/70-17 + 160/60 ZR17',
+                blurb: { en: 'Classic 1970s styling meets modern 649cc twin: round headlight, teardrop tank, and 67 HP in a lightweight package.', de: 'Klassisches 70er-Design trifft modernen 649cc Twin: Rundscheinwerfer, Tropfentank und 67 PS im leichten Paket.' },
+                youtubeQuery: 'Kawasaki Z650RS Review 2024',
+                img: 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Kawasaki_Z650RS.jpg',
+                g1: '4a3728', g2: 'c69933'
+            },
+            {
+                id: 'z900rs',
+                name: 'Kawasaki Z900RS',
+                subtitle: { en: 'Retro Caf\u00e9-Fighter', de: 'Retro Caf\u00e9-Fighter' },
+                icon: '\uD83C\uDFDB\uFE0F',
+                category: 'Classic',
+                license: 'A',
+                ps: 111, kw: 82, vmax: 230, weight: 212, torque: 98, year: 2024, price: 13000, accel: 3.5,
+                cc: 948, consumption: 5.8, tank: 17, seatHeight: 82,
+                engine: { en: '948cc Inline-4, 4-Stroke, Liquid-cooled', de: '948cc 4-Zylinder Reihenmotor, 4-Takt, fl\u00fcssigkek\u00fchlt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Double disc 300mm / Disc 250mm', de: 'Doppelscheibe 300mm / Scheibe 250mm' },
+                tires: '120/70 ZR17 + 190/50 ZR17',
+                blurb: { en: 'Retro styling inspired by the iconic 1972 Z1 with modern 948cc power: round gauges, classic paint, 111 HP.', de: 'Retro-Design inspiriert vom legend\u00e4ren 1972er Z1 mit moderner 948cc Power: Rundinstrumente, klassische Farben, 111 PS.' },
+                youtubeQuery: 'Kawasaki Z900RS Review 2024',
+                img: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Kawasaki_Z900RS_Cafe.jpg',
+                g1: '2c1810', g2: 'c0392b'
+            },
+            {
+                id: 'eliminator500',
+                name: 'Kawasaki Eliminator 500',
+                subtitle: { en: 'Lifestyle Cruiser 2023', de: 'Lifestyle Cruiser 2023' },
+                icon: '\uD83C\uDF05',
+                category: 'Cruiser',
+                license: 'A2',
+                ps: 45, kw: 33, vmax: 148, weight: 174, torque: 43, year: 2023, price: 6800, accel: 5.8,
+                cc: 451, consumption: 4.0, tank: 11, seatHeight: 73.5,
+                engine: { en: '451cc Parallel Twin, 4-Stroke, Liquid-cooled', de: '451cc 2-Zylinder Reihenmotor, 4-Takt, fl\u00fcssigkek\u00fchlt' },
+                transmission: { en: 'Manual (6-speed)', de: 'Manuell (6-Gang)' },
+                brakes: { en: 'Disc 310mm / Disc 240mm', de: 'Scheibe 310mm / Scheibe 240mm' },
+                tires: '130/70-18 + 150/80-16',
+                blurb: { en: '2023 lifestyle cruiser rebirth: the Eliminator returns with 451cc twin, ultra-low 73.5cm seat, and relaxed style for everyday riders.', de: '2023 Lifestyle-Cruiser Wiedergeburt: Der Eliminator kehrt zur\u00fcck mit 451cc Twin, ultraniedriger 73,5cm Sitzhöhe und entspanntem Style.' },
+                youtubeQuery: 'Kawasaki Eliminator 500 Review 2023',
+                img: 'https://upload.wikimedia.org/wikipedia/commons/1/19/Kawasaki_Eliminator_at_50th_Tokyo_Motorcycle_Show_%282023%29.jpg',
+                g1: '6d1212', g2: 'b03a2e'
+            }
+        ];
+
+        /* ==========================================
+           Utility: debounce
+        ========================================== */
+        function debounce(fn, delay) {
+            var timer;
+            return function() {
+                var args = arguments;
+                var ctx = this;
+                clearTimeout(timer);
+                timer = setTimeout(function() { fn.apply(ctx, args); }, delay);
+            };
+        }
+
+        /* ==========================================
+           Safe localStorage wrapper
+           Handles QuotaExceededError & private browsing
+        ========================================== */
+        var safeStorage = (function() {
+            function get(key) {
+                try { return localStorage.getItem(key); } catch(e) { return null; }
+            }
+            function set(key, val) {
+                try { localStorage.setItem(key, val); return true; }
+                catch(e) {
+                    // QuotaExceededError or SecurityError — silently ignore
+                    return false;
+                }
+            }
+            function remove(key) {
+                try { localStorage.removeItem(key); } catch(e) {}
+            }
+            return { get: get, set: set, remove: remove };
+        })();
+
+        /* ==========================================
+           Favorites (LocalStorage)
+        ========================================== */
+        var favorites = (function() {
+            var KEY = 'vroooom_favorites_v2';
+            var data = [];
+            try { data = JSON.parse(safeStorage.get(KEY)) || []; } catch(e) { data = []; }
+
+            function isFav(id) { return data.indexOf(id) !== -1; }
+            function toggle(id) {
+                var idx = data.indexOf(id);
+                if (idx !== -1) data.splice(idx, 1); else data.push(id);
+                safeStorage.set(KEY, JSON.stringify(data));
+            }
+            return { isFav: isFav, toggle: toggle };
+        })();
+
+        /* ==========================================
+           Card Rendering
+        ========================================== */
+        var currentFilter = { search: '', category: '', license: '', sort: 'default' };
+        var currentModalBikeId = null;
+
+        function getLocalizedStr(field) {
+            if (typeof field === 'string') return field;
+            return field[currentLang] || field['en'] || '';
+        }
+
+        function renderCards() {
+            var grid = document.getElementById('bikesGrid');
+            var noResults = document.getElementById('noResults');
+            var search = currentFilter.search.toLowerCase();
+            var category = currentFilter.category;
+            var license = currentFilter.license;
+            var sort = currentFilter.sort;
+
+            // Filter
+            var filtered = BIKES.filter(function(b) {
+                var name = b.name.toLowerCase();
+                var sub = getLocalizedStr(b.subtitle).toLowerCase();
+                if (search && name.indexOf(search) === -1 && sub.indexOf(search) === -1) return false;
+                if (category && b.category !== category) return false;
+                if (license && b.license !== license) return false;
+                return true;
+            });
+
+            // Sort
+            if (sort === 'name-asc') {
+                filtered.sort(function(a, b) { return a.name.localeCompare(b.name); });
+            } else if (sort === 'name-desc') {
+                filtered.sort(function(a, b) { return b.name.localeCompare(a.name); });
+            } else if (sort === 'ps-desc') {
+                filtered.sort(function(a, b) { return b.ps - a.ps; });
+            } else if (sort === 'ps-asc') {
+                filtered.sort(function(a, b) { return a.ps - b.ps; });
+            } else if (sort === 'price-asc') {
+                filtered.sort(function(a, b) { return a.price - b.price; });
+            } else if (sort === 'price-desc') {
+                filtered.sort(function(a, b) { return b.price - a.price; });
+            } else if (sort === 'vmax-desc') {
+                filtered.sort(function(a, b) { return b.vmax - a.vmax; });
+            }
+
+            grid.innerHTML = '';
+            if (filtered.length === 0) {
+                noResults.hidden = false;
+                return;
+            }
+            noResults.hidden = true;
+
+            filtered.forEach(function(bike) {
+                var isFaved = favorites.isFav(bike.id);
+                var card = document.createElement('div');
+                card.className = 'fact-card fact-card-clickable' + (isFaved ? ' card-favorited' : '');
+                card.setAttribute('data-bike', bike.id);
+                card.setAttribute('role', 'button');
+                card.setAttribute('tabindex', '0');
+                card.setAttribute('aria-label', bike.name + ' — ' + t('specsHint'));
+
+                var licenseClass = bike.license === 'A2' ? 'badge-a2' : 'badge-a';
+
+                card.innerHTML =
+                    (bike.img ? '<div class="card-photo" style="overflow:hidden;border-radius:8px 8px 0 0;margin:-1rem -1rem 0.75rem -1rem;max-height:175px;"><img src="' + bike.img + '" alt="' + bike.name + '" loading="lazy" decoding="async" style="width:100%;height:175px;object-fit:cover;display:block;" onerror="this.parentElement.style.display=\'none\'"></div>' : '') +
+                    '<div class="card-header">' +
+                        '<span class="card-icon" aria-hidden="true">' + bike.icon + '</span>' +
+                        '<div class="card-badges">' +
+                            '<span class="badge badge-category">' + t('cat' + bike.category.replace('-','')) + '</span>' +
+                            '<span class="badge ' + licenseClass + '">🪪 ' + bike.license + '</span>' +
+                        '</div>' +
+                        '<button class="fav-btn" data-bike="' + bike.id + '" aria-label="' + (isFaved ? 'Remove from favorites' : 'Add to favorites') + '" title="Favorite">' + (isFaved ? '❤️' : '🤍') + '</button>' +
+                    '</div>' +
+                    '<h3 class="card-name">' + bike.name + '</h3>' +
+                    '<p class="card-subtitle">' + getLocalizedStr(bike.subtitle) + '</p>' +
+                    '<p class="card-blurb">' + getLocalizedStr(bike.blurb) + '</p>' +
+                    '<div class="card-quickstats">' +
+                        '<span class="qstat">🐎 ' + bike.ps + ' HP</span>' +
+                        '<span class="qstat">🏁 ' + bike.vmax + ' km/h</span>' +
+                        '<span class="qstat">💶 ' + bike.price.toLocaleString('de-DE') + ' €</span>' +
+                    '</div>' +
+                    '<div class="card-footer">' +
+                        '<span class="card-hint">' + t('specsHint') + '</span>' +
+                        (isFaved ? '<span class="fav-indicator">❤️</span>' : '') +
+                    '</div>';
+
+                card.addEventListener('click', function(e) {
+                    if (e.target.closest('.fav-btn')) return;
+                    openModal(bike.id);
+                });
+                card.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(bike.id); }
+                });
+
+                var favBtnEl = card.querySelector('.fav-btn');
+                favBtnEl.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    favorites.toggle(bike.id);
+                    renderCards();
+                    if (currentModalBikeId === bike.id) updateModalFavBtn(bike.id);
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        /* ==========================================
+           Modal
+        ========================================== */
+        function openModal(bikeId) {
+            var bike = BIKES.find(function(b) { return b.id === bikeId; });
+            if (!bike) return;
+            currentModalBikeId = bikeId;
+
+            var overlay = document.getElementById('bikeModal');
+            var iconEl = document.getElementById('modalBikeIcon');
+            var titleEl = document.getElementById('modalBikeTitle');
+            var subtitleEl = document.getElementById('modalBikeSubtitle');
+            var blurbEl = document.getElementById('modalBlurb');
+            var specsGrid = document.getElementById('modalSpecsGrid');
+            var extGrid = document.getElementById('modalExtendedGrid');
+            var headerBg = document.getElementById('modalHeaderBg');
+            var badgesEl = document.getElementById('modalBadges');
+            var ytBtn = document.getElementById('modalYoutubeBtn');
+
+            iconEl.textContent = bike.icon;
+            var modalImgEl = document.getElementById('modalBikeImg');
+            if (modalImgEl) {
+                if (bike.img) {
+                    modalImgEl.src = bike.img;
+                    modalImgEl.alt = bike.name;
+                    modalImgEl.style.display = '';
+                } else {
+                    modalImgEl.style.display = 'none';
+                }
+            }
+            titleEl.textContent = bike.name;
+            subtitleEl.textContent = getLocalizedStr(bike.subtitle);
+            blurbEl.textContent = getLocalizedStr(bike.blurb);
+            headerBg.style.background = 'linear-gradient(135deg, #' + bike.g1 + ', #' + bike.g2 + ')';
+
+            var licClass = bike.license === 'A2' ? 'badge-a2' : 'badge-a';
+            badgesEl.innerHTML =
+                '<span class="badge badge-category">' + t('cat' + bike.category.replace('-','')) + '</span>' +
+                '<span class="badge ' + licClass + '">🪪 ' + bike.license + '</span>';
+
+            // Main specs
+            var specs = [
+                [t('specsCategory'), t('cat' + bike.category.replace('-','')) + ' (' + bike.license + ')'],
+                [t('specsEngine'), getLocalizedStr(bike.engine)],
+                [t('specsPower'), bike.ps + ' HP (' + bike.kw + ' kW)'],
+                [t('specsTorque'), bike.torque + ' Nm'],
+                [t('specsWeight'), bike.weight + ' kg'],
+                [t('specsVmax'), bike.vmax + ' km/h'],
+                [t('specs0100'), bike.accel ? '~' + bike.accel.toFixed(1) + ' s' : 'N/A'],
+                [t('specsYear'), String(bike.year)],
+                [t('specsPrice'), bike.price.toLocaleString('de-DE') + ' €']
+            ];
+            specsGrid.innerHTML = '';
+            specs.forEach(function(row) {
+                specsGrid.innerHTML += '<div class="spec-item"><span class="spec-label">' + row[0] + '</span><span class="spec-value">' + row[1] + '</span></div>';
+            });
+
+            // Extended specs
+            var ext = [
+                [t('specsCC'), bike.cc + ' cc'],
+                [t('specsGearbox'), getLocalizedStr(bike.transmission)],
+                [t('specsConsumption'), bike.consumption.toFixed(1) + ' L/100km'],
+                [t('specsTank'), bike.tank + ' L'],
+                [t('specsSeatH'), bike.seatHeight + ' cm'],
+                [t('specsBrakes'), getLocalizedStr(bike.brakes)],
+                [t('specsTires'), bike.tires],
+                [t('specsLicense'), bike.license]
+            ];
+            extGrid.innerHTML = '';
+            ext.forEach(function(row) {
+                extGrid.innerHTML += '<div class="spec-item"><span class="spec-label">' + row[0] + '</span><span class="spec-value">' + row[1] + '</span></div>';
+            });
+
+            ytBtn.href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(bike.youtubeQuery);
+            updateModalFavBtn(bikeId);
+
+            overlay.classList.add('modal-visible');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('modalCloseBtn').focus();
+        }
+
+        function updateModalFavBtn(bikeId) {
+            var btn = document.getElementById('modalFavBtn');
+            if (!btn) return;
+            var faved = favorites.isFav(bikeId);
+            btn.innerHTML = (faved ? '❤️' : '🤍') + ' <span data-i18n="favorite">' + t('favorite') + '</span>';
+        }
+
+        function closeModal() {
+            var overlay = document.getElementById('bikeModal');
+            overlay.classList.add('modal-closing');
+            setTimeout(function() {
+                overlay.classList.remove('modal-visible', 'modal-closing');
+                overlay.setAttribute('aria-hidden', 'true');
+            }, 220);
+            document.body.style.overflow = '';
+            currentModalBikeId = null;
+        }
+
+        document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+        document.getElementById('bikeModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.getElementById('modalFavBtn').addEventListener('click', function() {
+            if (!currentModalBikeId) return;
+            favorites.toggle(currentModalBikeId);
+            updateModalFavBtn(currentModalBikeId);
+            renderCards();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('bikeModal').classList.contains('modal-visible')) {
+                closeModal();
+            }
+        });
+
+        /* Touch-Swipe: swipe down on modal header to close */
+        (function() {
+            var modalContent = document.querySelector('#bikeModal .modal-content');
+            var touchStartY = 0;
+            var touchStartX = 0;
+            var isDragging = false;
+
+            modalContent.addEventListener('touchstart', function(e) {
+                touchStartY = e.touches[0].clientY;
+                touchStartX = e.touches[0].clientX;
+                isDragging = true;
+            }, { passive: true });
+
+            modalContent.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                var dy = e.touches[0].clientY - touchStartY;
+                var dx = e.touches[0].clientX - touchStartX;
+                // Visual drag feedback: translate downward
+                if (dy > 0 && Math.abs(dy) > Math.abs(dx)) {
+                    modalContent.style.transform = 'translateY(' + dy + 'px)';
+                    modalContent.style.transition = 'none';
+                }
+            }, { passive: true });
+
+            modalContent.addEventListener('touchend', function(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                var dy = e.changedTouches[0].clientY - touchStartY;
+                var dx = e.changedTouches[0].clientX - touchStartX;
+                modalContent.style.transform = '';
+                modalContent.style.transition = '';
+                // Close if swiped down > 80px and more vertical than horizontal
+                if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
+                    closeModal();
+                }
+            }, { passive: true });
+        })();
+
+        /* ==========================================
+           Search & Filter Controls
+        ========================================== */
+        document.getElementById('searchInput').addEventListener('input', debounce(function() {
+            currentFilter.search = this.value;
+            renderCards();
+        }, 200));
+        document.getElementById('filterCategory').addEventListener('change', function() {
+            currentFilter.category = this.value;
+            renderCards();
+        });
+        document.getElementById('filterLicense').addEventListener('change', function() {
+            currentFilter.license = this.value;
+            renderCards();
+        });
+        document.getElementById('filterSort').addEventListener('change', function() {
+            currentFilter.sort = this.value;
+            renderCards();
+        });
+        document.getElementById('clearFiltersBtn').addEventListener('click', function() {
+            currentFilter = { search: '', category: '', license: '', sort: 'default' };
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterLicense').value = '';
+            document.getElementById('filterSort').value = 'default';
+            renderCards();
+        });
+
+        /* ==========================================
+           Initialisation
+        ========================================== */
+        (function init() {
+            // Restore dark mode
+            var savedDark = safeStorage.get('darkMode');
+            if (savedDark === 'true') {
+                document.body.classList.add('dark-mode');
+                updateToggleButton(true);
+            }
+            // Remove pending class now that body is set
+            document.documentElement.classList.remove('dark-mode-pending');
+
+            // Restore language
+            var savedLang = safeStorage.get('language') || 'en';
+            currentLang = savedLang;
+            document.getElementById('btnEn').classList.toggle('active', savedLang === 'en');
+            document.getElementById('btnDe').classList.toggle('active', savedLang === 'de');
+            applyTranslations(savedLang);
+            // renderCards is called inside applyTranslations
+
+            // Ripple effect on static buttons (modal buttons added dynamically below)
+            document.querySelectorAll('.compare-btn, .btn-clear-filter').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    var ripple = document.createElement('span');
+                    ripple.className = 'btn-ripple';
+                    var rect = btn.getBoundingClientRect();
+                    ripple.style.cssText = 'position:absolute;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.45);transform:translate(-50%,-50%) scale(0);animation:btn-ripple-anim .6s ease-out forwards;pointer-events:none;left:' + (e.clientX - rect.left) + 'px;top:' + (e.clientY - rect.top) + 'px';
+                    btn.appendChild(ripple);
+                    setTimeout(function() { ripple.remove(); }, 600);
+                });
+            });
+
+            // Hamburger menu
+            var hamburger = document.getElementById('navHamburger');
+            var navLinksEl = document.getElementById('navLinks');
+            if (hamburger && navLinksEl) {
+                hamburger.addEventListener('click', function() {
+                    var expanded = navLinksEl.classList.toggle('nav-links-open');
+                    hamburger.setAttribute('aria-expanded', expanded);
+                });
+                // Close menu when a nav link is clicked
+                navLinksEl.querySelectorAll('.nav-link').forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        navLinksEl.classList.remove('nav-links-open');
+                        hamburger.setAttribute('aria-expanded', 'false');
+                    });
+                });
+            }
+
+            // Compare bar
+            (function() {
+                var compareSet = [];
+                var bar = document.getElementById('compareBar');
+                var countEl = document.getElementById('compareCount');
+                var chipsEl = document.getElementById('compareBarBikes');
+                var compareNowBtn = document.getElementById('compareNowBtn');
+                var compareClearBtn = document.getElementById('compareClearBtn');
+
+                function updateBar() {
+                    countEl.textContent = compareSet.length;
+                    chipsEl.innerHTML = compareSet.map(function(id) {
+                        var bike = BIKES.find(function(b) { return b.id === id; });
+                        return bike ? '<span class="compare-chip">' + bike.icon + ' ' + bike.name.replace('Kawasaki ', '') + '</span>' : '';
+                    }).join('');
+                    compareNowBtn.disabled = compareSet.length < 2;
+                    if (compareSet.length > 0) { bar.hidden = false; } else { bar.hidden = true; }
+                }
+
+                // Expose to card clicks (long-press or dedicated button)
+                window.compareToggle = function(bikeId) {
+                    var idx = compareSet.indexOf(bikeId);
+                    if (idx !== -1) {
+                        compareSet.splice(idx, 1);
+                    } else if (compareSet.length < 2) {
+                        compareSet.push(bikeId);
+                    }
+                    updateBar();
+                };
+
+                compareClearBtn.addEventListener('click', function() {
+                    compareSet = [];
+                    updateBar();
+                });
+
+                compareNowBtn.addEventListener('click', function() {
+                    if (compareSet.length < 2) return;
+                    alert('Vergleich: ' + compareSet.map(function(id) {
+                        var b = BIKES.find(function(x) { return x.id === id; });
+                        return b ? b.name : id;
+                    }).join(' vs '));
+                });
+            })();
+
+            // Read URL param for category filter (from landing page tiles)
+            (function() {
+                var params = new URLSearchParams(window.location.search);
+                var cat = params.get('category');
+                if (cat) {
+                    currentFilter.category = cat;
+                    var sel = document.getElementById('filterCategory');
+                    if (sel) sel.value = cat;
+                }
+            })();
+        })();
+    </script>
+
+    <!-- SITE FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <span class="footer-logo">🏍️ Vrooooom</span>
+                <p class="footer-tagline">Fast, Classic &amp; Legendary</p>
+            </div>
+            <nav class="footer-nav" aria-label="Footer Navigation">
+                <a href="index.html" class="footer-link">Home</a>
+                <a href="motorcycles.html" class="footer-link">Motorcycles</a>
+                <a href="about.html" class="footer-link">About</a>
+                <a href="contact.html" class="footer-link">Contact</a>
+            </nav>
+            <p class="footer-copy">&copy; 2024 Vrooooom. Fan site &mdash; not affiliated with Kawasaki.</p>
+        </div>
+    </footer>
+</body>
+</html>

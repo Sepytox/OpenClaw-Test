@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin The Wheel — Kawasaki Random Bike</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="cyberpunk.css">
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --neon-cyan: #00eaff;
+            --neon-purple: #bf00ff;
+            --neon-orange: #ff6600;
+            --dark-bg: #0a0a0a;
+            --card-bg: #111;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        /* NAV */
+        .site-nav {
+            background: rgba(10,10,10,0.95);
+            border-bottom: 1px solid var(--neon-green);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 0 20px rgba(57,255,20,0.15);
+        }
+        .site-nav .brand {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            text-decoration: none;
+            text-shadow: 0 0 10px var(--neon-green);
+            margin-right: 1rem;
+        }
+        .site-nav a {
+            color: #aaa;
+            text-decoration: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: color 0.2s, background 0.2s;
+        }
+        .site-nav a:hover, .site-nav a.active {
+            color: var(--neon-green);
+            background: rgba(57,255,20,0.08);
+        }
+
+        /* PAGE */
+        .wheel-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1rem 4rem;
+        }
+        .wheel-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .wheel-header h1 {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            color: var(--neon-cyan);
+            text-shadow: 0 0 20px var(--neon-cyan), 0 0 40px var(--neon-cyan);
+            letter-spacing: 3px;
+            margin-bottom: 0.4rem;
+        }
+        .wheel-header p { color: #aaa; font-size: 1rem; }
+
+        /* LAYOUT */
+        .wheel-layout {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 2.5rem;
+            align-items: start;
+        }
+        @media (max-width: 750px) {
+            .wheel-layout { grid-template-columns: 1fr; }
+        }
+
+        /* WHEEL SECTION */
+        .wheel-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        /* CANVAS */
+        .wheel-canvas-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        #wheelCanvas {
+            border-radius: 50%;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(0,234,255,0.4));
+            touch-action: none;
+            max-width: 100%;
+        }
+        /* Pointer / arrow */
+        .wheel-pointer {
+            position: absolute;
+            top: 50%;
+            right: -28px;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 18px solid transparent;
+            border-bottom: 18px solid transparent;
+            border-right: 34px solid var(--neon-green);
+            filter: drop-shadow(0 0 8px var(--neon-green));
+            z-index: 10;
+        }
+        /* Center button */
+        .wheel-center-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #0a0a0a;
+            border: 3px solid var(--neon-green);
+            color: var(--neon-green);
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.2s;
+            box-shadow: 0 0 20px rgba(57,255,20,0.4), inset 0 0 20px rgba(0,0,0,0.5);
+            line-height: 1.2;
+            z-index: 20;
+        }
+        .wheel-center-btn:hover:not(:disabled) {
+            box-shadow: 0 0 35px rgba(57,255,20,0.8), inset 0 0 20px rgba(0,0,0,0.5);
+            color: #fff;
+            border-color: #fff;
+        }
+        .wheel-center-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* SPIN BUTTON */
+        .spin-btn {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--neon-green), #00e676);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 30px rgba(57,255,20,0.5), 0 4px 15px rgba(0,0,0,0.4);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .spin-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .spin-btn:hover:not(:disabled)::after { opacity: 1; }
+        .spin-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 0 50px rgba(57,255,20,0.8), 0 8px 20px rgba(0,0,0,0.4);
+        }
+        .spin-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .spin-hint {
+            font-size: 0.8rem;
+            color: #555;
+            text-align: center;
+        }
+
+        /* RESULT PANEL */
+        .result-panel {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 1.5rem;
+            min-width: 280px;
+            max-width: 340px;
+        }
+        @media (max-width: 750px) { .result-panel { max-width: 100%; } }
+
+        .result-panel h2 {
+            font-size: 1rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #222;
+            padding-bottom: 0.75rem;
+        }
+        .result-empty {
+            text-align: center;
+            padding: 2rem 0;
+            color: #444;
+            font-size: 2.5rem;
+        }
+        .result-bike-display { display: none; }
+        .result-bike-display.active { display: block; }
+
+        .result-icon-big {
+            font-size: 4rem;
+            display: block;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 0 10px var(--neon-cyan));
+            animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes pop-in {
+            from { transform: scale(0.3); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .result-bike-name-big {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+            text-align: center;
+            margin-bottom: 0.25rem;
+        }
+        .result-bike-sub-big {
+            font-size: 0.82rem;
+            color: #888;
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+        .result-spec-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+        .result-spec-item {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 0.5rem;
+            text-align: center;
+        }
+        .result-spec-val { font-size: 1rem; font-weight: 700; color: var(--neon-cyan); }
+        .result-spec-lbl { font-size: 0.68rem; color: #555; }
+
+        .result-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .result-btns a, .result-btns button {
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: block;
+        }
+        .btn-primary-sm {
+            background: var(--neon-green);
+            color: #000;
+            border: none;
+            box-shadow: 0 0 15px rgba(57,255,20,0.3);
+        }
+        .btn-primary-sm:hover { box-shadow: 0 0 25px rgba(57,255,20,0.6); }
+        .btn-outline-sm {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+        .btn-outline-sm:hover { background: rgba(0,234,255,0.08); }
+        .btn-ghost-sm {
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+        }
+        .btn-ghost-sm:hover { border-color: #666; color: #ccc; }
+
+        /* HISTORY */
+        .spin-history {
+            margin-top: 2rem;
+        }
+        .spin-history h3 {
+            font-size: 0.8rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.75rem;
+        }
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .history-chip {
+            background: #0d0d0d;
+            border: 1px solid #222;
+            border-radius: 20px;
+            padding: 0.3rem 0.7rem;
+            font-size: 0.78rem;
+            color: #777;
+        }
+
+        /* CONFETTI */
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+        .confetti-piece {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            pointer-events: none;
+            z-index: 9999;
+            animation: confetti-fall linear forwards;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="site-nav">
+    <a href="index.html" class="brand">🏍️ Kawasaki</a>
+    <a href="index.html">🏠 Home</a>
+    <a href="index.html#motorcycles">🏍️ Motorcycles</a>
+    <a href="soundcheck.html">🔊 SoundCheck</a>
+    <a href="race.html">🏁 Racing Sim</a>
+    <a href="shop.html">🔧 Aftermarket</a>
+    <a href="quiz.html">🎯 Quiz</a>
+    <a href="wheel.html" class="active">🎡 Wheel</a>
+</nav>
+
+<div class="wheel-page">
+    <div class="wheel-header">
+        <h1>🎡 SPIN THE WHEEL</h1>
+        <p>Lass das Rad entscheiden — welches Kawasaki gehört dir?</p>
+    </div>
+
+    <div class="wheel-layout">
+        <!-- WHEEL -->
+        <div class="wheel-section">
+            <div class="wheel-canvas-wrap">
+                <canvas id="wheelCanvas" width="480" height="480"></canvas>
+                <div class="wheel-pointer"></div>
+                <button class="wheel-center-btn" id="centerSpinBtn" onclick="spinWheel()">
+                    SPIN!<br>🏍️
+                </button>
+            </div>
+
+            <button class="spin-btn" id="spinBtn" onclick="spinWheel()">
+                🎰 SURPRISE ME!
+            </button>
+            <div class="spin-hint">Tippe auf das Rad oder den Button zum Drehen<br>Swipe auf dem Handy</div>
+        </div>
+
+        <!-- RESULT PANEL -->
+        <div class="result-panel">
+            <h2>🏍️ Dein Bike</h2>
+            <div class="result-empty" id="resultEmpty">❓<br><small style="font-size:0.9rem;color:#444">Drehe das Rad!</small></div>
+            <div class="result-bike-display" id="resultBike">
+                <span class="result-icon-big" id="resIcon">🏍️</span>
+                <div class="result-bike-name-big" id="resBikeName">—</div>
+                <div class="result-bike-sub-big" id="resBikeSub">—</div>
+                <div class="result-spec-grid" id="resSpecs"></div>
+                <div class="result-btns">
+                    <a href="index.html" class="btn-primary-sm" id="resBikeLink">🏍️ Zum Bike</a>
+                    <button class="btn-outline-sm" onclick="shareResult()">📤 Teilen</button>
+                    <button class="btn-ghost-sm" onclick="spinWheel()">🔄 Nochmal drehen</button>
+                </div>
+            </div>
+
+            <div class="spin-history" id="spinHistory" style="display:none;">
+                <h3>Spin-Verlauf</h3>
+                <div class="history-list" id="historyList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// BIKE DATA
+// ==========================================
+const WHEEL_BIKES = [
+    { key: 'h2',          name: 'Ninja H2',       icon: '⚡', color: '#0f2027', ps: 231, vmax: 300, accel: 3.0, weight: 216, price: 33000, sub: 'Supercharged Hypersport' },
+    { key: 'zx10r',       name: 'ZX-10R',         icon: '🏆', color: '#0b8043', ps: 203, vmax: 299, accel: 2.9, weight: 186, price: 20400, sub: 'Superbike-Weltmeister' },
+    { key: 'zh2',         name: 'Z H2',            icon: '👹', color: '#8b0000', ps: 200, vmax: 290, accel: 3.2, weight: 239, price: 22900, sub: 'Supercharged Naked' },
+    { key: 'h2sx',        name: 'H2 SX',           icon: '🚀', color: '#16222a', ps: 200, vmax: 299, accel: 3.1, weight: 240, price: 25500, sub: 'Supercharged Tourer' },
+    { key: 'hybrid1200',  name: 'Ninja Hybrid',    icon: '🆕', color: '#42275a', ps: 220, vmax: 280, accel: 3.2, weight: 227, price: 35000, sub: 'Hybrid 2026' },
+    { key: 'zx6r',        name: 'ZX-6R',           icon: '🔥', color: '#8b3a00', ps: 130, vmax: 260, accel: 3.5, weight: 193, price: 12900, sub: '636cc Supersport' },
+    { key: 'z900',        name: 'Z900',            icon: '💪', color: '#00c853', ps: 125, vmax: 248, accel: 3.4, weight: 193, price: 10200, sub: 'Aggressive Naked' },
+    { key: 'versys1000',  name: 'Versys 1000',     icon: '🌍', color: '#355c7d', ps: 120, vmax: 220, accel: 3.9, weight: 235, price: 13500, sub: 'Adventure Tourer' },
+    { key: 'ninja650',    name: 'Ninja 650',       icon: '🎯', color: '#243b55', ps: 68,  vmax: 200, accel: 4.5, weight: 172, price: 8200,  sub: 'Mid-Range Sportler' },
+    { key: 'z650',        name: 'Z650',            icon: '🟢', color: '#38ef7d', ps: 68,  vmax: 190, accel: 4.2, weight: 168, price: 7700,  sub: 'Einsteiger Naked' },
+    { key: 'ninja400',    name: 'Ninja 400',       icon: '🏍️', color: '#26d0ce', ps: 45,  vmax: 190, accel: 4.8, weight: 168, price: 6500,  sub: 'Anfänger Sportler' },
+    { key: 'zx25r',       name: 'ZX-25R',          icon: '🎆', color: '#1565c0', ps: 51,  vmax: 215, accel: 5.0, weight: 182, price: 9800,  sub: '250cc 4-Zylinder' },
+    { key: 'eliminator400', name: 'Eliminator',    icon: '😎', color: '#870000', ps: 45,  vmax: 165, accel: 5.5, weight: 176, price: 6700,  sub: 'Cruiser Klassiker' },
+    { key: 'w800',        name: 'W800',            icon: '🕰️', color: '#603813', ps: 48,  vmax: 170, accel: 6.0, weight: 202, price: 10500, sub: 'Retro Klassiker' },
+    { key: 'klx300',      name: 'KLX 300',         icon: '⛰️', color: '#2c3e50', ps: 27,  vmax: 137, accel: 7.5, weight: 137, price: 6200,  sub: 'Dual-Sport Enduro' },
+    { key: 'kx450',       name: 'KX 450',          icon: '🏟️', color: '#1b5e20', ps: 62,  vmax: 150, accel: 3.8, weight: 110, price: 9500,  sub: 'MX Rennmaschine' },
+    { key: 'samurai',     name: 'Samurai',         icon: '⏰', color: '#4b1248', ps: 31,  vmax: 160, accel: 0,   weight: 145, price: 8000,  sub: 'Klassiker 1960er' }
+];
+
+const NUM_BIKES = WHEEL_BIKES.length;
+const SLICE_ANGLE = (2 * Math.PI) / NUM_BIKES;
+
+// Cyberpunk color palette for segments
+const SEGMENT_COLORS = [
+    '#001a2c', '#0d2137', '#0a2a1a', '#1a0a2a', '#2a1a00',
+    '#001a1a', '#1a0000', '#001a2c', '#0a1a0a', '#2a0a1a',
+    '#001a2c', '#0d2137', '#0a2a1a', '#1a0a2a', '#2a1a00',
+    '#001a1a', '#1a0000'
+];
+const SEGMENT_BORDERS = [
+    '#00eaff', '#39ff14', '#bf00ff', '#ff6600', '#39ff14',
+    '#00eaff', '#ff6600', '#39ff14', '#bf00ff', '#00eaff',
+    '#39ff14', '#ff6600', '#00eaff', '#bf00ff', '#39ff14',
+    '#ff6600', '#00eaff'
+];
+
+// State
+let rotation = 0;
+let spinning = false;
+let spinHistory = [];
+let lastResult = null;
+
+// Canvas setup
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const SIZE = canvas.width;
+const cx = SIZE / 2;
+const cy = SIZE / 2;
+const radius = SIZE / 2 - 8;
+
+// Responsive canvas
+function resizeCanvas() {
+    const maxW = Math.min(480, window.innerWidth - 40);
+    canvas.style.width = maxW + 'px';
+    canvas.style.height = maxW + 'px';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function drawWheel() {
+    ctx.clearRect(0, 0, SIZE, SIZE);
+
+    // Outer ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius + 5, 0, Math.PI * 2);
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Draw segments
+    WHEEL_BIKES.forEach((bike, i) => {
+        const startAngle = rotation + i * SLICE_ANGLE;
+        const endAngle = startAngle + SLICE_ANGLE;
+        const midAngle = startAngle + SLICE_ANGLE / 2;
+
+        // Segment fill
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = SEGMENT_COLORS[i % SEGMENT_COLORS.length];
+        ctx.fill();
+
+        // Segment border
+        ctx.strokeStyle = SEGMENT_BORDERS[i % SEGMENT_BORDERS.length];
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Neon inner border
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.strokeStyle = SEGMENT_BORDERS[i % SEGMENT_BORDERS.length] + '44';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Icon
+        const iconR = radius * 0.72;
+        const ix = cx + Math.cos(midAngle) * iconR;
+        const iy = cy + Math.sin(midAngle) * iconR;
+        ctx.save();
+        ctx.translate(ix, iy);
+        ctx.rotate(midAngle + Math.PI / 2);
+        ctx.font = `${Math.floor(SIZE * 0.05)}px serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(bike.icon, 0, 0);
+        ctx.restore();
+
+        // Name text
+        const textR = radius * 0.46;
+        const tx = cx + Math.cos(midAngle) * textR;
+        const ty = cy + Math.sin(midAngle) * textR;
+        ctx.save();
+        ctx.translate(tx, ty);
+        ctx.rotate(midAngle + Math.PI / 2);
+        ctx.font = `bold ${Math.floor(SIZE * 0.024)}px 'Segoe UI', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = SEGMENT_BORDERS[i % SEGMENT_BORDERS.length];
+        ctx.shadowBlur = 6;
+        // Short name for wheel
+        const shortName = bike.name.length > 10 ? bike.name.slice(0, 10) : bike.name;
+        ctx.fillText(shortName, 0, 0);
+        ctx.restore();
+    });
+
+    // Center circle
+    const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 35);
+    gradient.addColorStop(0, '#1a1a1a');
+    gradient.addColorStop(1, '#000');
+    ctx.beginPath();
+    ctx.arc(cx, cy, 35, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+    ctx.strokeStyle = '#39ff14';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Outer glow ring
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(0,234,255,0.15)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+}
+
+drawWheel();
+
+// ==========================================
+// SPIN PHYSICS
+// ==========================================
+function spinWheel() {
+    if (spinning) return;
+    spinning = true;
+    document.getElementById('spinBtn').disabled = true;
+    document.getElementById('centerSpinBtn').disabled = true;
+
+    // Random target: many full rotations + random position
+    const fullRotations = (8 + Math.random() * 12) * Math.PI * 2;
+    const randomSegment = Math.floor(Math.random() * NUM_BIKES);
+    // Aim the pointer (which is at right = 0 radians) at the center of chosen segment
+    const targetAngle = -randomSegment * SLICE_ANGLE - SLICE_ANGLE / 2 - Math.random() * SLICE_ANGLE * 0.6 + 0.05;
+    const targetRotation = rotation + fullRotations + targetAngle;
+
+    const startTime = performance.now();
+    const duration = 4000 + Math.random() * 2000; // 4-6 seconds
+    const startRotation = rotation;
+
+    function easeOut(t) {
+        // Cubic ease-out with a bit of bounce
+        return 1 - Math.pow(1 - t, 3);
+    }
+
+    function animate(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOut(progress);
+
+        rotation = startRotation + (targetRotation - startRotation) * eased;
+        drawWheel();
+
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            spinning = false;
+            document.getElementById('spinBtn').disabled = false;
+            document.getElementById('centerSpinBtn').disabled = false;
+            determineResult();
+        }
+    }
+
+    requestAnimationFrame(animate);
+}
+
+function determineResult() {
+    // Pointer at right = 0 degrees. Normalize rotation.
+    let normalizedAngle = ((-rotation) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+    let segmentIndex = Math.floor(normalizedAngle / SLICE_ANGLE) % NUM_BIKES;
+    const bike = WHEEL_BIKES[segmentIndex];
+
+    lastResult = bike;
+    spinHistory.unshift(bike);
+    if (spinHistory.length > 8) spinHistory.pop();
+
+    showResult(bike);
+    launchConfetti();
+    updateHistory();
+}
+
+function showResult(bike) {
+    document.getElementById('resultEmpty').style.display = 'none';
+    const display = document.getElementById('resultBike');
+    display.className = 'result-bike-display active';
+
+    document.getElementById('resIcon').textContent = bike.icon;
+    document.getElementById('resBikeName').textContent = 'Kawasaki ' + bike.name;
+    document.getElementById('resBikeSub').textContent = bike.sub;
+
+    const specs = document.getElementById('resSpecs');
+    specs.innerHTML = [
+        { val: bike.ps + ' PS', lbl: 'Leistung' },
+        { val: bike.vmax + ' km/h', lbl: 'Vmax' },
+        { val: bike.accel > 0 ? bike.accel + 's' : '—', lbl: '0-100 km/h' },
+        { val: bike.weight + ' kg', lbl: 'Gewicht' }
+    ].map(s => `<div class="result-spec-item"><div class="result-spec-val">${s.val}</div><div class="result-spec-lbl">${s.lbl}</div></div>`).join('');
+}
+
+function updateHistory() {
+    const hist = document.getElementById('spinHistory');
+    const list = document.getElementById('historyList');
+    hist.style.display = 'block';
+    list.innerHTML = spinHistory.map(b =>
+        `<div class="history-chip">${b.icon} ${b.name}</div>`
+    ).join('');
+}
+
+// ==========================================
+// CONFETTI
+// ==========================================
+function launchConfetti() {
+    const colors = ['#39ff14', '#00eaff', '#bf00ff', '#ff6600', '#fff'];
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            const el = document.createElement('div');
+            el.className = 'confetti-piece';
+            el.style.cssText = `
+                left: ${Math.random() * 100}vw;
+                top: -10px;
+                background: ${colors[Math.floor(Math.random() * colors.length)]};
+                width: ${4 + Math.random() * 8}px;
+                height: ${4 + Math.random() * 8}px;
+                border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                animation-duration: ${1.5 + Math.random() * 2}s;
+                animation-delay: 0s;
+            `;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 4000);
+        }, i * 30);
+    }
+}
+
+// ==========================================
+// SHARE
+// ==========================================
+function shareResult() {
+    if (!lastResult) return;
+    const text = `🎡 Kawasaki Wheel-Ergebnis!\nIch habe **${lastResult.icon} Kawasaki ${lastResult.name}** gerollt!\n${lastResult.sub} — ${lastResult.ps} PS\nDrehe auch du: ${window.location.href}`;
+    if (navigator.share) {
+        navigator.share({ title: 'Kawasaki Wheel', text, url: window.location.href });
+    } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            const btns = document.querySelectorAll('.btn-outline-sm');
+            if (btns[0]) { btns[0].textContent = '✅ Kopiert!'; setTimeout(() => { btns[0].textContent = '📤 Teilen'; }, 2000); }
+        });
+    } else {
+        prompt('Kopiere:', text);
+    }
+}
+
+// ==========================================
+// TOUCH/SWIPE — Mobile-freundlich
+// ==========================================
+let touchStartX = null, touchStartY = null;
+canvas.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+}, { passive: true });
+canvas.addEventListener('touchend', e => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist > 15) spinWheel(); // Swipe erkannt → drehen!
+    else if (dist < 10) spinWheel(); // Tap erkannt → auch drehen!
+    touchStartX = touchStartY = null;
+}, { passive: true });
+canvas.addEventListener('click', () => { if (!spinning) spinWheel(); });
+
+// Spin-Button auch via Tastatur
+document.addEventListener('keydown', e => {
+    if ((e.code === 'Space' || e.code === 'Enter') && !spinning) {
+        e.preventDefault();
+        spinWheel();
+    }
+});
+</script>
+</body>
+</html>

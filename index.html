@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vrooooom - Kawasaki Motorräder | 19 Modelle</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="cyberpunk.css">
     <script>
         // Apply saved preference immediately to avoid flash of wrong theme
         (function() {
@@ -26,6 +27,11 @@
                 <button class="nav-btn nav-btn-active" data-target="bikesGrid">🏍️ Übersicht</button>
                 <button class="nav-btn" data-target="raceSection">🏁 Speed-Race</button>
                 <button class="nav-btn" data-target="adviceSection">🧭 Kaufberatung</button>
+                <a class="nav-btn" href="soundcheck.html" style="text-decoration:none;">🔊 SoundCheck</a>
+                <a class="nav-btn" href="race.html" style="text-decoration:none;">🏁 Racing Sim</a>
+                <a class="nav-btn" href="shop.html" style="text-decoration:none;">🔧 Aftermarket</a>
+                <a class="nav-btn" href="quiz.html" style="text-decoration:none;">🎯 Quiz</a>
+                <a class="nav-btn" href="wheel.html" style="text-decoration:none;">🎡 Wheel</a>
             </nav>
         </header>
         <main>
@@ -125,6 +131,17 @@
             <section class="closing">
                 <h2>Kawasaki - Tradition trifft Zukunft</h2>
                 <p>Von klassischen Modellen bis zu High-Tech Superbikes - Kawasaki bleibt eine der Top-Adressen für Motorrad-Enthusiasten weltweit.</p>
+                <div class="legendary-sounds-teaser" style="margin-top:24px;padding:20px 24px;border:1px solid #00FFE0;border-radius:10px;background:rgba(0,255,224,0.05);text-align:center;">
+                    <h3 style="font-family:'Orbitron',monospace;text-transform:uppercase;letter-spacing:0.1em;color:#00FFE0;text-shadow:0 0 10px #00FFE0;margin-bottom:8px;">🔊 LEGENDARY SOUNDS</h3>
+                    <p style="margin-bottom:16px;">Erlebe den unverwechselbaren Sound jedes Kawasaki-Modells — Stock, Racing und Custom Exhausts.</p>
+                    <a href="soundcheck.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;font-size:0.85em;">🔊 ZUM SOUNDCHECK →</a>
+                </div>
+                <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+                    <a href="quiz.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:rgba(57,255,20,0.1);border-color:#39ff14;color:#39ff14;">🎯 WELCHES KAWASAKI BIN ICH?</a>
+                    <a href="wheel.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:rgba(0,234,255,0.08);border-color:#00eaff;color:#00eaff;">🎡 SURPRISE ME!</a>
+                    <a href="race.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:rgba(255,102,0,0.08);border-color:#ff6600;color:#ff6600;">🏁 RACING SIM</a>
+                    <a href="shop.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:rgba(191,0,255,0.08);border-color:#bf00ff;color:#bf00ff;">🔧 AFTERMARKET SHOP</a>
+                </div>
             </section>
         </main>
         <footer><p>&copy; 2026 Vrooooom Kawasaki | Test Website</p></footer>
@@ -562,6 +579,10 @@
                         '<span class="card-hint">🔍 Specs anzeigen</span>' +
                         '<span class="card-rating-badge" id="ratingBadge-' + key + '" hidden></span>' +
                         '<span class="card-fav-badge" id="favBadge-' + key + '" hidden>❤️</span>' +
+                    '</div>' +
+                    '<div class="card-action-links" style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">' +
+                        '<a href="shop.html?bike=' + key + '" class="card-action-link" style="font-size:0.72rem;padding:3px 8px;border:1px solid #333;border-radius:4px;color:#bf00ff;background:rgba(191,0,255,0.06);text-decoration:none;" onclick="event.stopPropagation();">🔧 Customize</a>' +
+                        '<a href="race.html?bike=' + key + '" class="card-action-link" style="font-size:0.72rem;padding:3px 8px;border:1px solid #333;border-radius:4px;color:#ff6600;background:rgba(255,102,0,0.06);text-decoration:none;" onclick="event.stopPropagation();">🏁 Race Sim</a>' +
                     '</div>';
                 grid.appendChild(card);
             });
@@ -1468,5 +1489,6 @@
             Reviews.updateAllBadges();
         })();
     </script>
+    <script src="cyberpunk-animations.js"></script>
 </body>
 </html>

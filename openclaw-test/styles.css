@@ -35,7 +35,7 @@
     --badge-offroad-text: #e65c00;
     --badge-classic: #e8e8ff;
     --badge-classic-text: #283593;
-    --transition: 0.3s ease;
+    --transition: all 0.3s ease; /* Matches landing.css for consistency */
 }
 
 html.dark-mode-pending body { display: none; }
@@ -321,13 +321,31 @@ main {
 
 /* ==========================================
    BIKES GRID
+   Desktop: 3 columns | Tablet: 2 columns | Mobile: 1 column
    ========================================== */
 .facts {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    /* Desktop: 3 columns */
+    grid-template-columns: repeat(3, 1fr);
     gap: 22px;
     margin-bottom: 36px;
     animation: fadeInUp 0.6s ease both;
+}
+
+/* Tablet: 2 columns (768–1024px) */
+@media (max-width: 1024px) {
+    .facts {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+}
+
+/* Mobile: 1 column (<768px) */
+@media (max-width: 768px) {
+    .facts {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
 }
 
 /* ==========================================
@@ -342,6 +360,11 @@ main {
     box-shadow: var(--card-shadow);
     position: relative;
     overflow: hidden;
+    /* GPU acceleration for smooth 60fps animations */
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .fact-card::before {
@@ -359,12 +382,10 @@ main {
     cursor: pointer;
 }
 
-.fact-card-clickable:hover,
+/* Hover styles defined in HOVER ANIMATIONS section below (DRY) */
 .fact-card-clickable:focus {
-    transform: translateY(-6px);
-    box-shadow: var(--card-shadow-hover);
-    border-color: var(--primary);
-    outline: none;
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .fact-card-clickable:hover::before,
@@ -405,15 +426,17 @@ main {
     cursor: pointer;
     padding: 4px;
     border-radius: 50%;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), background 0.2s ease;
     flex-shrink: 0;
     line-height: 1;
 }
 
 .fav-btn:hover {
-    transform: scale(1.3);
+    transform: scale(1.30) rotate(10deg);
     background: rgba(244, 143, 177, 0.1);
 }
+
+.fav-btn:active { transform: scale(0.90); }
 
 .card-name {
     font-size: 1.15em;
@@ -453,7 +476,7 @@ main {
     color: var(--primary-dark);
     border-radius: 6px;
     padding: 4px 9px;
-    transition: background var(--transition), color var(--transition);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background var(--transition), color var(--transition);
 }
 
 .card-footer {
@@ -489,7 +512,12 @@ main {
     font-weight: 700;
     border-radius: 50px;
     padding: 3px 10px;
-    transition: background var(--transition), color var(--transition);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background var(--transition), color var(--transition);
+}
+
+.badge:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .badge-category {
@@ -636,6 +664,10 @@ footer {
     box-shadow: 0 25px 60px rgba(0,0,0,0.35);
     transform: scale(0.94) translateY(10px);
     transition: transform 0.22s ease, background var(--transition);
+    /* GPU acceleration */
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .modal-overlay.modal-visible .modal-content {
@@ -862,6 +894,140 @@ footer {
 }
 
 /* ==========================================
+   COMPARE BAR (Sticky)
+   ========================================== */
+.compare-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--header-bg);
+    border-top: 2px solid var(--primary);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    z-index: 900;
+    padding: 12px 20px;
+    transition: transform 0.3s ease, background var(--transition);
+}
+
+.compare-bar[hidden] { display: none; }
+
+.compare-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.compare-bar-label {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.compare-bar-bikes {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    flex-wrap: wrap;
+}
+
+.compare-chip {
+    background: var(--input-bg);
+    border: 1.5px solid var(--primary);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.compare-bar-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.compare-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 0.9em;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.compare-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.compare-btn:not(:disabled):hover {
+    background: var(--primary-dark);
+    transform: scale(1.04);
+}
+
+.compare-close-btn {
+    background: #fff0f0;
+    border: 2px solid #ffcdd2;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 1em;
+    font-weight: 700;
+    color: #e53935;
+    cursor: pointer;
+    min-height: 44px;
+    min-width: 44px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.compare-close-btn:hover {
+    background: #e53935;
+    color: white;
+    border-color: #e53935;
+    transform: scale(1.08);
+}
+
+/* Compare bar: compact on mobile */
+@media (max-width: 768px) {
+    .compare-bar {
+        padding: 8px 12px;
+    }
+
+    .compare-bar-inner {
+        gap: 8px;
+    }
+
+    .compare-bar-label {
+        font-size: 0.8em;
+    }
+
+    .compare-bar-bikes {
+        /* show chips compactly */
+        flex: 0 0 auto;
+    }
+
+    .compare-btn {
+        font-size: 0.82em;
+        padding: 6px 12px;
+    }
+
+    .compare-chip {
+        font-size: 0.75em;
+        padding: 3px 8px;
+    }
+}
+
+/* ==========================================
    ANIMATIONS
    ========================================== */
 @keyframes fadeInUp {
@@ -1012,23 +1178,37 @@ body.dark-mode .extended-specs summary:hover {
         padding: 24px 16px;
     }
 
-    .facts {
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-        gap: 16px;
-    }
+    /* .facts already handled above in responsive grid section */
 
     .filter-row {
-        gap: 8px;
+        flex-direction: column;
+        gap: 10px;
     }
 
     .filter-group {
         flex-direction: column;
         align-items: flex-start;
         gap: 3px;
+        width: 100%;
     }
 
     .filter-select {
         width: 100%;
+        /* min touch target height */
+        min-height: 44px;
+        font-size: 1rem;
+    }
+
+    .search-input {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .btn-clear-filter {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+        margin-left: 0;
     }
 
     .specs-grid {
@@ -1036,8 +1216,24 @@ body.dark-mode .extended-specs summary:hover {
     }
 
     .modal-content {
-        max-height: 95vh;
-        border-radius: 16px;
+        /* Fullscreen on mobile */
+        max-height: 100vh;
+        height: 100%;
+        max-width: 100vw;
+        border-radius: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal-overlay .modal-content {
+        border-radius: 16px 16px 0 0;
+        max-height: 92vh;
+        height: auto;
     }
 
     .modal-header {
@@ -1046,6 +1242,22 @@ body.dark-mode .extended-specs summary:hover {
 
     .modal-body {
         padding: 18px 16px 20px;
+    }
+
+    /* Close button: larger touch target on mobile */
+    .modal-close {
+        width: 44px;
+        height: 44px;
+        font-size: 1.5em;
+        top: 10px;
+        right: 12px;
+    }
+
+    /* Specs: horizontal scroll on small screens */
+    .extended-specs .specs-grid {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 }
 
@@ -1082,9 +1294,7 @@ body.dark-mode .extended-specs summary:hover {
         padding: 7px 14px;
     }
 
-    .facts {
-        grid-template-columns: 1fr;
-    }
+    /* .facts: 1 column handled in responsive grid above */
 
     .search-filter-section {
         padding: 16px;
@@ -1102,5 +1312,196 @@ body.dark-mode .extended-specs summary:hover {
         margin-left: 0;
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* ============================================================
+   HOVER ANIMATIONS — Landing Page Upgrade
+   Enhanced card hover, button press, link underline effects
+   ============================================================ */
+
+/* Stronger card hover: scale + shadow + border flash */
+.fact-card-clickable:hover,
+.fact-card-clickable:focus {
+    transform: translateY(-6px) scale(1.03) !important;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25) !important;
+    border-color: var(--accent, #43b89c) !important;
+    outline: none;
+}
+
+/* Icon bounce on card hover */
+.fact-card-clickable:hover .card-icon,
+.fact-card-clickable:focus .card-icon {
+    transform: scale(1.18) rotate(-5deg);
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+
+.card-icon { transition: transform 0.3s ease; }
+
+/* Card name color shift on hover */
+.fact-card-clickable:hover .card-name {
+    color: var(--accent, #43b89c);
+    transition: color 0.3s ease;
+}
+
+/* Quick-stat chips pop on hover */
+.fact-card-clickable:hover .qstat {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
+
+/* Fav button — transitions merged into base .fav-btn above */
+
+/* Badge hover — transitions merged into base .badge above */
+
+/* YouTube button — enhanced */
+.btn-youtube {
+    transition: all 0.3s ease !important;
+    position: relative;
+    overflow: hidden;
+}
+.btn-youtube::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.12);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.btn-youtube:hover::after { opacity: 1; }
+.btn-youtube:hover {
+    transform: translateY(-3px) scale(1.04) !important;
+    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.40) !important;
+}
+.btn-youtube:active { transform: scale(0.97) !important; }
+
+/* Modal fav button */
+.btn-modal-fav {
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1) !important;
+}
+.btn-modal-fav:hover {
+    transform: scale(1.06) !important;
+}
+.btn-modal-fav:active { transform: scale(0.95) !important; }
+
+/* Filter select focus */
+.filter-select {
+    transition: border-color 0.25s ease, box-shadow 0.25s ease !important;
+}
+.filter-select:focus {
+    box-shadow: 0 0 0 3px rgba(67, 184, 156, 0.20) !important;
+}
+
+/* Search input animated focus */
+.search-input {
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease !important;
+}
+.search-input:focus {
+    box-shadow: 0 0 0 4px rgba(67, 184, 156, 0.18) !important;
+    background: #fff !important;
+}
+body.dark-mode .search-input:focus {
+    background: #1e293b !important;
+}
+
+/* Lang buttons */
+.lang-btn {
+    transition: all 0.25s ease !important;
+}
+.lang-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* Theme toggle */
+.theme-toggle {
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1) !important;
+}
+.theme-toggle:hover {
+    transform: rotate(20deg) scale(1.15) !important;
+}
+
+/* Clear filter btn */
+.btn-clear-filter {
+    transition: all 0.3s ease !important;
+}
+.btn-clear-filter:hover {
+    transform: scale(1.04) !important;
+}
+
+/* Comparison panel close button */
+.compare-close-btn,
+.compare-btn {
+    transition: all 0.3s ease !important;
+}
+.compare-close-btn:hover { transform: scale(1.08); }
+.compare-btn:hover { transform: scale(1.04); }
+
+/* Modal overlay fade-in smoother */
+.modal-content {
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.25s ease !important;
+}
+
+/* ============================================================
+   TOUCH OPTIMISATIONS — motorcycles.css scope
+   ============================================================ */
+
+/* All interactive elements: min 44×44px touch target */
+.fact-card-clickable,
+.fav-btn,
+.btn-youtube,
+.btn-modal-fav,
+.filter-select,
+.search-input,
+.btn-clear-filter,
+.lang-btn,
+.theme-toggle {
+    min-height: 44px;
+}
+
+/* Font-size ≥ 16px on all inputs to prevent iOS zoom */
+.search-input,
+.filter-select {
+    font-size: max(1em, 16px);
+}
+
+/* Disable hover animations on touch-only devices */
+@media (hover: none) {
+    .fact-card-clickable:hover,
+    .fact-card-clickable:focus {
+        transform: none !important;
+        box-shadow: var(--card-shadow) !important;
+        border-color: var(--input-border) !important;
+    }
+
+    .fact-card-clickable:hover .card-icon,
+    .fact-card-clickable:focus .card-icon {
+        transform: none;
+    }
+
+    .fact-card-clickable:hover .card-name {
+        color: var(--text-primary);
+    }
+
+    .fact-card-clickable:hover .qstat {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .fav-btn:hover {
+        transform: none !important;
+    }
+
+    .btn-youtube:hover,
+    .btn-modal-fav:hover,
+    .lang-btn:hover,
+    .theme-toggle:hover,
+    .badge:hover,
+    .btn-clear-filter:hover {
+        transform: none !important;
+    }
+
+    .modal-close:hover {
+        transform: none;
     }
 }
