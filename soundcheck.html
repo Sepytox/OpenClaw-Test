@@ -5,65 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🔊 SoundCheck — Kawasaki Auspuff-Sounds | Vrooooom</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="cyberpunk.css">
   <link rel="stylesheet" href="soundcheck.css">
-  <link rel="stylesheet" href="themes.css">
-    <script>
-        (function() {
-            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
-            document.documentElement.setAttribute('data-theme', t);
-        })();
-    </script>
-  <script>
-    // Theme applied via themes.css + settings.js FOUC prevention block
-  </script>
-
-  <style>
-    /* === THEME OVERRIDE: Apply CSS variables to SoundCheck page === */
-    body { background: var(--bg-primary) !important; color: var(--text-primary) !important; }
-    header {
-        background: var(--card-bg) !important;
-        border-color: var(--card-border) !important;
-    }
-    .sc-bike-card, .sc-compare-slot, .sc-intro, .sc-compare-panel {
-        background: var(--card-bg) !important;
-        border-color: var(--card-border) !important;
-        box-shadow: var(--shadow-card) !important;
-    }
-    .nav-btn { border-color: var(--card-border) !important; color: var(--text-secondary) !important; }
-    .nav-btn-active, .nav-btn:hover {
-        border-color: var(--accent-primary) !important;
-        color: var(--accent-primary) !important;
-    }
-  </style>
+  <link rel="stylesheet" href="design.css">
 </head>
 <body>
   <!-- Scroll Progress Bar (injected by JS) -->
 
-  <div class="container">
-    <header>
-      <div class="header-top">
-        <h1 class="glitch-text" data-text="🔊 SOUNDCHECK">🔊 SOUNDCHECK</h1>
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
-      </div>
-      <p class="subtitle">MOTORRAD EXHAUST SOUNDS — STOCK • RACING • CUSTOM</p>
+  <nav class="site-nav">
+    <a class="brand" href="index.html">🏍️ Vrooooom</a>
+    <a href="index.html">Übersicht</a>
+    <a href="soundcheck.html" class="active">SoundCheck</a>
+    <a href="race.html">Racing Sim</a>
+    <a href="shop.html">Aftermarket</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="wheel.html">Wheel</a>
+  </nav>
 
-      <nav class="main-nav" aria-label="Navigation">
-        <a class="nav-btn" href="index.html" style="text-decoration:none;">🏍️ Übersicht</a>
-        <a class="nav-btn nav-btn-active" href="soundcheck.html" style="text-decoration:none;">🔊 SoundCheck</a>
-        <a class="nav-btn" href="race.html" style="text-decoration:none;">🏁 Racing Sim</a>
-        <a class="nav-btn" href="shop.html" style="text-decoration:none;">🔧 Aftermarket</a>
-        <a class="nav-btn" href="quiz.html" style="text-decoration:none;">🎯 Quiz</a>
-        <a class="nav-btn" href="wheel.html" style="text-decoration:none;">🎡 Wheel</a>
-      </nav>
-    </header>
+  <div class="container">
 
     <main id="soundcheckMain">
 
       <!-- ===== INTRO SECTION ===== -->
       <section class="sc-intro sr-fade">
         <div class="sc-intro-text">
-          <h2 class="cyberpunk-heading">EXHAUST INTELLIGENCE</h2>
+          <h2>EXHAUST INTELLIGENCE</h2>
           <p>Erlebe den Sound jedes Kawasaki-Modells mit drei verschiedenen Auspuff-Konfigurationen.
              Vergleiche Stock OEM gegen Racing und Custom Exhausts — höre den Unterschied.</p>
           <div class="sc-legend">
@@ -101,7 +66,7 @@
       <!-- ===== MOTORCYCLE SOUND CARDS ===== -->
       <section class="sc-bikes-section" aria-label="Motorrad Sound-Liste">
         <div class="sc-section-header sr-up">
-          <h2 class="cyberpunk-heading">EXHAUST DATABASE</h2>
+          <h2>EXHAUST DATABASE</h2>
           <div class="sc-filter-row">
             <button class="sc-filter-btn active" data-filter="all">ALL</button>
             <button class="sc-filter-btn" data-filter="sport">SPORT</button>
@@ -117,7 +82,7 @@
 
       <!-- ===== FAVORITES SECTION ===== -->
       <section class="sc-favorites-section sr-fade" id="scFavoritesSection" hidden>
-        <h2 class="cyberpunk-heading">❤️ FAVORITE SOUNDS</h2>
+        <h2>❤️ FAVORITE SOUNDS</h2>
         <div class="sc-favorites-grid" id="scFavoritesGrid"></div>
         <button class="btn-clear-favorites" id="btnClearFavorites">🗑 ALLE LÖSCHEN</button>
       </section>
@@ -134,7 +99,7 @@
     <div class="sc-player-modal-content">
       <div class="sc-player-header">
         <div>
-          <h3 id="playerModalTitle" class="cyberpunk-heading">—</h3>
+          <h3 id="playerModalTitle">—</h3>
           <p id="playerModalSubtitle" class="sc-player-subtitle">—</p>
         </div>
         <button class="sc-player-close" id="scPlayerClose" aria-label="Player schließen">✕</button>
@@ -210,32 +175,7 @@
   </div>
   <div class="sc-modal-overlay" id="scModalOverlay" hidden></div>
 
-  <script src="cyberpunk-animations.js"></script>
   <script src="soundcheck.js"></script>
-  <script>
-    // Theme toggle sync
-    (function() {
-      var toggle = document.getElementById('themeToggle');
-      if (!toggle) return;
-      var isDark = localStorage.getItem('darkMode') === 'true';
-      if (isDark) document.body.classList.add('dark-mode');
-
-      toggle.addEventListener('click', function() {
-        var dark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('darkMode', dark ? 'true' : 'false');
-      });
-    })();
-
-    // Apply pending classes
-    (function() {
-      if (document.documentElement.classList.contains('dark-mode-pending')) {
-        document.body.classList.add('dark-mode');
-      }
-      if (document.documentElement.classList.contains('cyberpunk-pending')) {
-        document.body.classList.add('cyberpunk-mode');
-      }
-    })();
-  </script>
   <script src="settings.js"></script>
 </body>
 </html>
