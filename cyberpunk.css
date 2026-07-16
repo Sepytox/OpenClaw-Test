@@ -877,3 +877,61 @@ body.cyberpunk-mode .float-card:nth-child(3n) {
 .scroll-progress-bar {
   animation: progressPulse 1.5s ease-in-out infinite;
 }
+
+/* ============================================================
+   25. FUTURISTIC TYPOGRAPHY — ORBITRON ALL-CAPS SYSTEM
+   ============================================================ */
+
+body.cyberpunk-mode {
+  font-family: var(--cp-font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* All headings: Orbitron + ALL CAPS + letter spacing */
+body.cyberpunk-mode h1 {
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 900;
+  color: var(--cp-cyan);
+  text-shadow: 0 0 20px var(--cp-cyan), 0 0 40px var(--cp-magenta);
+}
+
+body.cyberpunk-mode h2 {
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--cp-cyan);
+  text-shadow: var(--cp-glow-cyan);
+}
+
+body.cyberpunk-mode h3 {
+  font-family: var(--cp-font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: var(--cp-magenta);
+  text-shadow: 0 0 10px var(--cp-magenta);
+}
+
+/* Code/monospace elements */
+body.cyberpunk-mode code,
+body.cyberpunk-mode pre,
+body.cyberpunk-mode .spec-value,
+body.cyberpunk-mode .price {
+  font-family: var(--cp-font-mono);
+  color: var(--cp-yellow);
+  text-shadow: var(--cp-glow-yellow);
+}
+
+/* Labels uppercase */
+body.cyberpunk-mode .spec-label,
+body.cyberpunk-mode .stat-label,
+body.cyberpunk-mode label {
+  font-family: var(--cp-font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75em;
+  color: var(--cp-text-muted);
+}
