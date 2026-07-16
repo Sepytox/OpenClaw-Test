@@ -803,10 +803,16 @@ function stepPhysics(state, bike, dt, manual) {
         state.reached100 = true;
     }
 
-    // Splits
+    // Intermediate splits (50m, 100m, 200m, 400m, 1000m)
     state.splitTargets.forEach(target => {
         if (!state.splits[target] && state.dist >= target) {
             state.splits[target] = state.time;
+            // Flash visual on split
+            const tbody = document.getElementById('splitsBody');
+            if (tbody) {
+                tbody.style.boxShadow = '0 0 20px rgba(57,255,20,0.4)';
+                setTimeout(() => { if(tbody) tbody.style.boxShadow = ''; }, 500);
+            }
         }
     });
 
