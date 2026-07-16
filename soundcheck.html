@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔊 SoundCheck — Kawasaki Auspuff-Sounds | Vrooooom</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="cyberpunk.css">
+  <link rel="stylesheet" href="soundcheck.css">
+  <script>
+    // Apply saved preferences immediately to avoid flash
+    (function() {
+      if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark-mode-pending');
+      }
+      if (localStorage.getItem('cyberpunkMode') === 'true') {
+        document.documentElement.classList.add('cyberpunk-pending');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <!-- Scroll Progress Bar (injected by JS) -->
+
+  <div class="container">
+    <header>
+      <div class="header-top">
+        <h1 class="glitch-text" data-text="🔊 SOUNDCHECK">🔊 SOUNDCHECK</h1>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
+      </div>
+      <p class="subtitle">MOTORRAD EXHAUST SOUNDS — STOCK • RACING • CUSTOM</p>
+
+      <nav class="main-nav" aria-label="Navigation">
+        <a class="nav-btn" href="index.html" style="text-decoration:none;">🏍️ Übersicht</a>
+        <a class="nav-btn nav-btn-active" href="soundcheck.html" style="text-decoration:none;">🔊 SoundCheck</a>
+      </nav>
+    </header>
+
+    <main id="soundcheckMain">
+
+      <!-- ===== INTRO SECTION ===== -->
+      <section class="sc-intro sr-fade">
+        <div class="sc-intro-text">
+          <h2 class="cyberpunk-heading">EXHAUST INTELLIGENCE</h2>
+          <p>Erlebe den Sound jedes Kawasaki-Modells mit drei verschiedenen Auspuff-Konfigurationen.
+             Vergleiche Stock OEM gegen Racing und Custom Exhausts — höre den Unterschied.</p>
+          <div class="sc-legend">
+            <span class="sc-badge badge-stock">STOCK</span>
+            <span class="sc-badge badge-racing">RACING</span>
+            <span class="sc-badge badge-custom">CUSTOM</span>
+          </div>
+        </div>
+        <div class="sc-visualizer-demo" aria-hidden="true">
+          <canvas id="demoVisualizer" width="300" height="80"></canvas>
+          <p class="sc-demo-label">AUDIO SPECTRUM PREVIEW</p>
+        </div>
+      </section>
+
+      <!-- ===== COMPARE A/B PANEL ===== -->
+      <section class="sc-compare-panel sr-up" id="comparePanel" aria-label="A/B Compare">
+        <h3>⚖️ A/B COMPARE</h3>
+        <div class="sc-compare-slots">
+          <div class="sc-compare-slot" id="slotA">
+            <span class="slot-label">SOUND A</span>
+            <span class="slot-info" id="slotAInfo">— Leer —</span>
+            <div class="mini-eq" id="slotAEq" aria-hidden="true"></div>
+          </div>
+          <div class="sc-vs">VS</div>
+          <div class="sc-compare-slot" id="slotB">
+            <span class="slot-label">SOUND B</span>
+            <span class="slot-info" id="slotBInfo">— Leer —</span>
+            <div class="mini-eq" id="slotBEq" aria-hidden="true"></div>
+          </div>
+        </div>
+        <button class="btn-ab-play" id="btnABPlay" disabled aria-label="A/B Compare abspielen">▶ COMPARE STARTEN</button>
+        <button class="btn-ab-clear" id="btnABClear" aria-label="A/B Compare zurücksetzen">✕ RESET</button>
+      </section>
+
+      <!-- ===== MOTORCYCLE SOUND CARDS ===== -->
+      <section class="sc-bikes-section" aria-label="Motorrad Sound-Liste">
+        <div class="sc-section-header sr-up">
+          <h2 class="cyberpunk-heading">EXHAUST DATABASE</h2>
+          <div class="sc-filter-row">
+            <button class="sc-filter-btn active" data-filter="all">ALL</button>
+            <button class="sc-filter-btn" data-filter="sport">SPORT</button>
+            <button class="sc-filter-btn" data-filter="naked">NAKED</button>
+            <button class="sc-filter-btn" data-filter="classic">CLASSIC</button>
+          </div>
+        </div>
+
+        <div class="sc-bikes-grid" id="scBikesGrid">
+          <!-- Cards injected by JS -->
+        </div>
+      </section>
+
+      <!-- ===== FAVORITES SECTION ===== -->
+      <section class="sc-favorites-section sr-fade" id="scFavoritesSection" hidden>
+        <h2 class="cyberpunk-heading">❤️ FAVORITE SOUNDS</h2>
+        <div class="sc-favorites-grid" id="scFavoritesGrid"></div>
+        <button class="btn-clear-favorites" id="btnClearFavorites">🗑 ALLE LÖSCHEN</button>
+      </section>
+
+    </main>
+
+    <footer>
+      <p>🔊 SoundCheck — Teil von <a href="index.html">Vrooooom Kawasaki</a> | Audio: Synthesized via Web Audio API</p>
+    </footer>
+  </div>
+
+  <!-- ===== AUDIO PLAYER MODAL ===== -->
+  <div class="sc-player-modal" id="scPlayerModal" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle" hidden>
+    <div class="sc-player-modal-content">
+      <div class="sc-player-header">
+        <div>
+          <h3 id="playerModalTitle" class="cyberpunk-heading">—</h3>
+          <p id="playerModalSubtitle" class="sc-player-subtitle">—</p>
+        </div>
+        <button class="sc-player-close" id="scPlayerClose" aria-label="Player schließen">✕</button>
+      </div>
+
+      <!-- Spectrum Analyzer Canvas -->
+      <canvas id="spectrumCanvas" class="sc-spectrum" width="600" height="120" aria-label="Frequenz-Spektrum"></canvas>
+
+      <!-- Waveform Canvas -->
+      <canvas id="waveformCanvas" class="sc-waveform" width="600" height="60" aria-label="Audio-Wellenform"></canvas>
+
+      <!-- Timeline -->
+      <div class="sc-timeline-wrap">
+        <span class="sc-time" id="playerCurrentTime">0:00</span>
+        <input type="range" class="sc-timeline" id="playerTimeline" min="0" max="100" value="0" step="0.1" aria-label="Playback Position">
+        <span class="sc-time" id="playerDuration">0:00</span>
+      </div>
+
+      <!-- Controls -->
+      <div class="sc-controls">
+        <button class="sc-ctrl-btn" id="btnRewind" aria-label="5 Sekunden zurück">⏮ 5s</button>
+        <button class="sc-ctrl-btn sc-ctrl-play" id="btnPlayPause" aria-label="Play/Pause">▶</button>
+        <button class="sc-ctrl-btn" id="btnForward" aria-label="5 Sekunden vor">5s ⏭</button>
+        <div class="sc-volume-wrap">
+          <span class="sc-volume-icon" aria-hidden="true">🔊</span>
+          <input type="range" class="sc-volume" id="playerVolume" min="0" max="1" step="0.01" value="0.8" aria-label="Lautstärke">
+        </div>
+      </div>
+
+      <!-- Metadata row -->
+      <div class="sc-metadata-row" id="playerMetadata">
+        <div class="sc-meta-item">
+          <span class="sc-meta-label">EXHAUST</span>
+          <span class="sc-meta-value" id="metaExhaust">—</span>
+        </div>
+        <div class="sc-meta-item">
+          <span class="sc-meta-label">LAUTSTÄRKE</span>
+          <span class="sc-meta-value" id="metaDb">—</span>
+        </div>
+        <div class="sc-meta-item">
+          <span class="sc-meta-label">PS</span>
+          <span class="sc-meta-value" id="metaPs">—</span>
+        </div>
+        <div class="sc-meta-item">
+          <span class="sc-meta-label">CHARAKTER</span>
+          <span class="sc-meta-value" id="metaChar">—</span>
+        </div>
+      </div>
+
+      <!-- Exhaust variant tabs -->
+      <div class="sc-exhaust-tabs" id="exhaustTabs" aria-label="Auspuff auswählen">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- Equalizer bars -->
+      <div class="sc-equalizer" id="playerEqualizer" aria-label="Equalizer" aria-hidden="true">
+        <div class="eq-label">EQUALIZER</div>
+        <div class="eq-bars" id="eqBars">
+          <!-- 20 bars injected by JS -->
+        </div>
+      </div>
+
+      <!-- Favorite + Compare buttons -->
+      <div class="sc-player-actions">
+        <button class="sc-btn-favorite" id="btnFavorite" aria-label="Als Favorit speichern">♡ FAVORITE</button>
+        <button class="sc-btn-compare-a" id="btnSetA" aria-label="Als Sound A setzen">A SETZEN</button>
+        <button class="sc-btn-compare-b" id="btnSetB" aria-label="Als Sound B setzen">B SETZEN</button>
+      </div>
+    </div>
+  </div>
+  <div class="sc-modal-overlay" id="scModalOverlay" hidden></div>
+
+  <script src="cyberpunk-animations.js"></script>
+  <script src="soundcheck.js"></script>
+  <script>
+    // Theme toggle sync
+    (function() {
+      var toggle = document.getElementById('themeToggle');
+      if (!toggle) return;
+      var isDark = localStorage.getItem('darkMode') === 'true';
+      if (isDark) document.body.classList.add('dark-mode');
+
+      toggle.addEventListener('click', function() {
+        var dark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', dark ? 'true' : 'false');
+      });
+    })();
+
+    // Apply pending classes
+    (function() {
+      if (document.documentElement.classList.contains('dark-mode-pending')) {
+        document.body.classList.add('dark-mode');
+      }
+      if (document.documentElement.classList.contains('cyberpunk-pending')) {
+        document.body.classList.add('cyberpunk-mode');
+      }
+    })();
+  </script>
+</body>
+</html>
