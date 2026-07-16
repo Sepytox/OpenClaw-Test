@@ -1,6 +1,7 @@
 /**
- * SOUNDCHECK — Motorrad Exhaust Audio Engine
- * Web Audio API synthesized sounds (no external files needed)
+ * SOUNDCHECK — Motorrad Exhaust Audio Engine v2
+ * Real MP3 audio files (royalty-free) with Web Audio API synthesis fallback
+ * Audio path: /audio/{bike-id}-{type}.mp3  (e.g. z900-stock.mp3)
  * Waveform Visualizer + Spectrum Analyzer + Equalizer
  * Favorites (localStorage) + A/B Compare
  */
@@ -125,6 +126,156 @@
     return audioCtx;
   }
 
+
+  /* ============================================================
+     REAL AUDIO FILE ENGINE
+     Loads MP3 files from /audio/ folder
+     Falls back to Web Audio synthesis if file not available
+     ============================================================ */
+
+  // Audio file definitions per bike
+  var AUDIO_FILES = {
+    zx6r:      { stock: 'audio/zx6r-stock.mp3',      racing: 'audio/zx6r-racing.mp3',      custom: 'audio/zx6r-custom.mp3'      },
+    z900:      { stock: 'audio/z900-stock.mp3',       racing: 'audio/z900-racing.mp3',       custom: 'audio/z900-custom.mp3'       },
+    zx10r:     { stock: 'audio/zx10r-stock.mp3',      racing: 'audio/zx10r-racing.mp3',      custom: 'audio/zx10r-custom.mp3'      },
+    z650rs:    { stock: 'audio/z650rs-stock.mp3',     racing: 'audio/z650rs-racing.mp3',     custom: 'audio/z650rs-custom.mp3'     },
+    versys650: { stock: 'audio/versys650-stock.mp3',  racing: 'audio/versys650-racing.mp3',  custom: 'audio/versys650-custom.mp3'  },
+    h2r:       { stock: 'audio/h2r-stock.mp3',        racing: 'audio/h2r-racing.mp3',        custom: 'audio/h2r-custom.mp3'        },
+  };
+
+  // Audio buffer cache
+  var audioBufferCache = {};
+  var loadingState = {};  // 'loading' | 'loaded' | 'error'
+
+  /**
+   * Load a real audio file and return decoded AudioBuffer
+   * Returns a Promise that resolves with AudioBuffer or rejects on error
+   */
+  function loadAudioFile(url) {
+    if (audioBufferCache[url]) {
+      return Promise.resolve(audioBufferCache[url]);
+    }
+    if (loadingState[url] === 'error') {
+      return Promise.reject(new Error('Previously failed: ' + url));
+    }
+
+    loadingState[url] = 'loading';
+    return fetch(url)
+      .then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status + ' for ' + url);
+        return response.arrayBuffer();
+      })
+      .then(function(arrayBuffer) {
+        return new Promise(function(resolve, reject) {
+          ensureAudioCtx().decodeAudioData(arrayBuffer, resolve, reject);
+        });
+      })
+      .then(function(buffer) {
+        audioBufferCache[url] = buffer;
+        loadingState[url] = 'loaded';
+        return buffer;
+      })
+      .catch(function(err) {
+        loadingState[url] = 'error';
+        console.warn('[SoundCheck] Audio load failed for', url, '— using synthesis fallback:', err.message);
+        throw err;
+      });
+  }
+
+  // Current HTML5 Audio element (for real files)
+  var currentAudioEl = null;
+  var useRealAudio = false;
+
+  /**
+   * Play a real audio file using HTML5 Audio + Web Audio API analyser
+   */
+  function playRealAudio(url, exhaust) {
+    stopCurrentPlayback();
+    ensureAudioCtx();
+
+    // Show loading state
+    setPlayerLoadingState(true, 'Lade Audio...');
+
+    var audioEl = new Audio();
+    audioEl.crossOrigin = 'anonymous';
+    audioEl.loop = true; // loop the audio file
+    audioEl.volume = gainNode.gain.value;
+
+    // Connect to analyser via MediaElementSourceNode
+    var sourceNode;
+    try {
+      sourceNode = audioCtx.createMediaElementSource(audioEl);
+      sourceNode.connect(analyser);
+      analyser.connect(audioCtx.destination);
+    } catch(e) {
+      // MediaElementSource already created for this element
+      console.warn('[SoundCheck] MediaElementSource error:', e);
+    }
+
+    audioEl.addEventListener('canplaythrough', function onCanPlay() {
+      audioEl.removeEventListener('canplaythrough', onCanPlay);
+      setPlayerLoadingState(false);
+      audioEl.play().catch(function(err) {
+        console.warn('[SoundCheck] Play error:', err);
+        setPlayerLoadingState(false, '⚠️ Klicken zum Abspielen');
+        // On autoplay block: show fallback synthesis
+        fallbackToSynthesis(exhaust);
+      });
+      isPlaying = true;
+      useRealAudio = true;
+      currentAudioEl = audioEl;
+      updatePlayButton(true);
+      startVisualizers();
+      playbackStartTime = Date.now();
+      playbackDuration = audioEl.duration || 30;
+    }, { once: true });
+
+    audioEl.addEventListener('error', function() {
+      setPlayerLoadingState(false, '⚠️ Sound nicht verfügbar');
+      console.warn('[SoundCheck] Audio error for', url, '— falling back to synthesis');
+      fallbackToSynthesis(exhaust);
+    }, { once: true });
+
+    audioEl.src = url;
+    audioEl.load();
+  }
+
+  function fallbackToSynthesis(exhaust) {
+    setPlayerLoadingState(false);
+    playbackDuration = 8;
+    playbackStartTime = Date.now();
+    currentSource = synthesizeExhaust(exhaust, playbackDuration);
+    isPlaying = true;
+    useRealAudio = false;
+    updatePlayButton(true);
+    updatePlayerUI(currentBike, currentExhaustIdx);
+    startVisualizers();
+    playbackEndTimeout = setTimeout(function() {
+      stopCurrentPlayback();
+      updateTimeDisplay(0);
+    }, playbackDuration * 1000 + 200);
+  }
+
+  function setPlayerLoadingState(loading, message) {
+    var playBtn = document.getElementById('btnPlayPause');
+    if (!playBtn) return;
+    if (loading) {
+      playBtn.textContent = '⏳';
+      playBtn.disabled = true;
+    } else {
+      playBtn.disabled = false;
+      if (message) {
+        // Show error/info message briefly
+        var infoEl = document.getElementById('scPlayerStatus');
+        if (infoEl) {
+          infoEl.textContent = message;
+          setTimeout(function() { if(infoEl) infoEl.textContent = ''; }, 3000);
+        }
+      }
+    }
+  }
+
+
   /**
    * Synthesize motorcycle exhaust sound using Web Audio API
    * Creates a rich engine-like sound using multiple oscillators + noise
@@ -241,6 +392,17 @@
   var playbackDuration = 8;
 
   function stopCurrentPlayback() {
+    // Stop HTML5 real audio element
+    if (currentAudioEl) {
+      try {
+        currentAudioEl.pause();
+        currentAudioEl.src = '';
+      } catch(e) {}
+      currentAudioEl = null;
+    }
+    useRealAudio = false;
+
+    // Stop Web Audio synthesis nodes
     if (currentSource) {
       try {
         if (currentSource.nodes) {
@@ -262,6 +424,7 @@
     }
     isPlaying = false;
     updatePlayButton(false);
+    setPlayerLoadingState(false);
   }
 
   function playExhaust(bike, exhaustIdx) {
@@ -269,21 +432,18 @@
     currentBike = bike;
     currentExhaustIdx = exhaustIdx;
     var exhaust = bike.exhausts[exhaustIdx];
-
-    playbackDuration = 8;
-    playbackStartTime = Date.now();
-
-    currentSource = synthesizeExhaust(exhaust, playbackDuration);
-    isPlaying = true;
-    updatePlayButton(true);
     updatePlayerUI(bike, exhaustIdx);
-    startVisualizers();
 
-    // Auto-stop
-    playbackEndTimeout = setTimeout(function() {
-      stopCurrentPlayback();
-      updateTimeDisplay(0);
-    }, playbackDuration * 1000 + 200);
+    // Try real audio file first
+    var audioFiles = AUDIO_FILES[bike.id];
+    var audioUrl = audioFiles && audioFiles[exhaust.type];
+
+    if (audioUrl) {
+      playRealAudio(audioUrl, exhaust);
+    } else {
+      // Fallback: Web Audio synthesis
+      fallbackToSynthesis(exhaust);
+    }
   }
 
   function togglePlayPause() {
