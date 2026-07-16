@@ -1152,6 +1152,18 @@
             applyTranslations(savedLang);
             // renderCards is called inside applyTranslations
 
+            // Ripple effect on static buttons (modal buttons added dynamically below)
+            document.querySelectorAll('.compare-btn, .btn-clear-filter').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    var ripple = document.createElement('span');
+                    ripple.className = 'btn-ripple';
+                    var rect = btn.getBoundingClientRect();
+                    ripple.style.cssText = 'position:absolute;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.45);transform:translate(-50%,-50%) scale(0);animation:btn-ripple-anim .6s ease-out forwards;pointer-events:none;left:' + (e.clientX - rect.left) + 'px;top:' + (e.clientY - rect.top) + 'px';
+                    btn.appendChild(ripple);
+                    setTimeout(function() { ripple.remove(); }, 600);
+                });
+            });
+
             // Hamburger menu
             var hamburger = document.getElementById('navHamburger');
             var navLinksEl = document.getElementById('navLinks');

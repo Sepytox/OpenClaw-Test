@@ -171,6 +171,21 @@
             if (btn) btn.textContent = isDark ? '☀️' : '🌓';
         }
 
+        // Ripple effect on .btn elements
+        document.querySelectorAll('.btn, .btn-submit').forEach(function(btn) {
+            btn.style.position = 'relative';
+            btn.style.overflow = 'hidden';
+            btn.addEventListener('click', function(e) {
+                var ripple = document.createElement('span');
+                ripple.className = 'btn-ripple';
+                var rect = btn.getBoundingClientRect();
+                ripple.style.left = (e.clientX - rect.left) + 'px';
+                ripple.style.top = (e.clientY - rect.top) + 'px';
+                btn.appendChild(ripple);
+                setTimeout(function() { ripple.remove(); }, 600);
+            });
+        });
+
         // Hamburger
         var hamburger = document.getElementById('navHamburger');
         var navLinks = document.getElementById('navLinks');
