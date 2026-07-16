@@ -463,6 +463,67 @@
         .question-card { animation: slide-in 0.3s ease; }
         .result-card { animation: slide-in 0.4s ease; }
     
+
+    /* === Aftermarket Card Layout: Quiz === */
+    .quiz-wrapper { padding: 1.5rem 1rem 4rem !important; }
+    .quiz-header { margin-bottom: 1.75rem !important; }
+    .quiz-header h1 { font-size: clamp(1.6rem, 5vw, 2rem) !important; margin-bottom: 0.4rem !important; }
+    .question-card {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 14px !important;
+        padding: 1.5rem !important;
+        box-shadow: var(--shadow-card) !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .option-btn, .answer-btn {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 0.85rem 1.1rem !important;
+        border-radius: 10px !important;
+        border: 1.5px solid var(--card-border) !important;
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        font-size: 0.875rem !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    .option-btn:hover, .answer-btn:hover {
+        border-color: var(--accent-primary) !important;
+        background: var(--card-bg-hover) !important;
+    }
+    .option-btn.selected, .answer-btn.selected, .option-btn.chosen {
+        border-color: var(--accent-primary) !important;
+        background: var(--card-bg-hover) !important;
+        box-shadow: var(--glow-primary) !important;
+    }
+    .result-card {
+        background: var(--card-bg) !important;
+        border: 2px solid var(--accent-primary) !important;
+        border-radius: 16px !important;
+        padding: 1.75rem !important;
+        box-shadow: var(--shadow-hover) !important;
+        text-align: center;
+    }
+    .quiz-nav-btn, .quiz-btn, .btn-next, .btn-submit {
+        background: var(--btn-primary-bg) !important;
+        color: var(--btn-primary-text) !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.75rem 1.75rem !important;
+        font-size: 0.9rem !important;
+        font-weight: 700 !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        letter-spacing: 0.02em;
+    }
+    .quiz-nav-btn:hover, .quiz-btn:hover, .btn-next:hover {
+        background: var(--btn-primary-hover) !important;
+        transform: translateY(-1px);
+    }
+
     /* === THEME OVERRIDE: Apply CSS variables to page-specific elements === */
     body { background-color: var(--bg-primary) !important; color: var(--text-primary) !important; }
     .site-nav {
