@@ -7,17 +7,35 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="cyberpunk.css">
   <link rel="stylesheet" href="soundcheck.css">
+  <link rel="stylesheet" href="themes.css">
+    <script>
+        (function() {
+            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
   <script>
-    // Apply saved preferences immediately to avoid flash
-    (function() {
-      if (localStorage.getItem('darkMode') === 'true') {
-        document.documentElement.classList.add('dark-mode-pending');
-      }
-      if (localStorage.getItem('cyberpunkMode') === 'true') {
-        document.documentElement.classList.add('cyberpunk-pending');
-      }
-    })();
+    // Theme applied via themes.css + settings.js FOUC prevention block
   </script>
+
+  <style>
+    /* === THEME OVERRIDE: Apply CSS variables to SoundCheck page === */
+    body { background: var(--bg-primary) !important; color: var(--text-primary) !important; }
+    header {
+        background: var(--card-bg) !important;
+        border-color: var(--card-border) !important;
+    }
+    .sc-bike-card, .sc-compare-slot, .sc-intro, .sc-compare-panel {
+        background: var(--card-bg) !important;
+        border-color: var(--card-border) !important;
+        box-shadow: var(--shadow-card) !important;
+    }
+    .nav-btn { border-color: var(--card-border) !important; color: var(--text-secondary) !important; }
+    .nav-btn-active, .nav-btn:hover {
+        border-color: var(--accent-primary) !important;
+        color: var(--accent-primary) !important;
+    }
+  </style>
 </head>
 <body>
   <!-- Scroll Progress Bar (injected by JS) -->
@@ -146,6 +164,9 @@
         </div>
       </div>
 
+      <!-- Audio Status -->
+      <div id="scPlayerStatus" style="font-size:0.78rem;color:var(--text-muted);text-align:center;min-height:1.2em;margin-top:0.25rem;transition:opacity 0.3s;"></div>
+
       <!-- Metadata row -->
       <div class="sc-metadata-row" id="playerMetadata">
         <div class="sc-meta-item">
@@ -215,5 +236,6 @@
       }
     })();
   </script>
+  <script src="settings.js"></script>
 </body>
 </html>

@@ -6,6 +6,13 @@
     <title>Which Kawasaki Are You? — Quiz</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="cyberpunk.css">
+    <link rel="stylesheet" href="themes.css">
+    <script>
+        (function() {
+            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <style>
         :root {
             --neon-green: #39ff14;
@@ -455,13 +462,122 @@
         }
         .question-card { animation: slide-in 0.3s ease; }
         .result-card { animation: slide-in 0.4s ease; }
+    
+
+    /* === Aftermarket Card Layout: Quiz === */
+    .quiz-wrapper { padding: 1.5rem 1rem 4rem !important; }
+    .quiz-header { margin-bottom: 1.75rem !important; }
+    .quiz-header h1 { font-size: clamp(1.6rem, 5vw, 2rem) !important; margin-bottom: 0.4rem !important; }
+    .question-card {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 14px !important;
+        padding: 1.5rem !important;
+        box-shadow: var(--shadow-card) !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .option-btn, .answer-btn {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 0.85rem 1.1rem !important;
+        border-radius: 10px !important;
+        border: 1.5px solid var(--card-border) !important;
+        background: var(--card-bg) !important;
+        color: var(--text-primary) !important;
+        font-size: 0.875rem !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+    }
+    .option-btn:hover, .answer-btn:hover {
+        border-color: var(--accent-primary) !important;
+        background: var(--card-bg-hover) !important;
+    }
+    .option-btn.selected, .answer-btn.selected, .option-btn.chosen {
+        border-color: var(--accent-primary) !important;
+        background: var(--card-bg-hover) !important;
+        box-shadow: var(--glow-primary) !important;
+    }
+    .result-card {
+        background: var(--card-bg) !important;
+        border: 2px solid var(--accent-primary) !important;
+        border-radius: 16px !important;
+        padding: 1.75rem !important;
+        box-shadow: var(--shadow-hover) !important;
+        text-align: center;
+    }
+    .quiz-nav-btn, .quiz-btn, .btn-next, .btn-submit {
+        background: var(--btn-primary-bg) !important;
+        color: var(--btn-primary-text) !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.75rem 1.75rem !important;
+        font-size: 0.9rem !important;
+        font-weight: 700 !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        letter-spacing: 0.02em;
+    }
+    .quiz-nav-btn:hover, .quiz-btn:hover, .btn-next:hover {
+        background: var(--btn-primary-hover) !important;
+        transform: translateY(-1px);
+    }
+
+    /* === THEME OVERRIDE: Apply CSS variables to page-specific elements === */
+    body { background-color: var(--bg-primary) !important; color: var(--text-primary) !important; }
+    .site-nav {
+        background: var(--nav-bg) !important;
+        border-bottom: 1px solid var(--nav-border) !important;
+        box-shadow: var(--nav-shadow) !important;
+    }
+    .site-nav .brand { color: var(--accent-primary) !important; text-shadow: var(--glow-text) !important; }
+    .site-nav a { color: var(--text-muted) !important; }
+    .site-nav a:hover, .site-nav a.active {
+        color: var(--accent-primary) !important;
+        background: rgba(0,255,224,0.08) !important;
+    }
+    [data-theme="light-professional"] .site-nav a:hover,
+    [data-theme="light-professional"] .site-nav a.active {
+        background: rgba(0,61,122,0.08) !important;
+    }
+    [data-theme="dark-professional"] .site-nav a:hover,
+    [data-theme="dark-professional"] .site-nav a.active {
+        background: rgba(59,130,246,0.1) !important;
+    }
+    /* Card backgrounds */
+    .part-card, .quiz-card, .option-card, .result-card, .bike-card,
+    .wheel-result, .dashboard-panel, .sc-bike-card, .bike-selector-section,
+    .race-result, .race-stats-panel, .shop-hero, .live-specs-bar,
+    .cart-panel, .category-panel {
+        background: var(--card-bg) !important;
+        border-color: var(--card-border) !important;
+        color: var(--text-primary) !important;
+        box-shadow: var(--shadow-card) !important;
+    }
+    /* Input/select elements */
+    select, input[type="text"], input[type="search"], input[type="email"], textarea {
+        background: var(--input-bg) !important;
+        border-color: var(--input-border) !important;
+        color: var(--input-text) !important;
+    }
+    select:focus, input:focus, textarea:focus {
+        border-color: var(--input-border-focus) !important;
+        box-shadow: var(--focus-ring) !important;
+    }
+    /* Text colors */
+    h1, h2, h3 { color: var(--text-primary) !important; }
+    p, li, span, label { color: inherit; }
+    /* Accent elements stay accent */
+    .neon-text, [class*="neon-"] { color: var(--accent-primary) !important; }
+
     </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav class="site-nav">
-    <a href="index.html" class="brand">🏍️ Kawasaki</a>
+<nav class="site-nav vc-nav">
+    <a href="index.html" class="brand vc-nav-brand">🏍️ Kawasaki</a>
     <a href="index.html">🏠 Home</a>
     <a href="index.html#motorcycles">🏍️ Motorcycles</a>
     <a href="soundcheck.html">🔊 SoundCheck</a>
@@ -882,5 +998,6 @@ function restartQuiz() {
     document.getElementById('introSection').style.display = 'block';
 }
 </script>
+    <script src="settings.js"></script>
 </body>
 </html>

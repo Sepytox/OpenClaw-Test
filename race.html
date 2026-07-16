@@ -6,6 +6,13 @@
     <title>Kawasaki Racing Simulator — Realistic Physics</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="cyberpunk.css">
+    <link rel="stylesheet" href="themes.css">
+    <script>
+        (function() {
+            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <style>
         :root {
             --neon-green: #39ff14;
@@ -393,6 +400,111 @@
         .racing-bg.moving {
             animation: grid-scroll 0.3s linear infinite;
         }
+    
+
+    /* === Aftermarket Card Layout: Racing Sim === */
+    .race-page { padding: 1.5rem 1rem 4rem !important; }
+    .page-title h1 { font-size: clamp(1.6rem, 5vw, 2rem) !important; }
+    .dashboard-panel, .race-panel, .stat-panel, .race-stats-panel,
+    .bike-selector-section, .race-track-section .track-wrap {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 14px !important;
+        padding: 1.25rem !important;
+        box-shadow: var(--shadow-card) !important;
+    }
+    .gauge-container, .gauge-wrap { 
+        background: var(--bg-tertiary) !important;
+        border-radius: 10px !important;
+    }
+    .mode-chip, .toggle-btn {
+        background: transparent !important;
+        border-color: var(--card-border) !important;
+        color: var(--text-secondary) !important;
+        border-radius: 8px !important;
+        padding: 0.4rem 0.85rem !important;
+        font-size: 0.8rem !important;
+    }
+    .mode-chip.active, .toggle-btn.on {
+        border-color: var(--accent-primary) !important;
+        color: var(--accent-primary) !important;
+        background: rgba(0,255,224,0.06) !important;
+    }
+    [data-theme="dark-professional"] .mode-chip.active,
+    [data-theme="dark-professional"] .toggle-btn.on {
+        border-color: #3B82F6 !important;
+        color: #93C5FD !important;
+        background: rgba(59,130,246,0.08) !important;
+    }
+    [data-theme="light-professional"] .mode-chip.active,
+    [data-theme="light-professional"] .toggle-btn.on {
+        border-color: #003D7A !important;
+        color: #003D7A !important;
+        background: rgba(0,61,122,0.08) !important;
+    }
+    .race-start-btn, .btn-race-start, .big-btn {
+        background: var(--btn-primary-bg) !important;
+        color: var(--btn-primary-text) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 0.85rem 2rem !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .race-start-btn:hover, .big-btn:hover {
+        background: var(--btn-primary-hover) !important;
+        transform: translateY(-1px);
+    }
+
+    /* === THEME OVERRIDE: Apply CSS variables to page-specific elements === */
+    body { background-color: var(--bg-primary) !important; color: var(--text-primary) !important; }
+    .site-nav {
+        background: var(--nav-bg) !important;
+        border-bottom: 1px solid var(--nav-border) !important;
+        box-shadow: var(--nav-shadow) !important;
+    }
+    .site-nav .brand { color: var(--accent-primary) !important; text-shadow: var(--glow-text) !important; }
+    .site-nav a { color: var(--text-muted) !important; }
+    .site-nav a:hover, .site-nav a.active {
+        color: var(--accent-primary) !important;
+        background: rgba(0,255,224,0.08) !important;
+    }
+    [data-theme="light-professional"] .site-nav a:hover,
+    [data-theme="light-professional"] .site-nav a.active {
+        background: rgba(0,61,122,0.08) !important;
+    }
+    [data-theme="dark-professional"] .site-nav a:hover,
+    [data-theme="dark-professional"] .site-nav a.active {
+        background: rgba(59,130,246,0.1) !important;
+    }
+    /* Card backgrounds */
+    .part-card, .quiz-card, .option-card, .result-card, .bike-card,
+    .wheel-result, .dashboard-panel, .sc-bike-card, .bike-selector-section,
+    .race-result, .race-stats-panel, .shop-hero, .live-specs-bar,
+    .cart-panel, .category-panel {
+        background: var(--card-bg) !important;
+        border-color: var(--card-border) !important;
+        color: var(--text-primary) !important;
+        box-shadow: var(--shadow-card) !important;
+    }
+    /* Input/select elements */
+    select, input[type="text"], input[type="search"], input[type="email"], textarea {
+        background: var(--input-bg) !important;
+        border-color: var(--input-border) !important;
+        color: var(--input-text) !important;
+    }
+    select:focus, input:focus, textarea:focus {
+        border-color: var(--input-border-focus) !important;
+        box-shadow: var(--focus-ring) !important;
+    }
+    /* Text colors */
+    h1, h2, h3 { color: var(--text-primary) !important; }
+    p, li, span, label { color: inherit; }
+    /* Accent elements stay accent */
+    .neon-text, [class*="neon-"] { color: var(--accent-primary) !important; }
+
     </style>
 </head>
 <body class="racing-bg" id="bodyEl">
@@ -400,8 +512,8 @@
 <div class="shift-warning" id="shiftWarning">⚠️ SHIFT UP!</div>
 
 <!-- NAV -->
-<nav class="site-nav">
-    <a href="index.html" class="brand">🏍️ Kawasaki</a>
+<nav class="site-nav vc-nav">
+    <a href="index.html" class="brand vc-nav-brand">🏍️ Kawasaki</a>
     <a href="index.html">🏠 Home</a>
     <a href="index.html#motorcycles">🏍️ Motorcycles</a>
     <a href="soundcheck.html">🔊 SoundCheck</a>
@@ -1315,5 +1427,6 @@ document.addEventListener('keydown', e => {
 // Initial draw
 drawTrack();
 </script>
+    <script src="settings.js"></script>
 </body>
 </html>

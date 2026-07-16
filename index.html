@@ -6,6 +6,13 @@
     <title>Vrooooom - Kawasaki Motorräder | 19 Modelle</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="cyberpunk.css">
+    <link rel="stylesheet" href="themes.css">
+    <script>
+        (function() {
+            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <script>
         // Apply saved preference immediately to avoid flash of wrong theme
         (function() {
@@ -1490,5 +1497,6 @@
         })();
     </script>
     <script src="cyberpunk-animations.js"></script>
+    <script src="settings.js"></script>
 </body>
 </html>
