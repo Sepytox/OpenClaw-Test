@@ -19,6 +19,9 @@
     </script>
 </head>
 <body>
+    <!-- SKIP TO MAIN CONTENT (Keyboard Accessibility) -->
+    <a href="#main-content" class="skip-to-main">Skip to main content</a>
+
     <!-- TOP NAVBAR -->
     <nav class="top-navbar" aria-label="Main Navigation">
         <div class="nav-brand">
@@ -44,7 +47,7 @@
     </section>
 
     <!-- MAIN CONTENT -->
-    <div class="page-content">
+    <div class="page-content" id="main-content">
         <div class="contact-grid">
 
             <!-- Contact Info -->
@@ -123,7 +126,10 @@
                                 placeholder="Max"
                                 required
                                 autocomplete="given-name"
+                                aria-required="true"
+                                aria-describedby="firstNameHint"
                             >
+                            <span id="firstNameHint" class="sr-only">Bitte Vornamen eingeben</span>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="lastName">Last Name</label>
@@ -148,7 +154,10 @@
                             placeholder="max@example.de"
                             required
                             autocomplete="email"
+                            aria-required="true"
+                            aria-describedby="emailHint"
                         >
+                        <span id="emailHint" class="sr-only">Bitte gültige E-Mail-Adresse eingeben</span>
                     </div>
 
                     <div class="form-group">
@@ -171,6 +180,7 @@
                             class="form-textarea"
                             placeholder="Tell us what's on your mind…"
                             required
+                            aria-required="true"
                         ></textarea>
                     </div>
 
