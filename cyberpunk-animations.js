@@ -315,3 +315,30 @@
   }
 
 })();
+
+/* ============================================================
+   PARALLAX + STAGGERED FADE-IN
+   Added as additional scroll animation feature
+   ============================================================ */
+(function() {
+  'use strict';
+
+  // Staggered fade already handled in initScrollReveal above.
+  // This adds parallax depth layers using data-parallax attribute.
+
+  function initParallaxElements() {
+    window.addEventListener('scroll', function() {
+      var scrollY = window.scrollY;
+      document.querySelectorAll('[data-parallax]').forEach(function(el) {
+        var speed = parseFloat(el.getAttribute('data-parallax')) || 0.3;
+        el.style.transform = 'translateY(' + (scrollY * speed) + 'px)';
+      });
+    }, { passive: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initParallaxElements);
+  } else {
+    initParallaxElements();
+  }
+})();
