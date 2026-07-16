@@ -789,7 +789,7 @@ function prevQuestion() {
 }
 
 function calculateResult() {
-    // Sum up scores
+    // Sum up scores from all 10 questions
     scores = { sport: 0, supersport: 0, naked: 0, cruiser: 0, enduro: 0, tourer: 0 };
     QUESTIONS.forEach((q, qi) => {
         if (answers[qi] !== null) {
@@ -798,15 +798,16 @@ function calculateResult() {
         }
     });
 
-    // Sort categories by score
+    // Sort categories by score (highest first)
     const sorted = Object.keys(scores).sort((a, b) => scores[b] - scores[a]);
     const topCat = sorted[0];
-    const maxScore = scores[sorted[0]];
 
-    // Calculate percentages (max possible per category per question is 5, 10 questions = 50 max)
+    // Calculate percentages relative to max possible (5 pts * 10 questions = 50 max)
     const maxPossible = 50;
     const pcts = {};
-    sorted.forEach(cat => { pcts[cat] = Math.round((scores[cat] / maxPossible) * 100); });
+    sorted.forEach(cat => {
+        pcts[cat] = Math.round((scores[cat] / maxPossible) * 100);
+    });
 
     // Show results
     showResults(topCat, sorted, pcts);
