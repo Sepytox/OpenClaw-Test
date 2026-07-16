@@ -226,6 +226,10 @@
     audioEl.addEventListener('canplaythrough', function onCanPlay() {
       audioEl.removeEventListener('canplaythrough', onCanPlay);
       setPlayerLoadingState(false);
+      // Adjust playback rate for variant character
+      // Stock: 1.0x (normal), Racing: 1.15x (higher pitch/revs), Custom: 1.08x (mid-aggressive)
+      var rateMap = { stock: 1.0, racing: 1.15, custom: 1.08 };
+      audioEl.playbackRate = rateMap[exhaust.type] || 1.0;
       audioEl.play().catch(function(err) {
         console.warn('[SoundCheck] Play error:', err);
         setPlayerLoadingState(false, '⚠️ Klicken zum Abspielen');
