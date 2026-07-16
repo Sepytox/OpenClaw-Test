@@ -401,6 +401,63 @@
             animation: grid-scroll 0.3s linear infinite;
         }
     
+
+    /* === Aftermarket Card Layout: Racing Sim === */
+    .race-page { padding: 1.5rem 1rem 4rem !important; }
+    .page-title h1 { font-size: clamp(1.6rem, 5vw, 2rem) !important; }
+    .dashboard-panel, .race-panel, .stat-panel, .race-stats-panel,
+    .bike-selector-section, .race-track-section .track-wrap {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 14px !important;
+        padding: 1.25rem !important;
+        box-shadow: var(--shadow-card) !important;
+    }
+    .gauge-container, .gauge-wrap { 
+        background: var(--bg-tertiary) !important;
+        border-radius: 10px !important;
+    }
+    .mode-chip, .toggle-btn {
+        background: transparent !important;
+        border-color: var(--card-border) !important;
+        color: var(--text-secondary) !important;
+        border-radius: 8px !important;
+        padding: 0.4rem 0.85rem !important;
+        font-size: 0.8rem !important;
+    }
+    .mode-chip.active, .toggle-btn.on {
+        border-color: var(--accent-primary) !important;
+        color: var(--accent-primary) !important;
+        background: rgba(0,255,224,0.06) !important;
+    }
+    [data-theme="dark-professional"] .mode-chip.active,
+    [data-theme="dark-professional"] .toggle-btn.on {
+        border-color: #3B82F6 !important;
+        color: #93C5FD !important;
+        background: rgba(59,130,246,0.08) !important;
+    }
+    [data-theme="light-professional"] .mode-chip.active,
+    [data-theme="light-professional"] .toggle-btn.on {
+        border-color: #003D7A !important;
+        color: #003D7A !important;
+        background: rgba(0,61,122,0.08) !important;
+    }
+    .race-start-btn, .btn-race-start, .big-btn {
+        background: var(--btn-primary-bg) !important;
+        color: var(--btn-primary-text) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 0.85rem 2rem !important;
+        font-weight: 800 !important;
+        font-size: 0.95rem !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .race-start-btn:hover, .big-btn:hover {
+        background: var(--btn-primary-hover) !important;
+        transform: translateY(-1px);
+    }
+
     /* === THEME OVERRIDE: Apply CSS variables to page-specific elements === */
     body { background-color: var(--bg-primary) !important; color: var(--text-primary) !important; }
     .site-nav {
