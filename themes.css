@@ -1264,23 +1264,7 @@ button:disabled {
    DISABLED STATES + FOCUS RINGS
    ============================================================ */
 
-/* Keyboard focus ring - always visible (all themes) */
-:focus-visible {
-  outline: 2px solid var(--accent-warm);
-  outline-offset: 2px;
-}
-
-[data-theme="light-professional"] :focus-visible {
-  outline-color: #D35400;
-}
-
-[data-theme="neon-dark"] :focus-visible {
-  outline-color: #FF6B35;
-}
-
-[data-theme="dark-professional"] :focus-visible {
-  outline-color: #F59E0B;
-}
+/* Focus ring handled above in accessibility section — no duplicate needed */
 
 /* ============================================================
    AESTHETIC SIMPLIFICATION
