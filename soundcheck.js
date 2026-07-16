@@ -1,0 +1,1082 @@
+/**
+ * SOUNDCHECK — Motorrad Exhaust Audio Engine
+ * Web Audio API synthesized sounds (no external files needed)
+ * Waveform Visualizer + Spectrum Analyzer + Equalizer
+ * Favorites (localStorage) + A/B Compare
+ */
+
+(function() {
+  'use strict';
+
+  /* ============================================================
+     MOTORCYCLE DATA
+     ============================================================ */
+  var BIKES = [
+    {
+      id: 'zx6r',
+      name: 'Kawasaki Ninja ZX-6R',
+      icon: '🏎️',
+      ps: 130,
+      category: 'sport',
+      exhausts: [
+        { type: 'stock',  label: 'Stock (OEM)',         brand: 'Kawasaki Standard', db: 95,  character: 'Smooth & Revvy',  freq: 180, harmonics: 3 },
+        { type: 'racing', label: 'Racing (Akrapovic)',   brand: 'Akrapovic Racing', db: 102, character: 'Aggressive',      freq: 190, harmonics: 4 },
+        { type: 'custom', label: 'Custom (Yoshimura)',   brand: 'Yoshimura RS9',   db: 105, character: 'Raw Scream',       freq: 175, harmonics: 5 }
+      ]
+    },
+    {
+      id: 'z900',
+      name: 'Kawasaki Z900',
+      icon: '⚡',
+      ps: 125,
+      category: 'naked',
+      exhausts: [
+        { type: 'stock',  label: 'Stock (OEM)',         brand: 'Kawasaki Standard', db: 92,  character: 'Deep Growl',      freq: 140, harmonics: 3 },
+        { type: 'racing', label: 'Racing (Arrow)',       brand: 'Arrow Race-Tech',  db: 99,  character: 'Thunderous',      freq: 150, harmonics: 4 },
+        { type: 'custom', label: 'Custom (SC-Project)', brand: 'SC-Project CR-T',  db: 104, character: 'Bark & Bite',     freq: 145, harmonics: 5 }
+      ]
+    },
+    {
+      id: 'zx10r',
+      name: 'Kawasaki Ninja ZX-10R',
+      icon: '🚀',
+      ps: 210,
+      category: 'sport',
+      exhausts: [
+        { type: 'stock',  label: 'Stock (OEM)',         brand: 'Kawasaki Standard', db: 98,  character: 'Refined Power',   freq: 200, harmonics: 3 },
+        { type: 'racing', label: 'Racing (Akrapovic)',   brand: 'Akrapovic Evo',    db: 106, character: 'Screaming Banshee', freq: 210, harmonics: 5 },
+        { type: 'custom', label: 'Custom (Termignoni)', brand: 'Termignoni D112',  db: 108, character: 'Track Monster',   freq: 205, harmonics: 6 }
+      ]
+    },
+    {
+      id: 'z650rs',
+      name: 'Kawasaki Z650RS',
+      icon: '🎸',
+      ps: 68,
+      category: 'classic',
+      exhausts: [
+        { type: 'stock',  label: 'Stock (OEM)',         brand: 'Kawasaki Standard', db: 88,  character: 'Retro Burble',    freq: 110, harmonics: 2 },
+        { type: 'racing', label: 'Racing (Vance & Hines)', brand: 'V&H Twin Slash', db: 95, character: 'Classic Roar',    freq: 115, harmonics: 3 },
+        { type: 'custom', label: 'Custom (Cobra)',       brand: 'Cobra Speedster',  db: 99,  character: 'Vintage Thunder', freq: 108, harmonics: 4 }
+      ]
+    },
+    {
+      id: 'versys650',
+      name: 'Kawasaki Versys 650',
+      icon: '🗺️',
+      ps: 69,
+      category: 'naked',
+      exhausts: [
+        { type: 'stock',  label: 'Stock (OEM)',         brand: 'Kawasaki Standard', db: 86,  character: 'Touring Rumble',  freq: 120, harmonics: 2 },
+        { type: 'racing', label: 'Racing (Remus)',       brand: 'Remus Hexacone',   db: 93,  character: 'Adventure Call',  freq: 125, harmonics: 3 },
+        { type: 'custom', label: 'Custom (Two Brothers)', brand: '2Bro S1R',        db: 97,  character: 'Trail Bark',      freq: 118, harmonics: 4 }
+      ]
+    },
+    {
+      id: 'h2r',
+      name: 'Kawasaki Ninja H2R',
+      icon: '💥',
+      ps: 310,
+      category: 'sport',
+      exhausts: [
+        { type: 'stock',  label: 'Stock (OEM)',         brand: 'Kawasaki Standard', db: 101, character: 'Supercharged Howl', freq: 240, harmonics: 4 },
+        { type: 'racing', label: 'Racing (Akrapovic)',   brand: 'Akrapovic Evolution', db: 110, character: 'Banshee Wail', freq: 250, harmonics: 6 },
+        { type: 'custom', label: 'Custom (Graves)',      brand: 'Graves Titanium',  db: 112, character: 'Jet Engine',      freq: 245, harmonics: 7 }
+      ]
+    }
+  ];
+
+  /* ============================================================
+     WEB AUDIO ENGINE
+     ============================================================ */
+  var AudioCtx = window.AudioContext || window.webkitAudioContext;
+  var audioCtx = null;
+  var analyser = null;
+  var gainNode = null;
+  var currentSource = null;
+  var isPlaying = false;
+  var currentBike = null;
+  var currentExhaustIdx = 0;
+
+  // Animation frame ID for visualizers
+  var animFrameId = null;
+
+  // A/B compare state
+  var compareA = null;
+  var compareB = null;
+  var compareSourceA = null;
+  var compareSourceB = null;
+  var isABPlaying = false;
+
+  function ensureAudioCtx() {
+    if (!audioCtx) {
+      audioCtx = new AudioCtx();
+      gainNode = audioCtx.createGain();
+      gainNode.gain.value = 0.8;
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      analyser.smoothingTimeConstant = 0.8;
+      gainNode.connect(analyser);
+      analyser.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  /**
+   * Synthesize motorcycle exhaust sound using Web Audio API
+   * Creates a rich engine-like sound using multiple oscillators + noise
+   */
+  function synthesizeExhaust(exhaust, duration) {
+    ensureAudioCtx();
+    duration = duration || 8;
+
+    var startTime = audioCtx.currentTime;
+    var endTime = startTime + duration;
+    var nodes = [];
+
+    // --- Engine fundamental tone (oscillator at base freq) ---
+    var osc1 = audioCtx.createOscillator();
+    osc1.type = 'sawtooth';
+    osc1.frequency.value = exhaust.freq;
+    var env1 = audioCtx.createGain();
+    env1.gain.setValueAtTime(0, startTime);
+    env1.gain.linearRampToValueAtTime(0.35, startTime + 0.15);
+    env1.gain.setValueAtTime(0.35, endTime - 0.2);
+    env1.gain.linearRampToValueAtTime(0, endTime);
+
+    // --- Rev-up automation ---
+    osc1.frequency.setValueAtTime(exhaust.freq * 0.8, startTime);
+    osc1.frequency.linearRampToValueAtTime(exhaust.freq * 1.6, startTime + 1.5);
+    osc1.frequency.linearRampToValueAtTime(exhaust.freq * 1.2, startTime + 2.5);
+    osc1.frequency.setValueAtTime(exhaust.freq * 1.2, endTime - 1);
+    osc1.frequency.linearRampToValueAtTime(exhaust.freq * 0.7, endTime);
+
+    osc1.connect(env1);
+    env1.connect(gainNode);
+    osc1.start(startTime);
+    osc1.stop(endTime);
+    nodes.push(osc1, env1);
+
+    // --- Harmonic overtones ---
+    for (var h = 2; h <= Math.min(exhaust.harmonics, 6); h++) {
+      var oscH = audioCtx.createOscillator();
+      oscH.type = h % 2 === 0 ? 'square' : 'sawtooth';
+      oscH.frequency.value = exhaust.freq * h;
+      oscH.frequency.setValueAtTime(exhaust.freq * h * 0.8, startTime);
+      oscH.frequency.linearRampToValueAtTime(exhaust.freq * h * 1.6, startTime + 1.5);
+      oscH.frequency.linearRampToValueAtTime(exhaust.freq * h * 1.2, startTime + 2.5);
+      oscH.frequency.linearRampToValueAtTime(exhaust.freq * h * 0.7, endTime);
+
+      var ampH = audioCtx.createGain();
+      ampH.gain.setValueAtTime(0, startTime);
+      ampH.gain.linearRampToValueAtTime(0.15 / h, startTime + 0.2);
+      ampH.gain.setValueAtTime(0.15 / h, endTime - 0.2);
+      ampH.gain.linearRampToValueAtTime(0, endTime);
+
+      oscH.connect(ampH);
+      ampH.connect(gainNode);
+      oscH.start(startTime);
+      oscH.stop(endTime);
+      nodes.push(oscH, ampH);
+    }
+
+    // --- Low sub rumble ---
+    var subOsc = audioCtx.createOscillator();
+    subOsc.type = 'sine';
+    subOsc.frequency.value = exhaust.freq * 0.5;
+    subOsc.frequency.setValueAtTime(exhaust.freq * 0.4, startTime);
+    subOsc.frequency.linearRampToValueAtTime(exhaust.freq * 0.8, startTime + 1.5);
+    subOsc.frequency.linearRampToValueAtTime(exhaust.freq * 0.5, endTime);
+    var subGain = audioCtx.createGain();
+    subGain.gain.setValueAtTime(0, startTime);
+    subGain.gain.linearRampToValueAtTime(0.25, startTime + 0.1);
+    subGain.gain.setValueAtTime(0.25, endTime - 0.15);
+    subGain.gain.linearRampToValueAtTime(0, endTime);
+    subOsc.connect(subGain);
+    subGain.connect(gainNode);
+    subOsc.start(startTime);
+    subOsc.stop(endTime);
+    nodes.push(subOsc, subGain);
+
+    // --- Noise burst (exhaust pops) ---
+    var bufferSize = audioCtx.sampleRate * duration;
+    var noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    var noiseData = noiseBuffer.getChannelData(0);
+    for (var i = 0; i < bufferSize; i++) {
+      noiseData[i] = (Math.random() * 2 - 1) * 0.3;
+    }
+    var noiseSource = audioCtx.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+
+    // Bandpass filter for exhaust-like noise
+    var bpf = audioCtx.createBiquadFilter();
+    bpf.type = 'bandpass';
+    bpf.frequency.value = exhaust.freq * 2;
+    bpf.Q.value = 0.8;
+
+    var noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(0, startTime);
+    noiseGain.gain.linearRampToValueAtTime(0.12, startTime + 0.1);
+    noiseGain.gain.setValueAtTime(0.12, endTime - 0.2);
+    noiseGain.gain.linearRampToValueAtTime(0, endTime);
+
+    noiseSource.connect(bpf);
+    bpf.connect(noiseGain);
+    noiseGain.connect(gainNode);
+    noiseSource.start(startTime);
+    noiseSource.stop(endTime);
+    nodes.push(noiseSource, bpf, noiseGain);
+
+    return { nodes: nodes, startTime: startTime, duration: duration };
+  }
+
+  /* ============================================================
+     PLAYBACK MANAGEMENT
+     ============================================================ */
+  var playbackEndTimeout = null;
+  var playbackStartTime = null;
+  var playbackDuration = 8;
+
+  function stopCurrentPlayback() {
+    if (currentSource) {
+      try {
+        if (currentSource.nodes) {
+          currentSource.nodes.forEach(function(node) {
+            if (node.stop) { try { node.stop(0); } catch(e) {} }
+            if (node.disconnect) { try { node.disconnect(); } catch(e) {} }
+          });
+        }
+      } catch(e) {}
+      currentSource = null;
+    }
+    if (animFrameId) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    }
+    if (playbackEndTimeout) {
+      clearTimeout(playbackEndTimeout);
+      playbackEndTimeout = null;
+    }
+    isPlaying = false;
+    updatePlayButton(false);
+  }
+
+  function playExhaust(bike, exhaustIdx) {
+    stopCurrentPlayback();
+    currentBike = bike;
+    currentExhaustIdx = exhaustIdx;
+    var exhaust = bike.exhausts[exhaustIdx];
+
+    playbackDuration = 8;
+    playbackStartTime = Date.now();
+
+    currentSource = synthesizeExhaust(exhaust, playbackDuration);
+    isPlaying = true;
+    updatePlayButton(true);
+    updatePlayerUI(bike, exhaustIdx);
+    startVisualizers();
+
+    // Auto-stop
+    playbackEndTimeout = setTimeout(function() {
+      stopCurrentPlayback();
+      updateTimeDisplay(0);
+    }, playbackDuration * 1000 + 200);
+  }
+
+  function togglePlayPause() {
+    if (isPlaying) {
+      stopCurrentPlayback();
+    } else if (currentBike) {
+      playExhaust(currentBike, currentExhaustIdx);
+    }
+  }
+
+  /* ============================================================
+     PLAYBACK POSITION TRACKING
+     ============================================================ */
+  function getPlaybackProgress() {
+    if (!isPlaying || !playbackStartTime) return 0;
+    var elapsed = (Date.now() - playbackStartTime) / 1000;
+    return Math.min(elapsed / playbackDuration, 1);
+  }
+
+  function formatTime(secs) {
+    var m = Math.floor(secs / 60);
+    var s = Math.floor(secs % 60);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function updateTimeDisplay(progress) {
+    var currentEl = document.getElementById('playerCurrentTime');
+    var durationEl = document.getElementById('playerDuration');
+    var timeline = document.getElementById('playerTimeline');
+    if (!currentEl) return;
+    var elapsed = progress * playbackDuration;
+    currentEl.textContent = formatTime(elapsed);
+    if (durationEl) durationEl.textContent = formatTime(playbackDuration);
+    if (timeline) {
+      timeline.value = progress * 100;
+      // Update CSS gradient fill
+      var pct = (progress * 100).toFixed(1) + '%';
+      timeline.style.background = 'linear-gradient(90deg, #00FFE0 ' + pct + ', rgba(0,255,224,0.15) ' + pct + ')';
+    }
+  }
+
+  /* ============================================================
+     VISUALIZERS — SPECTRUM + WAVEFORM + EQUALIZER
+     ============================================================ */
+  var spectrumCanvas = null;
+  var waveformCanvas = null;
+  var specCtx = null;
+  var waveCtx = null;
+  var eqBarsEls = [];
+
+  function initCanvases() {
+    spectrumCanvas = document.getElementById('spectrumCanvas');
+    waveformCanvas = document.getElementById('waveformCanvas');
+    if (spectrumCanvas) specCtx = spectrumCanvas.getContext('2d');
+    if (waveformCanvas) waveCtx = waveformCanvas.getContext('2d');
+
+    // Create equalizer bars
+    var eqBarsContainer = document.getElementById('eqBars');
+    if (eqBarsContainer) {
+      eqBarsContainer.innerHTML = '';
+      eqBarsEls = [];
+      for (var i = 0; i < 24; i++) {
+        var bar = document.createElement('div');
+        bar.className = 'eq-bar';
+        bar.style.height = '4px';
+        eqBarsContainer.appendChild(bar);
+        eqBarsEls.push(bar);
+      }
+    }
+  }
+
+  function startVisualizers() {
+    if (!analyser) return;
+
+    var specDataArray = new Uint8Array(analyser.frequencyBinCount);
+    var waveDataArray = new Uint8Array(analyser.fftSize);
+
+    function draw() {
+      animFrameId = requestAnimationFrame(draw);
+
+      // ---- Spectrum Analyzer ----
+      if (specCtx && spectrumCanvas) {
+        analyser.getByteFrequencyData(specDataArray);
+        var sw = spectrumCanvas.width;
+        var sh = spectrumCanvas.height;
+        specCtx.clearRect(0, 0, sw, sh);
+        specCtx.fillStyle = '#0A0E27';
+        specCtx.fillRect(0, 0, sw, sh);
+
+        var barCount = 64;
+        var barW = sw / barCount;
+        var step = Math.floor(specDataArray.length / barCount);
+
+        for (var i = 0; i < barCount; i++) {
+          var val = specDataArray[i * step] / 255;
+          var barH = val * sh;
+          // Gradient: cyan bottom → magenta top
+          var grad = specCtx.createLinearGradient(0, sh - barH, 0, sh);
+          grad.addColorStop(0, '#FF006E');
+          grad.addColorStop(0.5, '#00FFE0');
+          grad.addColorStop(1, '#00FFE0');
+          specCtx.fillStyle = grad;
+          specCtx.fillRect(i * barW, sh - barH, barW - 1, barH);
+
+          // Glow effect (brighter core)
+          specCtx.fillStyle = 'rgba(0, 255, 224, ' + (val * 0.4) + ')';
+          specCtx.fillRect(i * barW + 1, sh - barH + 1, barW - 3, barH > 4 ? barH - 2 : barH);
+        }
+
+        // Grid lines
+        specCtx.strokeStyle = 'rgba(0, 255, 224, 0.08)';
+        specCtx.lineWidth = 1;
+        for (var g = 0; g < 4; g++) {
+          var y = sh * g / 4;
+          specCtx.beginPath();
+          specCtx.moveTo(0, y);
+          specCtx.lineTo(sw, y);
+          specCtx.stroke();
+        }
+      }
+
+      // ---- Waveform ----
+      if (waveCtx && waveformCanvas) {
+        analyser.getByteTimeDomainData(waveDataArray);
+        var ww = waveformCanvas.width;
+        var wh = waveformCanvas.height;
+        waveCtx.clearRect(0, 0, ww, wh);
+        waveCtx.fillStyle = '#0A0E27';
+        waveCtx.fillRect(0, 0, ww, wh);
+
+        // Draw waveform line
+        waveCtx.lineWidth = 2;
+        waveCtx.strokeStyle = '#FF006E';
+        waveCtx.shadowBlur = 10;
+        waveCtx.shadowColor = '#FF006E';
+        waveCtx.beginPath();
+        var sliceWidth = ww / waveDataArray.length;
+        var x = 0;
+        for (var j = 0; j < waveDataArray.length; j++) {
+          var v = waveDataArray[j] / 128.0;
+          var y2 = v * wh / 2;
+          if (j === 0) {
+            waveCtx.moveTo(x, y2);
+          } else {
+            waveCtx.lineTo(x, y2);
+          }
+          x += sliceWidth;
+        }
+        waveCtx.stroke();
+        waveCtx.shadowBlur = 0;
+      }
+
+      // ---- Equalizer bars ----
+      if (eqBarsEls.length > 0) {
+        analyser.getByteFrequencyData(specDataArray);
+        var step2 = Math.floor(specDataArray.length / eqBarsEls.length);
+        eqBarsEls.forEach(function(bar, i) {
+          var val2 = specDataArray[i * step2] / 255;
+          bar.style.height = Math.max(3, val2 * 48) + 'px';
+        });
+      }
+
+      // ---- Timeline update ----
+      var progress = getPlaybackProgress();
+      updateTimeDisplay(progress);
+    }
+
+    draw();
+  }
+
+  /* ============================================================
+     DEMO VISUALIZER (intro section, animated idle)
+     ============================================================ */
+  function startDemoVisualizer() {
+    var canvas = document.getElementById('demoVisualizer');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var t = 0;
+
+    function demoFrame() {
+      requestAnimationFrame(demoFrame);
+      t += 0.04;
+      var w = canvas.width;
+      var h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#0A0E27';
+      ctx.fillRect(0, 0, w, h);
+
+      var bars = 40;
+      var bw = w / bars;
+      for (var i = 0; i < bars; i++) {
+        // Animated sine wave pattern
+        var amp = 0.5 + 0.5 * Math.sin(t + i * 0.4) * Math.sin(t * 0.7 + i * 0.2);
+        var barH = amp * h * 0.85;
+        var hue = (i / bars) * 180; // cyan to magenta
+        var color = hue < 90
+          ? 'rgba(0, 255, 224, ' + (0.5 + amp * 0.5) + ')'
+          : 'rgba(255, 0, 110, ' + (0.5 + amp * 0.5) + ')';
+        ctx.fillStyle = color;
+        ctx.fillRect(i * bw, h - barH, bw - 1, barH);
+      }
+    }
+
+    demoFrame();
+  }
+
+  /* ============================================================
+     UI UPDATE FUNCTIONS
+     ============================================================ */
+  function updatePlayButton(playing) {
+    var btn = document.getElementById('btnPlayPause');
+    if (!btn) return;
+    if (playing) {
+      btn.textContent = '⏸';
+      btn.classList.add('playing');
+      btn.setAttribute('aria-label', 'Pause');
+    } else {
+      btn.textContent = '▶';
+      btn.classList.remove('playing');
+      btn.setAttribute('aria-label', 'Play');
+    }
+  }
+
+  function updatePlayerUI(bike, exhaustIdx) {
+    var exhaust = bike.exhausts[exhaustIdx];
+
+    // Title
+    var title = document.getElementById('playerModalTitle');
+    if (title) title.textContent = bike.name.toUpperCase();
+
+    var subtitle = document.getElementById('playerModalSubtitle');
+    if (subtitle) subtitle.textContent = exhaust.type.toUpperCase() + ' — ' + exhaust.brand;
+
+    // Metadata
+    var metaExhaust = document.getElementById('metaExhaust');
+    var metaDb = document.getElementById('metaDb');
+    var metaPs = document.getElementById('metaPs');
+    var metaChar = document.getElementById('metaChar');
+    if (metaExhaust) metaExhaust.textContent = exhaust.brand;
+    if (metaDb)      metaDb.textContent = exhaust.db + ' dB';
+    if (metaPs)      metaPs.textContent = bike.ps + ' PS';
+    if (metaChar)    metaChar.textContent = exhaust.character;
+
+    // Tabs
+    updateExhaustTabs(bike, exhaustIdx);
+
+    // Favorite button state
+    var favKey = bike.id + '_' + exhaust.type;
+    var isFav = isFavorite(favKey);
+    var favBtn = document.getElementById('btnFavorite');
+    if (favBtn) {
+      favBtn.textContent = isFav ? '♥ SAVED' : '♡ FAVORITE';
+      favBtn.classList.toggle('active', isFav);
+    }
+  }
+
+  function updateExhaustTabs(bike, activeIdx) {
+    var container = document.getElementById('exhaustTabs');
+    if (!container) return;
+    container.innerHTML = '';
+
+    bike.exhausts.forEach(function(ex, idx) {
+      var tab = document.createElement('div');
+      tab.className = 'sc-exhaust-tab tab-' + ex.type + (idx === activeIdx ? ' active' : '');
+      tab.setAttribute('role', 'button');
+      tab.setAttribute('tabindex', '0');
+      tab.setAttribute('aria-label', ex.label + ', ' + ex.db + ' dB');
+      tab.innerHTML =
+        '<span class="tab-type-label">' + ex.type.toUpperCase() + '</span>' +
+        '<span class="tab-brand">' + ex.brand + '</span>' +
+        '<span class="tab-db">' + ex.db + ' dB</span>';
+
+      tab.addEventListener('click', function() {
+        currentExhaustIdx = idx;
+        stopCurrentPlayback();
+        playExhaust(bike, idx);
+        updateExhaustTabs(bike, idx);
+      });
+
+      tab.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          tab.click();
+        }
+      });
+
+      container.appendChild(tab);
+    });
+  }
+
+  /* ============================================================
+     MODAL MANAGEMENT
+     ============================================================ */
+  function openPlayer(bike, exhaustIdx) {
+    currentBike = bike;
+    currentExhaustIdx = exhaustIdx || 0;
+
+    var modal = document.getElementById('scPlayerModal');
+    var overlay = document.getElementById('scModalOverlay');
+    if (!modal || !overlay) return;
+
+    modal.hidden = false;
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    initCanvases();
+    updatePlayerUI(bike, currentExhaustIdx);
+    playExhaust(bike, currentExhaustIdx);
+  }
+
+  function closePlayer() {
+    stopCurrentPlayback();
+    var modal = document.getElementById('scPlayerModal');
+    var overlay = document.getElementById('scModalOverlay');
+    if (modal) modal.hidden = true;
+    if (overlay) overlay.hidden = true;
+    document.body.style.overflow = '';
+
+    // Clear canvases
+    if (specCtx && spectrumCanvas) {
+      specCtx.clearRect(0, 0, spectrumCanvas.width, spectrumCanvas.height);
+    }
+    if (waveCtx && waveformCanvas) {
+      waveCtx.clearRect(0, 0, waveformCanvas.width, waveformCanvas.height);
+    }
+    if (eqBarsEls.length) {
+      eqBarsEls.forEach(function(bar) { bar.style.height = '4px'; });
+    }
+  }
+
+  /* ============================================================
+     FAVORITES — localStorage
+     ============================================================ */
+  function getFavorites() {
+    try {
+      return JSON.parse(localStorage.getItem('soundcheckFavorites') || '[]');
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function saveFavorites(favs) {
+    try {
+      localStorage.setItem('soundcheckFavorites', JSON.stringify(favs));
+    } catch(e) {}
+  }
+
+  function isFavorite(key) {
+    return getFavorites().indexOf(key) !== -1;
+  }
+
+  function toggleFavorite(bike, exhaustIdx) {
+    var exhaust = bike.exhausts[exhaustIdx];
+    var key = bike.id + '_' + exhaust.type;
+    var favs = getFavorites();
+    var idx = favs.indexOf(key);
+
+    if (idx === -1) {
+      favs.push(key);
+    } else {
+      favs.splice(idx, 1);
+    }
+    saveFavorites(favs);
+    renderFavoritesSection();
+
+    // Update button
+    var isFav = idx === -1; // was just added
+    var favBtn = document.getElementById('btnFavorite');
+    if (favBtn) {
+      favBtn.textContent = isFav ? '♥ SAVED' : '♡ FAVORITE';
+      favBtn.classList.toggle('active', isFav);
+    }
+  }
+
+  function renderFavoritesSection() {
+    var section = document.getElementById('scFavoritesSection');
+    var grid = document.getElementById('scFavoritesGrid');
+    if (!section || !grid) return;
+
+    var favs = getFavorites();
+    if (favs.length === 0) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    grid.innerHTML = '';
+
+    favs.forEach(function(key) {
+      var parts = key.split('_');
+      var bikeId = parts[0];
+      var exType = parts[1];
+      var bike = BIKES.find(function(b) { return b.id === bikeId; });
+      if (!bike) return;
+      var exIdx = bike.exhausts.findIndex(function(e) { return e.type === exType; });
+      if (exIdx === -1) return;
+      var exhaust = bike.exhausts[exIdx];
+
+      var item = document.createElement('div');
+      item.className = 'sc-fav-item sr-scale';
+      item.setAttribute('role', 'article');
+      item.innerHTML =
+        '<button class="sc-fav-play" aria-label="Abspielen: ' + bike.name + ' ' + exhaust.type + '">▶</button>' +
+        '<div class="sc-fav-info">' +
+          '<div class="sc-fav-bike">' + bike.icon + ' ' + bike.name + '</div>' +
+          '<div class="sc-fav-type">' + exhaust.type.toUpperCase() + ' · ' + exhaust.brand + ' · ' + exhaust.db + ' dB</div>' +
+        '</div>' +
+        '<button class="sc-fav-remove" aria-label="Favorit entfernen">✕</button>';
+
+      item.querySelector('.sc-fav-play').addEventListener('click', function() {
+        openPlayer(bike, exIdx);
+      });
+
+      item.querySelector('.sc-fav-remove').addEventListener('click', function(e) {
+        e.stopPropagation();
+        var favArr = getFavorites();
+        var fidx = favArr.indexOf(key);
+        if (fidx !== -1) { favArr.splice(fidx, 1); }
+        saveFavorites(favArr);
+        renderFavoritesSection();
+      });
+
+      grid.appendChild(item);
+    });
+
+    // Re-trigger scroll reveal for new items
+    setTimeout(function() {
+      grid.querySelectorAll('.sr-scale').forEach(function(el) {
+        el.classList.add('sr-visible');
+      });
+    }, 50);
+  }
+
+  /* ============================================================
+     A/B COMPARE
+     ============================================================ */
+  function setCompareSlot(slot, bike, exhaustIdx) {
+    var exhaust = bike.exhausts[exhaustIdx];
+    var info = {
+      bike: bike,
+      exhaustIdx: exhaustIdx,
+      label: bike.name + ' — ' + exhaust.type.toUpperCase() + ' (' + exhaust.db + 'dB)'
+    };
+
+    if (slot === 'A') {
+      compareA = info;
+      var el = document.getElementById('slotAInfo');
+      if (el) el.textContent = info.label;
+    } else {
+      compareB = info;
+      var el2 = document.getElementById('slotBInfo');
+      if (el2) el2.textContent = info.label;
+    }
+
+    // Enable compare button if both slots filled
+    var btn = document.getElementById('btnABPlay');
+    if (btn) btn.disabled = !(compareA && compareB);
+
+    // Animate mini EQ for filled slot
+    renderMiniEq(slot === 'A' ? 'slotAEq' : 'slotBEq');
+  }
+
+  function renderMiniEq(containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    for (var i = 0; i < 8; i++) {
+      var bar = document.createElement('div');
+      bar.className = 'meq-bar';
+      var h = 4 + Math.random() * 16;
+      bar.style.height = h + 'px';
+      bar.style.animationDelay = (i * 0.07) + 's';
+      container.appendChild(bar);
+    }
+  }
+
+  function toggleABCompare() {
+    if (!compareA || !compareB) return;
+
+    if (isABPlaying) {
+      // Stop
+      if (compareSourceA) {
+        compareSourceA.nodes.forEach(function(n) { if (n.stop) { try { n.stop(0); } catch(e) {} } });
+        compareSourceA = null;
+      }
+      if (compareSourceB) {
+        compareSourceB.nodes.forEach(function(n) { if (n.stop) { try { n.stop(0); } catch(e) {} } });
+        compareSourceB = null;
+      }
+      isABPlaying = false;
+      var btn = document.getElementById('btnABPlay');
+      if (btn) {
+        btn.textContent = '▶ COMPARE STARTEN';
+        btn.classList.remove('playing');
+      }
+    } else {
+      // Play A then B
+      ensureAudioCtx();
+      stopCurrentPlayback();
+
+      var exA = compareA.bike.exhausts[compareA.exhaustIdx];
+      var exB = compareB.bike.exhausts[compareB.exhaustIdx];
+
+      compareSourceA = synthesizeExhaust(exA, 4);
+      // Play B after A finishes (4s later)
+      setTimeout(function() {
+        if (isABPlaying) {
+          compareSourceB = synthesizeExhaust(exB, 4);
+          setTimeout(function() { isABPlaying = false; var b = document.getElementById('btnABPlay'); if (b) { b.textContent = '▶ COMPARE STARTEN'; b.classList.remove('playing'); } }, 4200);
+        }
+      }, 4200);
+
+      isABPlaying = true;
+      var btn2 = document.getElementById('btnABPlay');
+      if (btn2) {
+        btn2.textContent = '⏹ STOP';
+        btn2.classList.add('playing');
+      }
+    }
+  }
+
+  /* ============================================================
+     BIKE CARD RENDERING
+     ============================================================ */
+  var activeFilter = 'all';
+
+  function renderBikesGrid() {
+    var grid = document.getElementById('scBikesGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    var filtered = BIKES.filter(function(bike) {
+      return activeFilter === 'all' || bike.category === activeFilter;
+    });
+
+    filtered.forEach(function(bike, bIdx) {
+      var card = document.createElement('div');
+      card.className = 'sc-bike-card sr-left float-card';
+      card.setAttribute('data-category', bike.category);
+      card.style.transitionDelay = (bIdx * 0.08) + 's';
+
+      var exhaustsHTML = bike.exhausts.map(function(ex, eIdx) {
+        var dbPercent = ((ex.db - 80) / 40 * 100).toFixed(0);
+        return '<div class="sc-exhaust-row" role="button" tabindex="0" aria-label="' + ex.label + ', ' + ex.db + ' dB" data-bike="' + bike.id + '" data-ex-idx="' + eIdx + '">' +
+          '<div class="sc-exhaust-type"><span class="sc-exhaust-label label-' + ex.type + '">' + ex.type.toUpperCase() + '</span></div>' +
+          '<span class="sc-exhaust-name">' + ex.brand + '</span>' +
+          '<div class="sc-db-bar"><div class="sc-db-bar-fill" style="width:' + dbPercent + '%"></div></div>' +
+          '<span class="sc-exhaust-db">' + ex.db + 'dB</span>' +
+          '<div class="sc-mini-wave">' + generateMiniWave(8) + '</div>' +
+          '<button class="sc-play-btn" aria-label="Abspielen">▶</button>' +
+          '</div>';
+      }).join('');
+
+      card.innerHTML =
+        '<div class="sc-bike-card-header">' +
+          '<span class="sc-bike-icon" aria-hidden="true">' + bike.icon + '</span>' +
+          '<div class="sc-bike-info">' +
+            '<h3 class="sc-bike-name">' + bike.name + '</h3>' +
+            '<div class="sc-bike-meta">' +
+              '<span class="sc-chip">' + bike.ps + ' PS</span>' +
+              '<span class="sc-chip chip-category">' + bike.category.toUpperCase() + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="sc-exhaust-list">' + exhaustsHTML + '</div>';
+
+      // Bind events on exhaust rows
+      card.querySelectorAll('.sc-exhaust-row').forEach(function(row) {
+        var bikeId = row.getAttribute('data-bike');
+        var exIdx = parseInt(row.getAttribute('data-ex-idx'), 10);
+        var rowBike = BIKES.find(function(b) { return b.id === bikeId; });
+
+        function handlePlay(e) {
+          e.stopPropagation();
+          openPlayer(rowBike, exIdx);
+        }
+
+        row.querySelector('.sc-play-btn').addEventListener('click', handlePlay);
+        row.addEventListener('click', handlePlay);
+        row.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePlay(e); }
+        });
+      });
+
+      grid.appendChild(card);
+    });
+
+    // Trigger scroll reveal after render
+    setTimeout(function() {
+      grid.querySelectorAll('.sr-left').forEach(function(el, i) {
+        setTimeout(function() { el.classList.add('sr-visible'); }, i * 80);
+      });
+    }, 100);
+  }
+
+  function generateMiniWave(count) {
+    var html = '';
+    for (var i = 0; i < count; i++) {
+      var h = 2 + Math.random() * 14;
+      html += '<div class="sc-mini-wave-bar" style="height:' + h + 'px;animation-delay:' + (i * 0.05) + 's"></div>';
+    }
+    return html;
+  }
+
+  /* ============================================================
+     FILTERS
+     ============================================================ */
+  function initFilters() {
+    document.querySelectorAll('.sc-filter-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.sc-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        activeFilter = btn.getAttribute('data-filter');
+        renderBikesGrid();
+      });
+    });
+  }
+
+  /* ============================================================
+     VOLUME CONTROL
+     ============================================================ */
+  function initVolumeControl() {
+    var volumeSlider = document.getElementById('playerVolume');
+    if (!volumeSlider) return;
+
+    volumeSlider.addEventListener('input', function() {
+      if (gainNode) {
+        gainNode.gain.value = parseFloat(volumeSlider.value);
+      }
+    });
+  }
+
+  /* ============================================================
+     TIMELINE SCRUBBING (visual only — synthesized audio restarts)
+     ============================================================ */
+  function initTimeline() {
+    var timeline = document.getElementById('playerTimeline');
+    if (!timeline) return;
+
+    timeline.addEventListener('input', function() {
+      // For synthesized audio, we restart from beginning (scrubbing not supported)
+      // Just update visual display
+      var val = parseFloat(timeline.value) / 100;
+      updateTimeDisplay(val);
+    });
+  }
+
+  /* ============================================================
+     REWIND / FORWARD
+     ============================================================ */
+  function initRewindForward() {
+    var btnRewind = document.getElementById('btnRewind');
+    var btnForward = document.getElementById('btnForward');
+
+    if (btnRewind) {
+      btnRewind.addEventListener('click', function() {
+        // Restart audio from beginning
+        if (currentBike) {
+          stopCurrentPlayback();
+          setTimeout(function() { playExhaust(currentBike, currentExhaustIdx); }, 50);
+        }
+      });
+    }
+
+    if (btnForward) {
+      btnForward.addEventListener('click', function() {
+        // Skip to next exhaust variant
+        if (currentBike) {
+          var nextIdx = (currentExhaustIdx + 1) % currentBike.exhausts.length;
+          stopCurrentPlayback();
+          playExhaust(currentBike, nextIdx);
+        }
+      });
+    }
+  }
+
+  /* ============================================================
+     SCROLL REVEAL on page elements
+     ============================================================ */
+  function initPageScrollReveal() {
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('sr-visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.sr-fade, .sr-left, .sr-right, .sr-scale, .sr-up').forEach(function(el) {
+      observer.observe(el);
+    });
+  }
+
+  /* ============================================================
+     MAIN INIT
+     ============================================================ */
+  function init() {
+    renderBikesGrid();
+    initFilters();
+    initPageScrollReveal();
+    startDemoVisualizer();
+    renderFavoritesSection();
+
+    // Close button
+    var closeBtn = document.getElementById('scPlayerClose');
+    if (closeBtn) closeBtn.addEventListener('click', closePlayer);
+
+    // Overlay click to close
+    var overlay = document.getElementById('scModalOverlay');
+    if (overlay) overlay.addEventListener('click', closePlayer);
+
+    // ESC to close
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closePlayer();
+    });
+
+    // Play/Pause
+    var playBtn = document.getElementById('btnPlayPause');
+    if (playBtn) playBtn.addEventListener('click', togglePlayPause);
+
+    // Favorite button
+    var favBtn = document.getElementById('btnFavorite');
+    if (favBtn) {
+      favBtn.addEventListener('click', function() {
+        if (currentBike) toggleFavorite(currentBike, currentExhaustIdx);
+      });
+    }
+
+    // A/B compare set buttons
+    var btnSetA = document.getElementById('btnSetA');
+    var btnSetB = document.getElementById('btnSetB');
+    if (btnSetA) {
+      btnSetA.addEventListener('click', function() {
+        if (currentBike) setCompareSlot('A', currentBike, currentExhaustIdx);
+      });
+    }
+    if (btnSetB) {
+      btnSetB.addEventListener('click', function() {
+        if (currentBike) setCompareSlot('B', currentBike, currentExhaustIdx);
+      });
+    }
+
+    // A/B Play
+    var btnABPlay = document.getElementById('btnABPlay');
+    if (btnABPlay) btnABPlay.addEventListener('click', toggleABCompare);
+
+    // A/B Clear
+    var btnABClear = document.getElementById('btnABClear');
+    if (btnABClear) {
+      btnABClear.addEventListener('click', function() {
+        compareA = null;
+        compareB = null;
+        var slotAInfo = document.getElementById('slotAInfo');
+        var slotBInfo = document.getElementById('slotBInfo');
+        if (slotAInfo) slotAInfo.textContent = '— Leer —';
+        if (slotBInfo) slotBInfo.textContent = '— Leer —';
+        document.getElementById('slotAEq').innerHTML = '';
+        document.getElementById('slotBEq').innerHTML = '';
+        var abBtn = document.getElementById('btnABPlay');
+        if (abBtn) abBtn.disabled = true;
+        if (isABPlaying) toggleABCompare();
+      });
+    }
+
+    // Clear all favorites
+    var clearFavBtn = document.getElementById('btnClearFavorites');
+    if (clearFavBtn) {
+      clearFavBtn.addEventListener('click', function() {
+        saveFavorites([]);
+        renderFavoritesSection();
+      });
+    }
+
+    initVolumeControl();
+    initTimeline();
+    initRewindForward();
+
+    // Handle URL param ?bike=xxx to auto-open
+    var params = new URLSearchParams(window.location.search);
+    var bikeParam = params.get('bike');
+    if (bikeParam) {
+      var matchBike = BIKES.find(function(b) {
+        return b.name.toLowerCase().indexOf(bikeParam.toLowerCase()) !== -1;
+      });
+      if (matchBike) {
+        setTimeout(function() { openPlayer(matchBike, 0); }, 500);
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
