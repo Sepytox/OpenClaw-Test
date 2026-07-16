@@ -15,15 +15,7 @@
         })();
     </script>
   <script>
-    // Apply saved preferences immediately to avoid flash
-    (function() {
-      if (localStorage.getItem('darkMode') === 'true') {
-        document.documentElement.classList.add('dark-mode-pending');
-      }
-      if (localStorage.getItem('cyberpunkMode') === 'true') {
-        document.documentElement.classList.add('cyberpunk-pending');
-      }
-    })();
+    // Theme applied via themes.css + settings.js FOUC prevention block
   </script>
 
   <style>
