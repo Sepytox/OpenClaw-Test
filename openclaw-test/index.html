@@ -204,23 +204,30 @@
     </footer>
 
     <script>
+        // Safe localStorage wrapper
+        var safeStorage = (function() {
+            function get(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
+            function set(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+            return { get: get, set: set };
+        })();
+
         // Dark mode persistence
         (function() {
-            if (localStorage.getItem('darkMode') === 'true') {
+            if (safeStorage.get('darkMode') === 'true') {
                 document.body.classList.add('dark-mode');
             }
         })();
 
         function toggleDarkMode() {
             var isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isDark);
+            safeStorage.set('darkMode', isDark);
             var btn = document.getElementById('themeToggle');
             if (btn) btn.textContent = isDark ? '☀️' : '🌓';
         }
 
         // Restore button state
         (function() {
-            var isDark = localStorage.getItem('darkMode') === 'true';
+            var isDark = safeStorage.get('darkMode') === 'true';
             var btn = document.getElementById('themeToggle');
             if (btn) btn.textContent = isDark ? '☀️' : '🌓';
         })();

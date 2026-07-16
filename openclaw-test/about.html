@@ -143,9 +143,16 @@
     </footer>
 
     <script>
+        // Safe localStorage wrapper
+        var safeStorage = (function() {
+            function get(key) { try { return localStorage.getItem(key); } catch(e) { return null; } }
+            function set(key, val) { try { localStorage.setItem(key, val); } catch(e) {} }
+            return { get: get, set: set };
+        })();
+
         // Dark mode
         (function() {
-            if (localStorage.getItem('darkMode') === 'true') {
+            if (safeStorage.get('darkMode') === 'true') {
                 document.body.classList.add('dark-mode');
                 var btn = document.getElementById('themeToggle');
                 if (btn) btn.textContent = '☀️';
@@ -154,7 +161,7 @@
 
         function toggleDarkMode() {
             var isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isDark);
+            safeStorage.set('darkMode', isDark);
             var btn = document.getElementById('themeToggle');
             if (btn) btn.textContent = isDark ? '☀️' : '🌓';
         }
