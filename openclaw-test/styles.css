@@ -880,6 +880,140 @@ footer {
 }
 
 /* ==========================================
+   COMPARE BAR (Sticky)
+   ========================================== */
+.compare-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--header-bg);
+    border-top: 2px solid var(--primary);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    z-index: 900;
+    padding: 12px 20px;
+    transition: transform 0.3s ease, background var(--transition);
+}
+
+.compare-bar[hidden] { display: none; }
+
+.compare-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.compare-bar-label {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.compare-bar-bikes {
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    flex-wrap: wrap;
+}
+
+.compare-chip {
+    background: var(--input-bg);
+    border: 1.5px solid var(--primary);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.compare-bar-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.compare-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 0.9em;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.compare-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.compare-btn:not(:disabled):hover {
+    background: var(--primary-dark);
+    transform: scale(1.04);
+}
+
+.compare-close-btn {
+    background: #fff0f0;
+    border: 2px solid #ffcdd2;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 1em;
+    font-weight: 700;
+    color: #e53935;
+    cursor: pointer;
+    min-height: 44px;
+    min-width: 44px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.compare-close-btn:hover {
+    background: #e53935;
+    color: white;
+    border-color: #e53935;
+    transform: scale(1.08);
+}
+
+/* Compare bar: compact on mobile */
+@media (max-width: 768px) {
+    .compare-bar {
+        padding: 8px 12px;
+    }
+
+    .compare-bar-inner {
+        gap: 8px;
+    }
+
+    .compare-bar-label {
+        font-size: 0.8em;
+    }
+
+    .compare-bar-bikes {
+        /* show chips compactly */
+        flex: 0 0 auto;
+    }
+
+    .compare-btn {
+        font-size: 0.82em;
+        padding: 6px 12px;
+    }
+
+    .compare-chip {
+        font-size: 0.75em;
+        padding: 3px 8px;
+    }
+}
+
+/* ==========================================
    ANIMATIONS
    ========================================== */
 @keyframes fadeInUp {
@@ -1033,17 +1167,34 @@ body.dark-mode .extended-specs summary:hover {
     /* .facts already handled above in responsive grid section */
 
     .filter-row {
-        gap: 8px;
+        flex-direction: column;
+        gap: 10px;
     }
 
     .filter-group {
         flex-direction: column;
         align-items: flex-start;
         gap: 3px;
+        width: 100%;
     }
 
     .filter-select {
         width: 100%;
+        /* min touch target height */
+        min-height: 44px;
+        font-size: 1rem;
+    }
+
+    .search-input {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .btn-clear-filter {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+        margin-left: 0;
     }
 
     .specs-grid {

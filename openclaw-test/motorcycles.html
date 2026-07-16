@@ -138,6 +138,18 @@
         <footer><p data-i18n="footer">&copy; 2026 Vrooooom Kawasaki | Test Website</p></footer>
     </div>
 
+    <!-- STICKY COMPARE BAR -->
+    <div class="compare-bar" id="compareBar" hidden aria-label="Compare selected motorcycles">
+        <div class="compare-bar-inner">
+            <span class="compare-bar-label">⚖️ <span id="compareCount">0</span>/2 ausgewählt</span>
+            <div class="compare-bar-bikes" id="compareBarBikes"></div>
+            <div class="compare-bar-actions">
+                <button class="compare-btn" id="compareNowBtn" disabled>Vergleichen →</button>
+                <button class="compare-close-btn" id="compareClearBtn" aria-label="Vergleich leeren">✕</button>
+            </div>
+        </div>
+    </div>
+
     <!-- BIKE DETAIL MODAL -->
     <div class="modal-overlay" id="bikeModal" role="dialog" aria-modal="true" aria-labelledby="modalBikeTitle" aria-hidden="true">
         <div class="modal-content">
@@ -1113,6 +1125,50 @@
                     });
                 });
             }
+
+            // Compare bar
+            (function() {
+                var compareSet = [];
+                var bar = document.getElementById('compareBar');
+                var countEl = document.getElementById('compareCount');
+                var chipsEl = document.getElementById('compareBarBikes');
+                var compareNowBtn = document.getElementById('compareNowBtn');
+                var compareClearBtn = document.getElementById('compareClearBtn');
+
+                function updateBar() {
+                    countEl.textContent = compareSet.length;
+                    chipsEl.innerHTML = compareSet.map(function(id) {
+                        var bike = BIKES.find(function(b) { return b.id === id; });
+                        return bike ? '<span class="compare-chip">' + bike.icon + ' ' + bike.name.replace('Kawasaki ', '') + '</span>' : '';
+                    }).join('');
+                    compareNowBtn.disabled = compareSet.length < 2;
+                    if (compareSet.length > 0) { bar.hidden = false; } else { bar.hidden = true; }
+                }
+
+                // Expose to card clicks (long-press or dedicated button)
+                window.compareToggle = function(bikeId) {
+                    var idx = compareSet.indexOf(bikeId);
+                    if (idx !== -1) {
+                        compareSet.splice(idx, 1);
+                    } else if (compareSet.length < 2) {
+                        compareSet.push(bikeId);
+                    }
+                    updateBar();
+                };
+
+                compareClearBtn.addEventListener('click', function() {
+                    compareSet = [];
+                    updateBar();
+                });
+
+                compareNowBtn.addEventListener('click', function() {
+                    if (compareSet.length < 2) return;
+                    alert('Vergleich: ' + compareSet.map(function(id) {
+                        var b = BIKES.find(function(x) { return x.id === id; });
+                        return b ? b.name : id;
+                    }).join(' vs '));
+                });
+            })();
 
             // Read URL param for category filter (from landing page tiles)
             (function() {
