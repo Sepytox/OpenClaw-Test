@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Vrooooom — Browse the full lineup of Kawasaki motorcycles. Compare specs, save favorites, and discover your perfect ride.">
+    <meta property="og:title" content="Vrooooom - Kawasaki Motorcycles">
+    <meta property="og:description" content="Browse 17+ Kawasaki models — Sport, Naked, Cruiser, Adventure, and Off-Road. Power, precision, perfection.">
+    <meta property="og:type" content="website">
     <title>Vrooooom - Kawasaki Motorcycles</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="landing.css">
@@ -24,6 +28,12 @@
             <button class="theme-toggle nav-theme-btn" id="themeToggle" onclick="toggleDarkMode()" aria-label="Toggle dark mode" title="Toggle Dark/Light Mode">🌓</button>
         </div>
     </nav>
+
+    <!-- SCROLL TO EXPLORE HINT -->
+    <div class="scroll-hint" id="scrollHint" aria-hidden="true">
+        <span class="scroll-hint-text">Scroll to explore</span>
+        <span class="scroll-hint-arrow">&#8595;</span>
+    </div>
 
     <!-- HERO SECTION -->
     <section class="hero" aria-label="Hero Banner">
@@ -233,9 +243,33 @@
         }
 
         // Category tiles → pass category filter via URL param
-        document.querySelectorAll('a.category-tile').forEach(function(tile) {
-            tile.addEventListener('click', function(e) {
-                // Allow normal navigation — motorcycles.html reads param on load
+        // (Navigation handled natively — motorcycles.html reads param on load)
+
+        // Scroll-to-explore hint: hide after user scrolls
+        (function() {
+            var hint = document.getElementById('scrollHint');
+            if (!hint) return;
+            var hidden = false;
+            function onScroll() {
+                if (!hidden && window.scrollY > 80) {
+                    hidden = true;
+                    hint.classList.add('scroll-hint-hidden');
+                    window.removeEventListener('scroll', onScroll);
+                }
+            }
+            window.addEventListener('scroll', onScroll, { passive: true });
+        })();
+
+        // Ripple effect on all .btn elements
+        document.querySelectorAll('.btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                var ripple = document.createElement('span');
+                ripple.className = 'btn-ripple';
+                var rect = btn.getBoundingClientRect();
+                ripple.style.left = (e.clientX - rect.left) + 'px';
+                ripple.style.top = (e.clientY - rect.top) + 'px';
+                btn.appendChild(ripple);
+                setTimeout(function() { ripple.remove(); }, 600);
             });
         });
     </script>
