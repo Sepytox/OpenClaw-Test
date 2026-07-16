@@ -682,11 +682,14 @@ function launchConfetti() {
 // ==========================================
 function shareResult() {
     if (!lastResult) return;
-    const text = `Ich habe beim Kawasaki Wheel 🎡 ${lastResult.icon} ${lastResult.name} gerollt! Drehe auch du: ${window.location.href}`;
+    const text = `🎡 Kawasaki Wheel-Ergebnis!\nIch habe **${lastResult.icon} Kawasaki ${lastResult.name}** gerollt!\n${lastResult.sub} — ${lastResult.ps} PS\nDrehe auch du: ${window.location.href}`;
     if (navigator.share) {
         navigator.share({ title: 'Kawasaki Wheel', text, url: window.location.href });
     } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => alert('📋 Link kopiert!'));
+        navigator.clipboard.writeText(text).then(() => {
+            const btns = document.querySelectorAll('.btn-outline-sm');
+            if (btns[0]) { btns[0].textContent = '✅ Kopiert!'; setTimeout(() => { btns[0].textContent = '📤 Teilen'; }, 2000); }
+        });
     } else {
         prompt('Kopiere:', text);
     }
