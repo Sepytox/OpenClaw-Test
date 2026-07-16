@@ -1248,10 +1248,13 @@ function updateRecordDisplay() {
         list.innerHTML = '<div style="color:#333;font-size:0.85rem;">Noch keine Rennen gefahren</div>';
         return;
     }
-    list.innerHTML = keys.map(k => {
+    // Sort by best time
+    const sorted = keys.sort((a, b) => records[a] - records[b]);
+    list.innerHTML = sorted.map((k, i) => {
         const bike = RACE_BIKES[k];
-        return `<div class="record-item">
-            <div class="rec-bike">${bike ? bike.name : k}</div>
+        const medal = i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
+        return `<div class="record-item" style="${i === 0 ? 'border-color:var(--neon-green)' : ''}">
+            <div class="rec-bike">${medal}${bike ? bike.name : k}</div>
             <div class="rec-val">${records[k].toFixed(2)}s</div>
             <div class="rec-lbl">0-100 km/h Rekord</div>
         </div>`;
