@@ -283,10 +283,12 @@
 
             // Simulate send
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Sending…';
+            submitBtn.setAttribute('aria-busy', 'true');
+            submitBtn.innerHTML = '<span class="loading-spinner" aria-hidden="true"></span> Sending…';
 
             setTimeout(function() {
                 submitBtn.style.display = 'none';
+                submitBtn.setAttribute('aria-busy', 'false');
                 successEl.style.display = 'block';
                 document.getElementById('contactForm').reset();
             }, 800);

@@ -708,6 +708,25 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================================
+   LOADING SPINNER
+   ============================================================ */
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid rgba(255, 255, 255, 0.4);
+    border-top-color: var(--white);
+    border-radius: 50%;
+    animation: spinner-rotate 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 0.3rem;
+}
+
+@keyframes spinner-rotate {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================
    SCROLL-TO-EXPLORE HINT
    ============================================================ */
 .scroll-hint {
