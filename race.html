@@ -862,7 +862,9 @@ function updateUI(accel) {
 
     if (raceMode !== 'compare') {
         // Gauges
-        drawGauge('rpmGauge', rpm, bike.redline, rpm > bike.redline * 0.9 ? '#ff0044' : rpm > bike.redline * 0.75 ? '#ff6600' : '#00eaff', rpm.toFixed(0));
+        // Color-coded RPM zones: cyan=normal, yellow=mid, orange=high, red=redline
+        const rpmColor = rpm > bike.redline * 0.93 ? '#ff0044' : rpm > bike.redline * 0.78 ? '#ff6600' : rpm > bike.redline * 0.5 ? '#ffcc00' : '#00eaff';
+        drawGauge('rpmGauge', rpm, bike.redline, rpmColor, rpm.toFixed(0));
         drawGauge('speedGauge', speedKmh, bike.vmax, '#39ff14', speedKmh.toFixed(0));
 
         // Stat boxes
