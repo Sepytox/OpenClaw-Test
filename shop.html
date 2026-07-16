@@ -723,7 +723,15 @@ function applyCombo(comboKey) {
 // SAVE/LOAD
 // ==========================================
 function saveConfig() {
-    const config = { bike: currentBike, parts: [...selectedParts] };
+    const selected = PARTS.filter(p => selectedParts.has(p.id));
+    const totalPS = selected.reduce((s, p) => s + p.psGain, 0);
+    const totalCost = selected.reduce((s, p) => s + p.price, 0);
+    const config = {
+        bike: currentBike,
+        parts: [...selectedParts],
+        savedAt: new Date().toISOString(),
+        summary: { parts: selected.length, totalPS, totalCost }
+    };
     localStorage.setItem('kawasaki_shop_config', JSON.stringify(config));
     const btn = event.target;
     btn.textContent = '✅ Gespeichert!';
