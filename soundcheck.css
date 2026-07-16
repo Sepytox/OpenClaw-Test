@@ -1240,3 +1240,105 @@ body.cyberpunk-mode .eq-bar {
 .eq-bar {
   position: relative;
 }
+
+/* ============================================================
+   21. MOBILE-RESPONSIVE SOUNDCHECK — Final Touch
+   ============================================================ */
+
+/* Extra small screens (360px and below) */
+@media (max-width: 360px) {
+  .sc-intro {
+    padding: 14px;
+  }
+
+  .sc-bike-card {
+    padding: 14px;
+  }
+
+  .sc-controls {
+    justify-content: space-around;
+  }
+
+  .sc-exhaust-row {
+    flex-wrap: wrap;
+    padding: 8px;
+  }
+
+  .sc-exhaust-name {
+    flex: none;
+    width: 100%;
+    order: 1;
+  }
+
+  .sc-db-bar {
+    order: 2;
+  }
+
+  .sc-exhaust-db {
+    order: 3;
+  }
+
+  .sc-mini-wave {
+    display: none; /* Hidden on very small screens */
+  }
+
+  .sc-play-btn {
+    order: 4;
+  }
+}
+
+/* Tablet landscape (769–1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sc-bikes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .sc-player-modal {
+    max-width: 580px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .sc-play-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1em;
+  }
+
+  .sc-ctrl-btn {
+    padding: 12px 20px;
+    font-size: 0.8em;
+    min-height: 44px;
+  }
+
+  .sc-ctrl-play {
+    width: 60px;
+    height: 60px;
+    font-size: 1.4em;
+  }
+
+  .sc-exhaust-tab {
+    padding: 14px 16px;
+    min-height: 64px;
+  }
+
+  .sc-filter-btn {
+    padding: 10px 18px;
+    font-size: 0.75em;
+    min-height: 40px;
+  }
+
+  .btn-ab-play,
+  .btn-ab-clear {
+    padding: 14px 20px;
+    font-size: 0.85em;
+  }
+
+  .sc-btn-favorite,
+  .sc-btn-compare-a,
+  .sc-btn-compare-b {
+    padding: 14px;
+    min-height: 48px;
+  }
+}
