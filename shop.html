@@ -710,6 +710,8 @@ const COMBO_PARTS = {
 
 function applyCombo(comboKey) {
     const parts = COMBO_PARTS[comboKey];
+    // Clear and apply combo (clean slate)
+    selectedParts.clear();
     parts.forEach(id => selectedParts.add(id));
     currentCat = 'all';
     document.querySelectorAll('.cat-tab').forEach(el => el.classList.remove('active'));
@@ -717,6 +719,8 @@ function applyCombo(comboKey) {
     renderParts();
     updateCart();
     updateLiveSpecs();
+    // Scroll to specs bar
+    document.querySelector('.live-specs-bar').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ==========================================
