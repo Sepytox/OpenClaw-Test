@@ -1384,3 +1384,84 @@ th {
   color: var(--text-muted);
   font-weight: 600;
 }
+
+/* ============================================================
+   SCROLL ANIMATIONS — Simplified (keep only 3-4 key effects)
+   ============================================================ */
+
+/* Keep only fade-in and slide-up for main sections */
+.sr-fade { 
+  opacity: 0; 
+  transition: opacity 0.5s ease; 
+}
+.sr-fade.visible { opacity: 1; }
+
+.sr-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.sr-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Remove aggressive bounces */
+@keyframes bounce { 
+  /* Simplified — just a subtle scale */
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+}
+
+/* Keep section counter animations */
+.sr-scale {
+  opacity: 0;
+  transform: scale(0.97);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.sr-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ============================================================
+   CARD PADDING + BORDER-RADIUS CONSISTENCY (all pages)
+   ============================================================ */
+
+/* Ensure consistent card padding across all pages */
+.vc-card,
+.part-card,
+.quiz-card,
+.question-card,
+.result-card,
+.wheel-result-card,
+.dashboard-panel,
+.race-panel,
+.stat-panel,
+.sc-bike-card,
+.bike-card,
+.feature-card,
+.timeline-card,
+.contact-form-card,
+.faq-item {
+  padding: 1.25rem !important;
+  border-radius: 12px !important;
+  box-sizing: border-box !important;
+}
+
+/* Larger hero/featured cards */
+.sc-compare-panel,
+.shop-hero,
+.wheel-layout > *:first-child,
+.quiz-wrapper > .intro-card {
+  padding: 1.5rem !important;
+  border-radius: 16px !important;
+}
+
+/* Compact mini cards */
+.cat-tab,
+.mode-chip,
+.filter-chip,
+.tag-chip {
+  border-radius: 8px !important;
+}
