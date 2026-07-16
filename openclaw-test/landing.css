@@ -1002,3 +1002,75 @@ img { max-width: 100%; display: block; }
     .spotlight-grid { grid-template-columns: 1fr; }
     .categories-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ============================================================
+   RESPONSIVE DESIGN TWEAKS — Extra Polish
+   ============================================================ */
+
+/* Very small screens */
+@media (max-width: 360px) {
+    .hero-title { font-size: 2.2rem; letter-spacing: -0.5px; }
+    .hero-stat-num { font-size: 1.8rem; }
+    .hero-stats { gap: 1.5rem; }
+    .top-navbar { padding: 0 0.75rem; }
+    .btn { padding: 0.65rem 1.25rem; font-size: 0.9rem; }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .spotlight-grid { grid-template-columns: repeat(3, 1fr); }
+    .features-grid  { grid-template-columns: repeat(2, 1fr); }
+    .categories-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Print */
+@media print {
+    .top-navbar, .site-footer, .hero-cta-group, .cta-banner { display: none; }
+    body { background: #fff; color: #000; }
+}
+
+/* Focus-visible for keyboard navigation */
+.btn:focus-visible,
+.nav-link:focus-visible,
+.category-tile:focus-visible,
+.feature-card:focus-visible {
+    outline: 3px solid var(--red);
+    outline-offset: 3px;
+}
+
+/* Dark mode for about/contact cards */
+body.dark-mode .about-card,
+body.dark-mode .contact-info-card,
+body.dark-mode .contact-form-card,
+body.dark-mode .faq-item {
+    background: #1a2332;
+    border-color: #2a3548;
+}
+
+body.dark-mode .form-input,
+body.dark-mode .form-textarea,
+body.dark-mode .form-select {
+    background: #0f1623;
+    border-color: #2a3548;
+    color: #e8edf4;
+}
+
+body.dark-mode .form-input:focus,
+body.dark-mode .form-textarea:focus,
+body.dark-mode .form-select:focus {
+    background: #1a2332;
+}
+
+body.dark-mode .timeline-item::before {
+    border-color: #0f1623;
+}
+
+/* Smooth scroll for the whole page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Improved hero gradient animation on reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+}
