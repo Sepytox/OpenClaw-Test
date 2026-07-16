@@ -12,9 +12,11 @@
     <link rel="stylesheet" href="landing.css">
     <script>
         (function() {
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.body && document.body.classList.add('dark-mode');
-            }
+            try {
+                if (localStorage.getItem('darkMode') === 'true') {
+                    document.body && document.body.classList.add('dark-mode');
+                }
+            } catch(e) {}
         })();
     </script>
 </head>
