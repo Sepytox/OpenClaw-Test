@@ -353,6 +353,49 @@
             animation: confetti-fall linear forwards;
         }
     
+
+    /* === Aftermarket Card Layout: Wheel === */
+    .wheel-page { padding: 1.5rem 1rem 4rem !important; }
+    .wheel-header h1 { font-size: clamp(1.6rem, 5vw, 2rem) !important; }
+    .wheel-result-card, .result-info, .wheel-result {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 14px !important;
+        padding: 1.5rem !important;
+        box-shadow: var(--shadow-card) !important;
+    }
+    .wheel-result-card.selected, .wheel-result.winner {
+        border-color: var(--accent-primary) !important;
+        box-shadow: var(--glow-primary), var(--shadow-hover) !important;
+    }
+    .spin-btn, .btn-spin {
+        background: var(--btn-primary-bg) !important;
+        color: var(--btn-primary-text) !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 0.9rem 2.5rem !important;
+        font-size: 1rem !important;
+        font-weight: 800 !important;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        letter-spacing: 0.04em;
+        box-shadow: var(--shadow-card);
+    }
+    .spin-btn:hover, .btn-spin:hover {
+        background: var(--btn-primary-hover) !important;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }
+    .history-list li, .history-item {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 8px !important;
+        padding: 0.6rem 0.9rem !important;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem !important;
+        color: var(--text-secondary) !important;
+    }
+
     /* === THEME OVERRIDE: Apply CSS variables to page-specific elements === */
     body { background-color: var(--bg-primary) !important; color: var(--text-primary) !important; }
     .site-nav {
