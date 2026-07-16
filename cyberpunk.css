@@ -813,3 +813,40 @@ body.cyberpunk-mode .neon-pulse {
   transform: none !important;
   clip-path: none !important;
 }
+
+/* ============================================================
+   23. 3D TILT ENHANCE + FLOATING CARDS — ADDITIONAL STYLES
+   ============================================================ */
+
+/* Perspective wrapper for 3D tilt depth */
+.facts {
+  perspective: 1500px;
+}
+
+/* Motorcycle image zoom/rotate on scroll */
+body.cyberpunk-mode .fact-img {
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-origin: center center;
+}
+
+body.cyberpunk-mode .fact-card:hover .fact-img {
+  transform: scale(1.08) rotate(-1.5deg);
+}
+
+/* Levitation shadow sync with float animation */
+@keyframes floatShadow {
+  0%, 100% { box-shadow: 0 0 20px var(--cp-cyan-dim), 0 10px 30px rgba(0,0,0,0.3); }
+  50%       { box-shadow: 0 0 30px var(--cp-cyan-mid), 0 25px 50px rgba(0,0,0,0.5); }
+}
+
+body.cyberpunk-mode .float-card {
+  animation: float 4s ease-in-out infinite, floatShadow 4s ease-in-out infinite;
+}
+
+body.cyberpunk-mode .float-card:nth-child(2n) {
+  animation-delay: 0.8s;
+}
+
+body.cyberpunk-mode .float-card:nth-child(3n) {
+  animation-delay: 1.6s;
+}
