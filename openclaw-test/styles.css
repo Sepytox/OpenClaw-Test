@@ -1444,3 +1444,67 @@ body.dark-mode .search-input:focus {
 .modal-content {
     transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), opacity 0.25s ease !important;
 }
+
+/* ============================================================
+   TOUCH OPTIMISATIONS — motorcycles.css scope
+   ============================================================ */
+
+/* All interactive elements: min 44×44px touch target */
+.fact-card-clickable,
+.fav-btn,
+.btn-youtube,
+.btn-modal-fav,
+.filter-select,
+.search-input,
+.btn-clear-filter,
+.lang-btn,
+.theme-toggle {
+    min-height: 44px;
+}
+
+/* Font-size ≥ 16px on all inputs to prevent iOS zoom */
+.search-input,
+.filter-select {
+    font-size: max(1em, 16px);
+}
+
+/* Disable hover animations on touch-only devices */
+@media (hover: none) {
+    .fact-card-clickable:hover,
+    .fact-card-clickable:focus {
+        transform: none !important;
+        box-shadow: var(--card-shadow) !important;
+        border-color: var(--input-border) !important;
+    }
+
+    .fact-card-clickable:hover .card-icon,
+    .fact-card-clickable:focus .card-icon {
+        transform: none;
+    }
+
+    .fact-card-clickable:hover .card-name {
+        color: var(--text-primary);
+    }
+
+    .fact-card-clickable:hover .qstat {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .fav-btn:hover {
+        transform: none !important;
+    }
+
+    .btn-youtube:hover,
+    .btn-modal-fav:hover,
+    .lang-btn:hover,
+    .theme-toggle:hover,
+    .badge:hover,
+    .btn-clear-filter:hover {
+        transform: none !important;
+    }
+
+    .modal-close:hover {
+        transform: none;
+    }
+}

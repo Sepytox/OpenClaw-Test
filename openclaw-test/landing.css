@@ -1178,6 +1178,73 @@ body.dark-mode .timeline-item::before {
     border-color: #0f1623;
 }
 
+/* ============================================================
+   TOUCH OPTIMISATIONS — Global
+   ============================================================ */
+
+/* All interactive elements: minimum 44×44px touch target (Apple HIG) */
+.btn,
+.btn-submit,
+.btn-primary,
+.btn-secondary,
+.btn-spotlight,
+.btn-large,
+.nav-link,
+.category-tile,
+.footer-link {
+    min-height: 44px;
+}
+
+/* Inputs: 16px font prevents iOS auto-zoom */
+input, select, textarea {
+    font-size: max(1rem, 16px);
+}
+
+/* Disable hover effects on touch-only devices */
+@media (hover: none) {
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .btn-spotlight:hover {
+        transform: none;
+        box-shadow: none;
+    }
+
+    .feature-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-sm);
+        border-color: var(--mid-grey);
+    }
+
+    .spotlight-card:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: rgba(255,255,255,0.10);
+    }
+
+    .spotlight-card-center:hover {
+        transform: scale(1.05); /* keep the scale offset, just no hover translate */
+    }
+
+    .category-tile:hover {
+        transform: none;
+        box-shadow: var(--shadow-sm);
+        border-color: var(--mid-grey);
+        background: var(--white);
+    }
+
+    .about-card:hover {
+        transform: none;
+        box-shadow: var(--shadow-sm);
+        border-color: var(--mid-grey);
+    }
+
+    .nav-logo:hover { color: var(--white); }
+    .nav-link:hover { background: none; }
+    .nav-theme-btn:hover { background: rgba(255,255,255,0.10); transform: none; }
+    .footer-link:hover { color: rgba(255,255,255,0.6); }
+    .footer-link:hover::after { width: 0; }
+}
+
 /* Smooth scroll for the whole page */
 html {
     scroll-behavior: smooth;
