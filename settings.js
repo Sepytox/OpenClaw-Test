@@ -1,29 +1,29 @@
 /**
- * VROOOOM — Settings Panel
- * Theme switching (Neon Dark / Light Professional / Dark Professional)
- * Brightness control, Accessibility options
+ * VROOOOM — Settings Panel v2
+ * Dark / Light Theme via data-theme attribute + CSS variables
+ * Brightness & Accessibility options
  * Persisted in localStorage
  */
 
 (function () {
   'use strict';
 
-  /* ── Keys ──────────────────────────────────────────────────── */
-  var STORAGE = {
-    theme:         'vroooom_theme',
-    brightness:    'vroooom_brightness',
-    highContrast:  'vroooom_a11y_contrast',
-    largeText:     'vroooom_a11y_text',
-    reduceMotion:  'vroooom_a11y_motion',
+  /* ── Storage keys ───────────────────────────────────────────── */
+  var KEYS = {
+    theme:        'theme',
+    brightness:   'vroooom_brightness',
+    highContrast: 'vroooom_a11y_contrast',
+    largeText:    'vroooom_a11y_text',
+    reduceMotion: 'vroooom_a11y_motion',
   };
 
   /* ── Defaults ───────────────────────────────────────────────── */
   var DEFAULTS = {
-    theme:         'neon-dark',
-    brightness:    100,
-    highContrast:  false,
-    largeText:     false,
-    reduceMotion:  false,
+    theme:        'dark',
+    brightness:   100,
+    highContrast: false,
+    largeText:    false,
+    reduceMotion: false,
   };
 
   /* ── Helpers ────────────────────────────────────────────────── */
@@ -42,19 +42,23 @@
 
   /* ── State ──────────────────────────────────────────────────── */
   var state = {
-    theme:        load(STORAGE.theme,        DEFAULTS.theme),
-    brightness:   load(STORAGE.brightness,   DEFAULTS.brightness),
-    highContrast: load(STORAGE.highContrast, DEFAULTS.highContrast),
-    largeText:    load(STORAGE.largeText,    DEFAULTS.largeText),
-    reduceMotion: load(STORAGE.reduceMotion, DEFAULTS.reduceMotion),
+    theme:        load(KEYS.theme,        DEFAULTS.theme),
+    brightness:   load(KEYS.brightness,   DEFAULTS.brightness),
+    highContrast: load(KEYS.highContrast, DEFAULTS.highContrast),
+    largeText:    load(KEYS.largeText,    DEFAULTS.largeText),
+    reduceMotion: load(KEYS.reduceMotion, DEFAULTS.reduceMotion),
   };
 
   /* ── Apply theme ────────────────────────────────────────────── */
   function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    // Remove legacy dark-mode classes if present
-    document.body.classList.remove('dark-mode', 'cyberpunk-mode');
-    document.documentElement.classList.remove('dark-mode-pending', 'cyberpunk-pending');
+    var t = (theme === 'light') ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    // Update all theme-toggle buttons on page
+    document.querySelectorAll('#themeToggle').forEach(function(btn) {
+      btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    });
+    // Remove legacy classes if present
+    document.body.classList.remove('dark-mode', 'neon-dark', 'cyberpunk-mode');
   }
 
   function applyBrightness(value) {
@@ -84,59 +88,6 @@
   applyAll();
 
   /* ── Build Settings Panel HTML ──────────────────────────────── */
-  function buildPanel() {
-    var html = [
-      /* Overlay */
-      '<div class="settings-overlay" id="settingsOverlay" role="presentation"></div>',
-      /* Trigger button */
-      '<button class="settings-trigger" id="settingsTrigger" aria-label="Einstellungen öffnen" title="⚙️ Einstellungen">⚙️</button>',
-      /* Panel */
-      '<aside class="settings-panel" id="settingsPanel" role="dialog" aria-modal="true" aria-label="Einstellungen">',
-        '<div class="settings-panel-header">',
-          '<span class="settings-panel-title">⚙️ Einstellungen</span>',
-          '<button class="settings-close" id="settingsClose" aria-label="Einstellungen schließen">✕</button>',
-        '</div>',
-        '<div class="settings-panel-body">',
-
-          /* Theme section */
-          '<div class="settings-section">',
-            '<div class="settings-section-title">🌙 Theme</div>',
-            '<div class="theme-options">',
-              themeOption('neon-dark',          '🌌', 'theme-preview-neon',      'Neon Dark',          'Energetic, Gaming, Cyberpunk'),
-              themeOption('light-professional', '☀️', 'theme-preview-light',     'Light Professional', 'Clean, Readable, Business'),
-              themeOption('dark-professional',  '🌃', 'theme-preview-dark-pro',  'Dark Professional',  'Sleek, Modern, Seriös'),
-            '</div>',
-          '</div>',
-
-          /* Brightness section */
-          '<div class="settings-section">',
-            '<div class="settings-section-title">🔆 Helligkeit</div>',
-            '<div class="settings-slider-row">',
-              '<div class="settings-slider-label">',
-                '<span>Helligkeit</span>',
-                '<span class="settings-slider-val" id="brightnessVal">' + state.brightness + '%</span>',
-              '</div>',
-              '<input class="vc-range" type="range" id="brightnessRange" min="50" max="100" step="5" value="' + state.brightness + '" aria-label="Helligkeit anpassen">',
-            '</div>',
-          '</div>',
-
-          /* Accessibility section */
-          '<div class="settings-section">',
-            '<div class="settings-section-title">♿ Accessibility</div>',
-            checkRow('a11yContrast', 'highContrast', 'Hoher Kontrast', 'Stärkere Farb-Kontraste für bessere Lesbarkeit', state.highContrast),
-            checkRow('a11yText',    'largeText',    'Große Schrift',   'Text-Größe von 14px auf 18px erhöhen',           state.largeText),
-            checkRow('a11yMotion',  'reduceMotion', 'Animationen reduzieren', 'Weniger Bewegung für bessere Fokussierung', state.reduceMotion),
-          '</div>',
-
-        '</div>',
-        '<div class="settings-panel-footer">',
-          '<button class="settings-reset-btn" id="settingsReset">💾 Auf Standard zurücksetzen</button>',
-        '</div>',
-      '</aside>',
-    ].join('');
-    return html;
-  }
-
   function themeOption(value, icon, previewClass, name, desc) {
     var active = state.theme === value ? ' active' : '';
     return [
@@ -160,6 +111,51 @@
     ].join('');
   }
 
+  function buildPanel() {
+    return [
+      '<div class="settings-overlay" id="settingsOverlay" role="presentation"></div>',
+      '<button class="settings-trigger" id="settingsTrigger" aria-label="Einstellungen öffnen" title="⚙️ Einstellungen">⚙️</button>',
+      '<aside class="settings-panel" id="settingsPanel" role="dialog" aria-modal="true" aria-label="Einstellungen">',
+        '<div class="settings-panel-header">',
+          '<span class="settings-panel-title">⚙️ Einstellungen</span>',
+          '<button class="settings-close" id="settingsClose" aria-label="Einstellungen schließen">✕</button>',
+        '</div>',
+        '<div class="settings-panel-body">',
+
+          '<div class="settings-section">',
+            '<div class="settings-section-title">🌙 Theme</div>',
+            '<div class="theme-options">',
+              themeOption('dark',  '🌑', 'theme-preview-neon',   'Dark Mode',  'Orange/Schwarz — Standard'),
+              themeOption('light', '☀️', 'theme-preview-light',  'Light Mode', 'Hell & aufgeräumt'),
+            '</div>',
+          '</div>',
+
+          '<div class="settings-section">',
+            '<div class="settings-section-title">🔆 Helligkeit</div>',
+            '<div class="settings-slider-row">',
+              '<div class="settings-slider-label">',
+                '<span>Helligkeit</span>',
+                '<span class="settings-slider-val" id="brightnessVal">' + state.brightness + '%</span>',
+              '</div>',
+              '<input class="vc-range" type="range" id="brightnessRange" min="50" max="100" step="5" value="' + state.brightness + '" aria-label="Helligkeit anpassen">',
+            '</div>',
+          '</div>',
+
+          '<div class="settings-section">',
+            '<div class="settings-section-title">♿ Accessibility</div>',
+            checkRow('a11yContrast', 'highContrast', 'Hoher Kontrast',        'Stärkere Farb-Kontraste',          state.highContrast),
+            checkRow('a11yText',    'largeText',    'Große Schrift',           'Text-Größe erhöhen',               state.largeText),
+            checkRow('a11yMotion',  'reduceMotion', 'Animationen reduzieren',  'Weniger Bewegung',                 state.reduceMotion),
+          '</div>',
+
+        '</div>',
+        '<div class="settings-panel-footer">',
+          '<button class="settings-reset-btn" id="settingsReset">Auf Standard zurücksetzen</button>',
+        '</div>',
+      '</aside>',
+    ].join('');
+  }
+
   /* ── Inject panel into DOM ──────────────────────────────────── */
   function injectPanel() {
     var el = document.createElement('div');
@@ -172,17 +168,16 @@
 
   /* ── Event binding ──────────────────────────────────────────── */
   function bindEvents() {
-    var trigger  = document.getElementById('settingsTrigger');
-    var overlay  = document.getElementById('settingsOverlay');
-    var panel    = document.getElementById('settingsPanel');
-    var closeBtn = document.getElementById('settingsClose');
+    var trigger    = document.getElementById('settingsTrigger');
+    var overlay    = document.getElementById('settingsOverlay');
+    var panel      = document.getElementById('settingsPanel');
+    var closeBtn   = document.getElementById('settingsClose');
     var brightness = document.getElementById('brightnessRange');
-    var resetBtn = document.getElementById('settingsReset');
+    var resetBtn   = document.getElementById('settingsReset');
 
     function openPanel() {
       panel.classList.add('open');
       overlay.classList.add('open');
-      panel.focus();
       document.body.style.overflow = 'hidden';
     }
 
@@ -190,26 +185,21 @@
       panel.classList.remove('open');
       overlay.classList.remove('open');
       document.body.style.overflow = '';
-      trigger.focus();
     }
 
     trigger.addEventListener('click', openPanel);
     closeBtn.addEventListener('click', closePanel);
     overlay.addEventListener('click', closePanel);
 
-    // Escape key
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && panel.classList.contains('open')) {
-        closePanel();
-      }
+      if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
     });
 
     // Theme buttons
-    var themeButtons = document.querySelectorAll('[data-theme-value]');
-    themeButtons.forEach(function (btn) {
+    document.querySelectorAll('[data-theme-value]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         state.theme = btn.getAttribute('data-theme-value');
-        save(STORAGE.theme, state.theme);
+        save(KEYS.theme, state.theme);
         applyTheme(state.theme);
         updateThemeButtons();
       });
@@ -221,36 +211,32 @@
         state.brightness = parseInt(brightness.value, 10);
         var valEl = document.getElementById('brightnessVal');
         if (valEl) valEl.textContent = state.brightness + '%';
-        save(STORAGE.brightness, state.brightness);
+        save(KEYS.brightness, state.brightness);
         applyBrightness(state.brightness);
       });
     }
 
     // Checkboxes (a11y)
-    var checks = document.querySelectorAll('[data-state-key]');
-    checks.forEach(function (chk) {
+    document.querySelectorAll('[data-state-key]').forEach(function (chk) {
       chk.addEventListener('change', function () {
         var key = chk.getAttribute('data-state-key');
         state[key] = chk.checked;
-        var storageKey = STORAGE[key];
-        if (storageKey) save(storageKey, state[key]);
+        if (KEYS[key]) save(KEYS[key], state[key]);
         applyA11y(state.highContrast, state.largeText, state.reduceMotion);
       });
     });
 
-    // Reset button
+    // Reset
     if (resetBtn) {
       resetBtn.addEventListener('click', function () {
         Object.keys(DEFAULTS).forEach(function (k) {
           state[k] = DEFAULTS[k];
-          if (STORAGE[k]) save(STORAGE[k], DEFAULTS[k]);
+          if (KEYS[k]) save(KEYS[k], DEFAULTS[k]);
         });
         applyAll();
-        // Re-inject to rebuild UI
         var root = document.getElementById('vroooom-settings-root');
         if (root) root.remove();
         injectPanel();
-        // Re-open panel
         setTimeout(function () {
           var p = document.getElementById('settingsPanel');
           var o = document.getElementById('settingsOverlay');
@@ -261,10 +247,8 @@
   }
 
   function updateThemeButtons() {
-    var buttons = document.querySelectorAll('[data-theme-value]');
-    buttons.forEach(function (btn) {
-      var isActive = btn.getAttribute('data-theme-value') === state.theme;
-      btn.classList.toggle('active', isActive);
+    document.querySelectorAll('[data-theme-value]').forEach(function (btn) {
+      btn.classList.toggle('active', btn.getAttribute('data-theme-value') === state.theme);
     });
   }
 
