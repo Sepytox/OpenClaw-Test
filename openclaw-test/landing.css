@@ -470,11 +470,9 @@ img { max-width: 100%; display: block; }
     margin: 0 auto;
 }
 
+/* Spotlight cards use inline CSS vars --g1 and --g2 for per-card gradients */
 .spotlight-card {
-    background: linear-gradient(135deg, #var(--g1,1a2332), #var(--g2,2c3548));
-    background-image: linear-gradient(135deg, #var(--g1), #var(--g2));
-    /* Use CSS custom props from inline style */
-    background: linear-gradient(135deg, var(--g1-color, #1a2332), var(--g2-color, #2c3548));
+    background: linear-gradient(135deg, var(--g1, #1a2332), var(--g2, #2c3548));
     border-radius: var(--radius-lg);
     padding: 2rem 1.75rem;
     color: var(--white);
@@ -486,12 +484,6 @@ img { max-width: 100%; display: block; }
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.10);
     transition: var(--transition);
-    /* Gradient from inline --g1/--g2 vars on the element */
-}
-
-/* Override: use the inline CSS variable approach */
-.spotlight-card {
-    background: linear-gradient(135deg, var(--g1), var(--g2));
 }
 
 .spotlight-card:hover {
