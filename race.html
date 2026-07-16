@@ -1257,7 +1257,8 @@ function updateRecordDisplay() {
 }
 updateRecordDisplay();
 
-// Keyboard shortcuts
+// Keyboard shortcuts — Arrow Up/Down = throttle, Q/A = shift (manual mode)
+// H = toggle help overlay
 document.addEventListener('keydown', e => {
     if (!simState.running) return;
     if (e.code === 'ArrowUp' || e.code === 'Space') {
@@ -1274,6 +1275,11 @@ document.addEventListener('keydown', e => {
     }
     if (e.code === 'KeyQ' && raceMode === 'manual') shiftUp();
     if (e.code === 'KeyA' && raceMode === 'manual') shiftDown();
+    // Full throttle shortcut
+    if (e.code === 'KeyF') {
+        document.getElementById('throttleSlider').value = 100;
+        updateThrottle(100);
+    }
 });
 
 // Keyboard shortcuts help overlay
