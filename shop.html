@@ -6,6 +6,7 @@
     <title>Kawasaki Aftermarket Shop — Tuning & Parts</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <style>
 /* PAGE */
         .shop-page { max-width:1200px;margin:0 auto;padding:1.5rem 1rem 4rem; }
@@ -171,7 +172,7 @@
             font-size: 0.7rem;
             font-weight: 600;
         }
-        .gain-ps { background: rgba(57,255,20,0.1); color: var(--accent); border: 1px solid rgba(57,255,20,0.2); }
+        .gain-ps { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--border-hover); }
         .gain-weight { background: rgba(0,234,255,0.1); color: #00c8ff; border: 1px solid rgba(0,234,255,0.2); }
         .gain-accel { background: rgba(255,102,0,0.1); color: var(--accent); border: 1px solid rgba(255,102,0,0.2); }
 
@@ -230,8 +231,8 @@
 
         /* SAVINGS */
         .cart-savings {
-            background: rgba(57,255,20,0.06);
-            border: 1px solid rgba(57,255,20,0.15);
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-dim);
             border-radius: 8px;
             padding: 0.75rem;
             margin-bottom: 1rem;
@@ -290,6 +291,7 @@
     <a href="shop.html" class="active">Aftermarket</a>
     <a href="quiz.html">Quiz</a>
     <a href="wheel.html">Wheel</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
 </nav>
 
 <div class="shop-page">
@@ -758,6 +760,21 @@ init();
     }
 })();
 updateLiveSpecs();
+
+// Theme toggle
+(function() {
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    var t = localStorage.getItem('theme') || 'dark';
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    btn.addEventListener('click', function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        btn.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+})();
 </script>
     <script src="settings.js"></script>
 </body>

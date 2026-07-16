@@ -6,6 +6,7 @@
     <title>Kawasaki Racing Simulator — Realistic Physics</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -43,14 +44,14 @@
             padding:0.4rem 0.85rem;border-radius:20px;border:1px solid #333;background:transparent;
             color:#777;font-size:0.8rem;cursor:pointer;transition:all 0.2s;
         }
-        .mode-chip.active { border-color:#00c8ff;color:#00c8ff;background:rgba(0,234,255,0.06); }
+        .mode-chip.active { border-color:var(--accent);color:var(--accent);background:var(--accent-dim); }
         .toggle-group { display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap; }
         .toggle-label { font-size:0.75rem;color:#666;text-transform:uppercase;letter-spacing:1px; }
         .toggle-btn {
             padding:0.35rem 0.8rem;border-radius:6px;border:1px solid #333;background:transparent;
             color:#666;font-size:0.78rem;cursor:pointer;transition:all 0.2s;
         }
-        .toggle-btn.on { border-color:var(--accent);color:var(--accent);background:rgba(57,255,20,0.06); }
+        .toggle-btn.on { border-color:var(--accent);color:var(--accent);background:var(--accent-dim); }
 
         /* RACE TRACK */
         .race-track-section { margin-bottom:1.5rem; }
@@ -112,7 +113,7 @@
         .stat-box .stat-val {
             font-size: 1.4rem;
             font-weight: 800;
-            color: #00c8ff;
+            color: var(--accent);
             font-variant-numeric: tabular-nums;
             line-height: 1;
         }
@@ -222,8 +223,8 @@
         .race-ctrl-btns { display:flex;gap:0.75rem;flex-wrap:wrap; }
         .race-start-btn {
             padding: 0.9rem 2.5rem;
-            background: linear-gradient(135deg, var(--accent), #00e676);
-            color: #000;
+            background: var(--accent);
+            color: #fff;
             border: none;
             border-radius: 50px;
             font-size: 1.1rem;
@@ -266,7 +267,7 @@
         }
         .compare-bike-panel h3 { font-size:0.8rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:0.75rem; }
         .compare-stat { display:flex;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid #111;font-size:0.85rem; }
-        .compare-stat span:last-child { color:#00c8ff;font-weight:600; }
+        .compare-stat span:last-child { color:var(--accent);font-weight:600; }
         .compare-leading { color: var(--accent) !important; }
 
         /* LAP/RECORD */
@@ -324,7 +325,7 @@
         .splits-table th { color:#555;text-align:left;padding:0.4rem 0.75rem;border-bottom:1px solid #1a1a1a;font-weight:600;text-transform:uppercase;font-size:0.7rem;letter-spacing:1px; }
         .splits-table td { padding:0.4rem 0.75rem;border-bottom:1px solid #111;color:#aaa; }
         .splits-table tr:last-child td { border-bottom:none; }
-        .split-time { color:#00c8ff !important;font-weight:600; }
+        .split-time { color:var(--accent) !important;font-weight:600; }
 
         /* VELOCITY GRAPH */
         .graph-section {
@@ -347,8 +348,8 @@
             transition: all 0.2s;
         }
         .shift-indicator.normal { color: #444; }
-        .shift-indicator.ready { color: var(--accent); background: rgba(57,255,20,0.06); }
-        .shift-indicator.warn { color: var(--accent); background: rgba(255,102,0,0.06); animation: blink 0.4s step-end infinite; }
+        .shift-indicator.ready { color: var(--accent); background: var(--accent-dim); }
+        .shift-indicator.warn { color: var(--accent); background: var(--accent-dim); animation: blink 0.4s step-end infinite; }
         .shift-indicator.redline { color: #ff0044; background: rgba(255,0,68,0.1); animation: blink 0.2s step-end infinite; }
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
@@ -358,8 +359,8 @@
             to { background-position: 0 40px; }
         }
         .racing-bg {
-            background-image: linear-gradient(rgba(0,234,255,0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0,234,255,0.03) 1px, transparent 1px);
+            background-image: linear-gradient(rgba(255,102,0,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,102,0,0.03) 1px, transparent 1px);
             background-size: 40px 40px;
         }
         .racing-bg.moving {
@@ -382,6 +383,7 @@
     <a href="shop.html">Aftermarket</a>
     <a href="quiz.html">Quiz</a>
     <a href="wheel.html">Wheel</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
 </nav>
 
 <div class="race-page">
@@ -842,9 +844,9 @@ function updateUI(accel) {
     if (raceMode !== 'compare') {
         // Gauges
         // Color-coded RPM zones: cyan=normal, yellow=mid, orange=high, red=redline
-        const rpmColor = rpm > bike.redline * 0.93 ? '#ff0044' : rpm > bike.redline * 0.78 ? '#ff6600' : rpm > bike.redline * 0.5 ? '#ffcc00' : '#00eaff';
+        const rpmColor = rpm > bike.redline * 0.93 ? '#ff0044' : rpm > bike.redline * 0.78 ? '#ff6600' : rpm > bike.redline * 0.5 ? '#ffcc00' : '#ff8800';
         drawGauge('rpmGauge', rpm, bike.redline, rpmColor, rpm.toFixed(0));
-        drawGauge('speedGauge', speedKmh, bike.vmax, '#39ff14', speedKmh.toFixed(0));
+        drawGauge('speedGauge', speedKmh, bike.vmax, '#ff6600', speedKmh.toFixed(0));
 
         // Stat boxes
         document.getElementById('speedDisplay').textContent = speedKmh.toFixed(0);
@@ -862,7 +864,7 @@ function updateUI(accel) {
         rpmBar.style.width = rpmPct + '%';
         if (rpmPct > 90) { rpmBar.style.background = 'linear-gradient(90deg,#ff0044,#ff4466)'; }
         else if (rpmPct > 75) { rpmBar.style.background = 'linear-gradient(90deg,#ff6600,#ffaa00)'; }
-        else { rpmBar.style.background = 'linear-gradient(90deg,#00eaff,#39ff14)'; }
+        else { rpmBar.style.background = 'linear-gradient(90deg,#ff8800,#ff6600)'; }
 
         // Shift indicator
         const si = document.getElementById('shiftIndicator');
@@ -946,8 +948,8 @@ function drawGauge(canvasId, value, max, color, label) {
 }
 
 // Draw initial gauges
-drawGauge('rpmGauge', 0, 14000, '#00eaff', '0');
-drawGauge('speedGauge', 0, 300, '#39ff14', '0');
+drawGauge('rpmGauge', 0, 14000, '#ff8800', '0');
+drawGauge('speedGauge', 0, 300, '#ff6600', '0');
 
 // ==========================================
 // TRACK CANVAS
@@ -998,28 +1000,28 @@ function drawTrack() {
 
     // Finish line
     const finX = W - 4;
-    ctx.strokeStyle = '#39ff14';
+    ctx.strokeStyle = '#ff6600';
     ctx.lineWidth = 3;
-    ctx.shadowColor = '#39ff14';
+    ctx.shadowColor = '#ff6600';
     ctx.shadowBlur = 8;
     ctx.beginPath();
     ctx.moveTo(finX, roadY - 5);
     ctx.lineTo(finX, roadY + roadH + 5);
     ctx.stroke();
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#39ff14';
+    ctx.fillStyle = '#ff6600';
     ctx.font = 'bold 10px sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText('🏁 FINISH', finX - 2, roadY - 8);
 
     // Bike 1
     const b1x = Math.min((simState.dist / trackLen) * W, W - 20);
-    drawBikeMarker(ctx, b1x, roadY + roadH/2, '#39ff14', '1');
+    drawBikeMarker(ctx, b1x, roadY + roadH/2, '#ff6600', '1');
 
     // Bike 2
     if (raceMode === 'compare') {
         const b2x = Math.min((sim2State.dist / trackLen) * W, W - 20);
-        drawBikeMarker(ctx, b2x, roadY + roadH/2, '#00eaff', '2');
+        drawBikeMarker(ctx, b2x, roadY + roadH/2, '#ff8800', '2');
     }
 }
 
@@ -1080,8 +1082,8 @@ function drawVelocityGraph() {
         ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W-10, y); ctx.stroke();
     });
 
-    drawLine(hist1, '#39ff14');
-    if (raceMode === 'compare') drawLine(hist2, '#00eaff');
+    drawLine(hist1, '#ff6600');
+    if (raceMode === 'compare') drawLine(hist2, '#ff8800');
 
     // Labels
     ctx.fillStyle = '#444';
@@ -1183,8 +1185,8 @@ function resetRace() {
     resetSimState(sim2State);
     document.getElementById('throttleSlider').value = 0;
     document.getElementById('throttleVal').textContent = '0%';
-    drawGauge('rpmGauge', 0, 14000, '#00eaff', '0');
-    drawGauge('speedGauge', 0, 300, '#39ff14', '0');
+    drawGauge('rpmGauge', 0, 14000, '#ff8800', '0');
+    drawGauge('speedGauge', 0, 300, '#ff6600', '0');
     if (document.getElementById('speedDisplay')) {
         ['speedDisplay','rpmDisplay','timeDisplay','distDisplay','accelDisplay'].forEach(id => {
             const el = document.getElementById(id); if(el) el.textContent = '0';
@@ -1287,6 +1289,21 @@ document.addEventListener('keydown', e => {
 
 // Initial draw
 drawTrack();
+
+// Theme toggle
+(function() {
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    var t = localStorage.getItem('theme') || 'dark';
+    btn.textContent = t === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+    btn.addEventListener('click', function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        btn.textContent = next === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+    });
+})();
 </script>
     <script src="settings.js"></script>
 </body>

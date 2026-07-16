@@ -6,9 +6,10 @@
     <title>Which Kawasaki Are You? — Quiz</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <style>
             color: var(--accent);
-            background: rgba(57,255,20,0.08);
+            background: var(--accent-dim);
         }
 
         /* QUIZ CONTAINER */
@@ -57,7 +58,7 @@
         }
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent), #00c8ff);
+            background: linear-gradient(90deg, var(--accent), var(--accent));
             border-radius: 3px;
             transition: width 0.4s ease;
             
@@ -78,12 +79,12 @@
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 2px;
-            background: linear-gradient(90deg, #00c8ff, transparent);
+            background: linear-gradient(90deg, var(--accent), transparent);
             border-radius: 12px 12px 0 0;
         }
         .question-number {
             font-size: 0.75rem;
-            color: #00c8ff;
+            color: var(--accent);
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 0.75rem;
@@ -130,25 +131,25 @@
             font-size: 0.75rem;
             font-weight: 700;
             margin-right: 0.5rem;
-            color: #00c8ff;
+            color: var(--accent);
             flex-shrink: 0;
         }
         .answer-btn:hover {
-            border-color: #00c8ff;
+            border-color: var(--accent);
             color: #fff;
-            background: rgba(0,234,255,0.05);
+            background: var(--accent-dim);
             
             transform: translateY(-1px);
         }
         .answer-btn.selected {
             border-color: var(--accent);
-            background: rgba(57,255,20,0.08);
+            background: var(--accent-dim);
             color: #fff;
             
         }
         .answer-btn.selected .answer-label {
             background: var(--accent);
-            color: #000;
+            color: var(--text);
         }
 
         /* NAVIGATION */
@@ -172,7 +173,7 @@
         }
         .quiz-btn-primary {
             background: var(--accent);
-            color: #000;
+            color: var(--text);
             
         }
         .quiz-btn-primary:hover {
@@ -212,7 +213,7 @@
             position: absolute;
             top: -50%; left: -50%;
             width: 200%; height: 200%;
-            background: radial-gradient(ellipse at center, rgba(57,255,20,0.05) 0%, transparent 60%);
+            background: radial-gradient(ellipse at center, var(--accent-dim) 0%, transparent 60%);
             animation: pulse-glow 3s ease-in-out infinite;
         }
         @keyframes pulse-glow {
@@ -222,7 +223,7 @@
         .result-badge {
             display: inline-block;
             background: var(--accent);
-            color: #000;
+            color: var(--text);
             font-size: 0.75rem;
             font-weight: 700;
             padding: 0.3rem 1rem;
@@ -251,7 +252,7 @@
         }
         .result-rider-type {
             font-size: 1.1rem;
-            color: #00c8ff;
+            color: var(--accent);
             margin-bottom: 2rem;
         }
         .result-rider-type strong {
@@ -293,8 +294,8 @@
             transition: width 1s ease;
         }
         .match-bar-fill.first { background: linear-gradient(90deg, var(--accent), #00e676);  }
-        .match-bar-fill.second { background: linear-gradient(90deg, #00c8ff, #0097a7);  }
-        .match-bar-fill.third { background: linear-gradient(90deg, #bf00ff, #7b1fa2);  }
+        .match-bar-fill.second { background: linear-gradient(90deg, var(--accent), #0097a7);  }
+        .match-bar-fill.third { background: linear-gradient(90deg, var(--accent), var(--accent-hover));  }
 
         /* RESULT SPECS */
         .result-specs {
@@ -316,7 +317,7 @@
         .spec-chip .spec-val {
             font-size: 1.1rem;
             font-weight: 700;
-            color: #00c8ff;
+            color: var(--accent);
         }
         .spec-chip .spec-lbl {
             font-size: 0.7rem;
@@ -346,17 +347,17 @@
         }
         .btn-goto {
             background: var(--accent);
-            color: #000;
+            color: var(--text);
             border: none;
             
         }
         .btn-goto:hover {  transform: translateY(-2px); }
         .btn-share {
             background: transparent;
-            border: 1px solid #00c8ff;
-            color: #00c8ff;
+            border: 1px solid var(--accent);
+            color: var(--accent);
         }
-        .btn-share:hover { background: rgba(0,234,255,0.08);  }
+        .btn-share:hover { background: var(--accent-dim);  }
         .btn-retry {
             background: transparent;
             border: 1px solid #444;
@@ -399,7 +400,7 @@
             font-size: 0.85rem;
             color: #ccc;
         }
-        .intro-feat span { color: #00c8ff; margin-right: 0.4rem; }
+        .intro-feat span { color: var(--accent); margin-right: 0.4rem; }
 
         /* ANIMATIONS */
         @keyframes slide-in {
@@ -421,6 +422,7 @@
     <a href="shop.html">Aftermarket</a>
     <a href="quiz.html" class="active">Quiz</a>
     <a href="wheel.html">Wheel</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
 </nav>
 
 <!-- QUIZ WRAPPER -->
@@ -833,6 +835,21 @@ function restartQuiz() {
     document.getElementById('resultsSection').style.display = 'none';
     document.getElementById('introSection').style.display = 'block';
 }
+
+// Theme toggle
+(function() {
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    var t = localStorage.getItem('theme') || 'dark';
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    btn.addEventListener('click', function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        btn.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+})();
 </script>
     <script src="settings.js"></script>
 </body>

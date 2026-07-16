@@ -6,9 +6,10 @@
     <title>Spin The Wheel — Kawasaki Random Bike</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <style>
             color: var(--accent);
-            background: rgba(57,255,20,0.08);
+            background: var(--accent-dim);
         }
 
         /* PAGE */
@@ -23,7 +24,7 @@
         }
         .wheel-header h1 {
             font-size: clamp(2rem, 6vw, 3.5rem);
-            color: #00c8ff;
+            color: var(--accent);
             
             letter-spacing: 3px;
             margin-bottom: 0.4rem;
@@ -84,7 +85,7 @@
             width: 70px;
             height: 70px;
             border-radius: 50%;
-            background: #0a0a0a;
+            background: var(--bg-secondary);
             border: 3px solid var(--accent);
             color: var(--accent);
             font-size: 0.65rem;
@@ -103,8 +104,8 @@
         }
         .wheel-center-btn:hover:not(:disabled) {
             
-            color: #fff;
-            border-color: #fff;
+            color: var(--text);
+            border-color: var(--border);
         }
         .wheel-center-btn:disabled {
             opacity: 0.5;
@@ -116,7 +117,7 @@
             padding: 1rem 3rem;
             font-size: 1.2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--accent), #00e676);
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
             color: #000;
             border: none;
             border-radius: 50px;
@@ -187,7 +188,7 @@
             display: block;
             text-align: center;
             margin-bottom: 0.5rem;
-            filter: drop-shadow(0 0 10px #00c8ff);
+            filter: drop-shadow(0 0 10px var(--accent));
             animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes pop-in {
@@ -215,13 +216,13 @@
             margin-bottom: 1.25rem;
         }
         .result-spec-item {
-            background: #0d0d0d;
+            background: var(--bg-secondary);
             border: 1px solid #222;
             border-radius: 8px;
             padding: 0.5rem;
             text-align: center;
         }
-        .result-spec-val { font-size: 1rem; font-weight: 700; color: #00c8ff; }
+        .result-spec-val { font-size: 1rem; font-weight: 700; color: var(--accent); }
         .result-spec-lbl { font-size: 0.68rem; color: #555; }
 
         .result-btns {
@@ -249,8 +250,8 @@
         .btn-primary-sm:hover {  }
         .btn-outline-sm {
             background: transparent;
-            border: 1px solid #00c8ff;
-            color: #00c8ff;
+            border: 1px solid var(--accent);
+            color: var(--accent);
         }
         .btn-outline-sm:hover { background: rgba(0,234,255,0.08); }
         .btn-ghost-sm {
@@ -277,7 +278,7 @@
             gap: 0.4rem;
         }
         .history-chip {
-            background: #0d0d0d;
+            background: var(--bg-secondary);
             border: 1px solid #222;
             border-radius: 20px;
             padding: 0.3rem 0.7rem;
@@ -311,6 +312,7 @@
     <a href="shop.html">Aftermarket</a>
     <a href="quiz.html">Quiz</a>
     <a href="wheel.html" class="active">Wheel</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
 </nav>
 
 <div class="wheel-page">
@@ -395,10 +397,10 @@ const SEGMENT_COLORS = [
     '#001a1a', '#1a0000'
 ];
 const SEGMENT_BORDERS = [
-    '#00eaff', '#39ff14', '#bf00ff', '#ff6600', '#39ff14',
-    '#00eaff', '#ff6600', '#39ff14', '#bf00ff', '#00eaff',
-    '#39ff14', '#ff6600', '#00eaff', '#bf00ff', '#39ff14',
-    '#ff6600', '#00eaff'
+    '#ff8800', '#ff6600', '#cc3300', '#ff6600', '#ff6600',
+    '#cc3300', '#ff6600', '#ff8800', '#333333', '#cc3300',
+    '#ff6600', '#ff8800', '#cc3300', '#333333', '#ff6600',
+    '#ff8800', '#cc3300'
 ];
 
 // State
@@ -502,7 +504,7 @@ function drawWheel() {
     ctx.arc(cx, cy, 35, 0, Math.PI * 2);
     ctx.fillStyle = gradient;
     ctx.fill();
-    ctx.strokeStyle = '#39ff14';
+    ctx.strokeStyle = '#ff6600';
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -608,7 +610,7 @@ function updateHistory() {
 // CONFETTI
 // ==========================================
 function launchConfetti() {
-    const colors = ['#39ff14', '#00eaff', '#bf00ff', '#ff6600', '#fff'];
+    const colors = ['#ff6600', '#ff8800', '#cc3300', '#fff', '#ffcc00'];
     for (let i = 0; i < 50; i++) {
         setTimeout(() => {
             const el = document.createElement('div');
@@ -673,6 +675,21 @@ document.addEventListener('keydown', e => {
         spinWheel();
     }
 });
+
+// Theme toggle
+(function() {
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    var t = localStorage.getItem('theme') || 'dark';
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    btn.addEventListener('click', function() {
+        var current = document.documentElement.getAttribute('data-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        btn.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+})();
 </script>
     <script src="settings.js"></script>
 </body>

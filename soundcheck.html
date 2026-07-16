@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="soundcheck.css">
   <link rel="stylesheet" href="design.css">
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
 </head>
 <body>
   <!-- Scroll Progress Bar (injected by JS) -->
@@ -19,6 +20,7 @@
     <a href="shop.html">Aftermarket</a>
     <a href="quiz.html">Quiz</a>
     <a href="wheel.html">Wheel</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
   </nav>
 
   <div class="container">
@@ -176,6 +178,21 @@
   <div class="sc-modal-overlay" id="scModalOverlay" hidden></div>
 
   <script src="soundcheck.js"></script>
+  <script>
+  (function() {
+    var btn = document.getElementById('themeToggle');
+    if (!btn) return;
+    var t = localStorage.getItem('theme') || 'dark';
+    btn.textContent = t === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+    btn.addEventListener('click', function() {
+      var current = document.documentElement.getAttribute('data-theme');
+      var next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      btn.textContent = next === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
+    });
+  })();
+  </script>
   <script src="settings.js"></script>
 </body>
 </html>
