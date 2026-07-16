@@ -855,11 +855,19 @@ function showResults(topCat, sorted, pcts) {
 
 function shareResult() {
     const name = document.getElementById('resultName').textContent;
-    const text = `Ich bin ein ${name}-Fahrer! 🏍️ Finde dein Kawasaki-Match: ${window.location.href}`;
+    const riderType = document.getElementById('resultRiderType').innerText;
+    const text = `Ich bin ein ${name}-Fahrer! 🏍️\n${riderType}\nFinde dein Kawasaki-Match: ${window.location.href}`;
+    // Discord share text
+    const discordText = `**Which Kawasaki Are You?** 🏍️\nMein Ergebnis: **${name}** — ${riderType}\nMach auch den Quiz: ${window.location.href}`;
     if (navigator.share) {
         navigator.share({ title: 'Which Kawasaki Are You?', text, url: window.location.href });
     } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(text).then(() => alert('📋 Link kopiert!\n\n' + text));
+        navigator.clipboard.writeText(discordText).then(() => {
+            const btn = document.querySelector('.btn-share');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '✅ Kopiert!';
+            setTimeout(() => { btn.innerHTML = orig; }, 2000);
+        });
     } else {
         prompt('Kopiere diesen Text:', text);
     }
