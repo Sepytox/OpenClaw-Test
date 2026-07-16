@@ -959,7 +959,9 @@ img { max-width: 100%; display: block; }
 @media (max-width: 768px) {
     .top-navbar { padding: 0 1rem; }
 
-    .nav-hamburger { display: block; }
+    .nav-hamburger {
+        display: flex; /* use flex so align-items/justify-content work */
+    }
 
     .nav-links {
         /* Slide-down animation via max-height trick */
@@ -1041,6 +1043,75 @@ img { max-width: 100%; display: block; }
     .hero { min-height: 70vh; }
     .hero-content { padding: 1.5rem 1rem; }
     .hero-cta-group { margin-bottom: 2rem; }
+}
+
+/* ============================================================
+   ABOUT PAGE — MOBILE TIMELINE
+   ============================================================ */
+@media (max-width: 600px) {
+    /* Simplify timeline: tighter, no split layout */
+    .timeline {
+        border-left: 2px solid var(--red);
+        padding-left: 1.25rem;
+        gap: 1.5rem;
+    }
+
+    .timeline-item::before {
+        left: -1.85rem;
+        width: 12px;
+        height: 12px;
+    }
+
+    .timeline-year {
+        font-size: 0.75rem;
+    }
+
+    .timeline-text {
+        font-size: 0.9rem;
+    }
+
+    /* About grid: single column */
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .page-content {
+        padding: 2rem 1rem;
+    }
+
+    .page-hero {
+        padding: 3rem 1rem 2.5rem;
+    }
+}
+
+/* ============================================================
+   CONTACT PAGE — MOBILE FORM
+   ============================================================ */
+@media (max-width: 768px) {
+    /* Inputs: min 44px height + 16px font (prevents iOS zoom) */
+    .form-input,
+    .form-textarea,
+    .form-select {
+        min-height: 44px;
+        font-size: 1rem; /* 16px — prevents iOS auto-zoom */
+        padding: 0.7rem 0.9rem;
+    }
+
+    .form-textarea {
+        min-height: 120px;
+    }
+
+    .btn-submit {
+        min-height: 48px;
+        font-size: 1rem;
+    }
+
+    /* FAQ accordion better spacing on mobile */
+    .faq-item summary {
+        padding: 0.9rem 1.1rem;
+        font-size: 0.95rem;
+    }
 }
 
 /* ============================================================
