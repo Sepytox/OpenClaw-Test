@@ -1276,6 +1276,14 @@ document.addEventListener('keydown', e => {
     if (e.code === 'KeyA' && raceMode === 'manual') shiftDown();
 });
 
+// Keyboard shortcuts help overlay
+document.addEventListener('keydown', e => {
+    if (e.code === 'KeyH') {
+        const help = document.getElementById('keyHelp');
+        if (help) help.style.display = help.style.display === 'none' ? 'block' : 'none';
+    }
+});
+
 // Check URL param for pre-selected bike
 (function() {
     const params = new URLSearchParams(window.location.search);
