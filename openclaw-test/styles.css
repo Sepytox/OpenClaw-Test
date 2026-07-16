@@ -35,7 +35,7 @@
     --badge-offroad-text: #e65c00;
     --badge-classic: #e8e8ff;
     --badge-classic-text: #283593;
-    --transition: 0.3s ease;
+    --transition: all 0.3s ease; /* Matches landing.css for consistency */
 }
 
 html.dark-mode-pending body { display: none; }
