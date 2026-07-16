@@ -10,6 +10,81 @@
     <title>Vrooooom - Kawasaki Motorcycles</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="landing.css">
+    <link rel="stylesheet" href="../themes.css">
+    <script>
+        (function() {
+            var t = localStorage.getItem('vroooom_theme') || 'neon-dark';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
+
+    <style>
+    /* === Theme Integration === */
+    body { background: var(--bg-primary) !important; color: var(--text-primary) !important; transition: background 0.3s, color 0.3s; }
+    
+    .top-navbar, nav[class*="navbar"] {
+        background: var(--nav-bg) !important;
+        border-bottom: 1px solid var(--nav-border) !important;
+        box-shadow: var(--nav-shadow) !important;
+    }
+    .nav-logo, .nav-brand a { color: var(--accent-primary) !important; text-shadow: var(--glow-text) !important; }
+    .nav-link { color: var(--text-muted) !important; }
+    .nav-link:hover, .nav-link-active { color: var(--accent-primary) !important; }
+    
+    .card, .bike-card, .feature-card, .timeline-item, .timeline-card,
+    .contact-form-card, .faq-item, .team-card, .stat-card {
+        background: var(--card-bg) !important;
+        border: 1px solid var(--card-border) !important;
+        border-radius: 12px !important;
+        box-shadow: var(--shadow-card) !important;
+        transition: all 0.2s ease !important;
+    }
+    .card:hover, .bike-card:hover, .feature-card:hover, .faq-item:hover {
+        border-color: var(--card-border-hover) !important;
+        box-shadow: var(--shadow-hover) !important;
+        transform: translateY(-2px);
+    }
+    
+    h1, h2, h3, h4, h5 { color: var(--text-primary) !important; }
+    p, li { color: var(--text-secondary) !important; }
+    
+    /* Light mode specific */
+    [data-theme="light-professional"] h1,
+    [data-theme="light-professional"] h2,
+    [data-theme="light-professional"] h3 {
+        text-shadow: none !important;
+    }
+    [data-theme="light-professional"] .page-hero,
+    [data-theme="light-professional"] .hero {
+        background: linear-gradient(135deg, #F0F4FF 0%, #E8F0FE 100%) !important;
+    }
+    [data-theme="light-professional"] .page-hero-title,
+    [data-theme="light-professional"] .hero-title { color: #1A1A1A !important; }
+    
+    /* Accent spans keep their color */
+    .accent, [style*="color:var(--green)"], [style*="color:var(--red)"] {
+        /* preserved */
+    }
+    
+    input, select, textarea {
+        background: var(--input-bg) !important;
+        border-color: var(--input-border) !important;
+        color: var(--input-text) !important;
+    }
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--input-border-focus) !important;
+        box-shadow: var(--focus-ring) !important;
+    }
+    
+    button.btn-primary, .cta-btn, .submit-btn, .btn-send {
+        background: var(--btn-primary-bg) !important;
+        color: var(--btn-primary-text) !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        border: none !important;
+    }
+    button.btn-primary:hover, .cta-btn:hover { background: var(--btn-primary-hover) !important; }
+    </style>
 </head>
 <body>
     <!-- SKIP TO MAIN CONTENT (Keyboard Accessibility) -->
@@ -283,5 +358,6 @@
             });
         });
     </script>
+    <script src="../settings.js"></script>
 </body>
 </html>
