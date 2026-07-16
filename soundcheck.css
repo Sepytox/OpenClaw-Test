@@ -1185,3 +1185,58 @@ body.dark-mode .sc-intro {
 .sc-exhaust-row[data-ex-idx="2"] .sc-db-bar-fill {
   background: linear-gradient(90deg, #FFD700, rgba(255,215,0,0.5));
 }
+
+/* ============================================================
+   20. SPECTRUM-ANALYZER + EQUALIZER ANIMATION — Enhanced
+   ============================================================ */
+
+/* EQ bar gradient animation */
+@keyframes eqBarColor {
+  0%   { background: linear-gradient(180deg, #FF006E 0%, #00FFE0 100%); }
+  50%  { background: linear-gradient(180deg, #FFD700 0%, #FF006E 100%); }
+  100% { background: linear-gradient(180deg, #FF006E 0%, #00FFE0 100%); }
+}
+
+body.cyberpunk-mode .eq-bar {
+  animation: eqBarColor 3s ease-in-out infinite;
+}
+
+/* Glow on eq bars when high amplitude */
+.eq-bar:nth-child(odd) {
+  animation-delay: 0.2s;
+}
+
+.eq-bar:nth-child(3n) {
+  animation-delay: 0.4s;
+}
+
+/* Spectrum analyzer grid overlay */
+.sc-spectrum-wrap {
+  position: relative;
+}
+
+/* Equalizer container glow */
+.sc-equalizer {
+  border: 1px solid var(--cp-cyan-dim, rgba(0,255,224,0.15));
+  border-radius: 6px;
+  padding: 10px 12px 8px;
+  background: var(--cp-bg, #0A0E27);
+}
+
+/* Peak markers on eq bars */
+.eq-bar::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: -3px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: white;
+  opacity: 0.5;
+  border-radius: 1px;
+}
+
+.eq-bar {
+  position: relative;
+}
