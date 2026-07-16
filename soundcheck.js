@@ -151,6 +151,11 @@
    * Load a real audio file and return decoded AudioBuffer
    * Returns a Promise that resolves with AudioBuffer or rejects on error
    */
+  /**
+   * Load an MP3 from the /audio/ folder, decode it, and cache the AudioBuffer.
+   * @param {string} url - Relative path to the audio file
+   * @returns {Promise<AudioBuffer>} - Decoded audio data
+   */
   function loadAudioFile(url) {
     if (audioBufferCache[url]) {
       return Promise.resolve(audioBufferCache[url]);
@@ -188,6 +193,12 @@
 
   /**
    * Play a real audio file using HTML5 Audio + Web Audio API analyser
+   */
+  /**
+   * Play a real audio file using HTML5 Audio connected to the Web Audio API analyser.
+   * Falls back to synthesis if loading or playback fails (autoplay block etc).
+   * @param {string} url - Path to MP3 file
+   * @param {object} exhaust - Exhaust config (for synthesis fallback)
    */
   function playRealAudio(url, exhaust) {
     stopCurrentPlayback();
@@ -240,6 +251,11 @@
     audioEl.load();
   }
 
+  /**
+   * Fallback: synthesize engine sound with Web Audio API.
+   * Called when real audio file fails to load or play.
+   * @param {object} exhaust - Exhaust config with freq, harmonics, etc.
+   */
   function fallbackToSynthesis(exhaust) {
     setPlayerLoadingState(false);
     playbackDuration = 8;
