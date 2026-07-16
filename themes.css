@@ -1217,3 +1217,67 @@ body.brightness-adjusted {
 [data-theme="dark-professional"] .progress-bar-fill {
   background: #3B82F6 !important;
 }
+
+/* ============================================================
+   INPUT, BORDER & PLACEHOLDER CONTRAST FIXES
+   ============================================================ */
+
+/* Neon dark - keep cyan focus ring */
+[data-theme="neon-dark"] input:focus,
+[data-theme="neon-dark"] select:focus,
+[data-theme="neon-dark"] textarea:focus {
+  border-color: #00FFE0 !important;
+  box-shadow: 0 0 0 3px rgba(0,255,224,0.2) !important;
+  outline: none;
+}
+
+/* Dark professional - blue focus ring */
+[data-theme="dark-professional"] input:focus,
+[data-theme="dark-professional"] select:focus,
+[data-theme="dark-professional"] textarea:focus {
+  border-color: #3B82F6 !important;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.25) !important;
+  outline: none;
+}
+
+/* ============================================================
+   BUTTON + LINK CONTRAST FIXES
+   ============================================================ */
+
+/* All themes: disabled opacity readable */
+button:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
+
+/* Remove neon glows from headings in non-neon themes */
+[data-theme="light-professional"] h1,
+[data-theme="light-professional"] h2,
+[data-theme="light-professional"] h3,
+[data-theme="dark-professional"] h1,
+[data-theme="dark-professional"] h2,
+[data-theme="dark-professional"] h3 {
+  text-shadow: none !important;
+}
+
+/* ============================================================
+   DISABLED STATES + FOCUS RINGS
+   ============================================================ */
+
+/* Keyboard focus ring - always visible (all themes) */
+:focus-visible {
+  outline: 2px solid var(--accent-warm);
+  outline-offset: 2px;
+}
+
+[data-theme="light-professional"] :focus-visible {
+  outline-color: #D35400;
+}
+
+[data-theme="neon-dark"] :focus-visible {
+  outline-color: #FF6B35;
+}
+
+[data-theme="dark-professional"] :focus-visible {
+  outline-color: #F59E0B;
+}
