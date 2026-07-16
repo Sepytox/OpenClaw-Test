@@ -382,12 +382,10 @@ main {
     cursor: pointer;
 }
 
-.fact-card-clickable:hover,
+/* Hover styles defined in HOVER ANIMATIONS section below (DRY) */
 .fact-card-clickable:focus {
-    transform: translateY(-6px);
-    box-shadow: var(--card-shadow-hover);
-    border-color: var(--primary);
-    outline: none;
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .fact-card-clickable:hover::before,
@@ -428,15 +426,17 @@ main {
     cursor: pointer;
     padding: 4px;
     border-radius: 50%;
-    transition: transform 0.2s ease, background 0.2s ease;
+    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), background 0.2s ease;
     flex-shrink: 0;
     line-height: 1;
 }
 
 .fav-btn:hover {
-    transform: scale(1.3);
+    transform: scale(1.30) rotate(10deg);
     background: rgba(244, 143, 177, 0.1);
 }
+
+.fav-btn:active { transform: scale(0.90); }
 
 .card-name {
     font-size: 1.15em;
@@ -476,7 +476,7 @@ main {
     color: var(--primary-dark);
     border-radius: 6px;
     padding: 4px 9px;
-    transition: background var(--transition), color var(--transition);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background var(--transition), color var(--transition);
 }
 
 .card-footer {
@@ -512,7 +512,12 @@ main {
     font-weight: 700;
     border-radius: 50px;
     padding: 3px 10px;
-    transition: background var(--transition), color var(--transition);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background var(--transition), color var(--transition);
+}
+
+.badge:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .badge-category {
@@ -1341,31 +1346,14 @@ body.dark-mode .extended-specs summary:hover {
 }
 
 /* Quick-stat chips pop on hover */
-.qstat {
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
-}
 .fact-card-clickable:hover .qstat {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
-/* Fav button */
-.fav-btn {
-    transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), background 0.2s ease !important;
-}
-.fav-btn:hover {
-    transform: scale(1.30) rotate(10deg) !important;
-}
-.fav-btn:active { transform: scale(0.90) !important; }
+/* Fav button — transitions merged into base .fav-btn above */
 
-/* Badge hover */
-.badge {
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
-}
-.badge:hover {
-    transform: scale(1.08);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
+/* Badge hover — transitions merged into base .badge above */
 
 /* YouTube button — enhanced */
 .btn-youtube {
