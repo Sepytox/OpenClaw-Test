@@ -890,6 +890,34 @@ img { max-width: 100%; display: block; }
 }
 .timeline-text strong { color: var(--text-dark); }
 
+/* About site info box */
+.about-site-box {
+    margin-top: 4rem;
+    padding: 2rem;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--mid-grey);
+    box-shadow: var(--shadow-sm);
+}
+
+.about-site-text {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 1rem;
+}
+
+.about-site-text:last-child { margin-bottom: 0; }
+
+.about-site-strong { color: var(--text-dark); font-weight: 700; }
+
+.about-site-link {
+    color: var(--red);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 /* ============================================================
    CONTACT PAGE
    ============================================================ */
