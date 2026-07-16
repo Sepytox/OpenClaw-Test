@@ -761,3 +761,55 @@ body.cyberpunk-mode .theme-toggle:hover {
     letter-spacing: 0.08em;
   }
 }
+
+/* ============================================================
+   22. ADDITIONAL SCROLL ANIMATION STYLES
+   ============================================================ */
+
+/* Text reveal (clip-path) for headings */
+.text-reveal {
+  display: inline-block;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Parallax hero — used in JS */
+header {
+  transform-origin: top center;
+  transition: transform 0.1s ease;
+}
+
+/* Neon Pulse border keyframe */
+@keyframes neonPulseBorder {
+  0%, 100% {
+    box-shadow: 0 0 8px var(--cp-cyan), 0 0 20px rgba(0,255,224,0.3);
+    border-color: var(--cp-cyan);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--cp-magenta), 0 0 30px rgba(255,0,110,0.3);
+    border-color: var(--cp-magenta);
+  }
+}
+
+body.cyberpunk-mode .neon-pulse {
+  animation: neonPulseBorder 2.5s ease-in-out infinite;
+}
+
+/* Staggered entrance for grid children */
+.facts > .fact-card {
+  transition-property: opacity, transform;
+  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  transition-duration: 0.7s;
+}
+
+/* Scale entrance state */
+.sr-scale:not(.sr-visible) {
+  transform: scale(0.85);
+}
+
+/* Ensure visible state overrides */
+.sr-visible {
+  opacity: 1 !important;
+  transform: none !important;
+  clip-path: none !important;
+}
