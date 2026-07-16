@@ -850,3 +850,30 @@ body.cyberpunk-mode .float-card:nth-child(2n) {
 body.cyberpunk-mode .float-card:nth-child(3n) {
   animation-delay: 1.6s;
 }
+
+/* ============================================================
+   24. SCROLL PROGRESS BAR — NEON ANIMATED STYLES
+   ============================================================ */
+
+/* Additional animated glow on progress bar */
+.scroll-progress-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -2px;
+  width: 20px;
+  height: 8px;
+  background: var(--cp-cyan);
+  border-radius: 50%;
+  box-shadow: var(--cp-glow-cyan);
+  filter: blur(2px);
+}
+
+@keyframes progressPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+.scroll-progress-bar {
+  animation: progressPulse 1.5s ease-in-out infinite;
+}
