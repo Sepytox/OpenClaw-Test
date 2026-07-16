@@ -360,6 +360,11 @@ main {
     box-shadow: var(--card-shadow);
     position: relative;
     overflow: hidden;
+    /* GPU acceleration for smooth 60fps animations */
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .fact-card::before {
@@ -654,6 +659,10 @@ footer {
     box-shadow: 0 25px 60px rgba(0,0,0,0.35);
     transform: scale(0.94) translateY(10px);
     transition: transform 0.22s ease, background var(--transition);
+    /* GPU acceleration */
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
 .modal-overlay.modal-visible .modal-content {
