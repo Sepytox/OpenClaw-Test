@@ -1281,3 +1281,122 @@ button:disabled {
 [data-theme="dark-professional"] :focus-visible {
   outline-color: #F59E0B;
 }
+
+/* ============================================================
+   AESTHETIC SIMPLIFICATION
+   Whitespace | Font Scale | Reduced Animations
+   ============================================================ */
+
+/* ─── Unified Font Scale (14/18/24/32px) ─── */
+body {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+h1 { font-size: clamp(1.8rem, 5vw, 2rem); }  /* 32px */
+h2 { font-size: clamp(1.35rem, 3vw, 1.5rem); } /* 24px */
+h3 { font-size: clamp(1.05rem, 2vw, 1.125rem); } /* 18px */
+p, li, td { font-size: 0.875rem; }  /* 14px */
+
+/* Override per-page huge headings to stay in scale */
+.quiz-header h1,
+.wheel-header h1,
+.page-title h1,
+.page-header h1 {
+  font-size: clamp(1.8rem, 5vw, 2.25rem) !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* ─── Glitch effects — ONLY in neon-dark ─── */
+[data-theme="light-professional"] .glitch-text::before,
+[data-theme="light-professional"] .glitch-text::after,
+[data-theme="dark-professional"] .glitch-text::before,
+[data-theme="dark-professional"] .glitch-text::after {
+  display: none !important;
+}
+
+[data-theme="light-professional"] .glitch-text,
+[data-theme="dark-professional"] .glitch-text {
+  animation: none !important;
+}
+
+/* ─── Reduce excessive scroll animations ─── */
+/* Keep only fade-in, remove bounce/shake */
+.sr-fade, .sr-up, .sr-scale {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* ─── Breathing whitespace ─── */
+.vc-page section + section,
+.quiz-wrapper > * + *,
+.wheel-page > * + *,
+.race-page > * + *,
+.shop-page > * + * {
+  margin-top: 1.5rem;
+}
+
+/* ─── Card padding + border-radius consistent ─── */
+.part-card,
+.quiz-card,
+.option-card {
+  padding: 1.25rem !important;
+  border-radius: 12px !important;
+}
+
+/* ─── Neon glow: selective (only on active/highlighted elements) ─── */
+[data-theme="neon-dark"] .part-card:not(.selected):not(:hover),
+[data-theme="neon-dark"] .option-card:not(.selected):not(:hover) {
+  box-shadow: none !important;
+}
+
+[data-theme="neon-dark"] .part-card.selected,
+[data-theme="neon-dark"] .option-card.selected {
+  box-shadow: 0 0 20px rgba(0,255,224,0.2) !important;
+}
+
+/* ─── Borders subtle in neon (not on everything) ─── */
+[data-theme="neon-dark"] .quiz-wrapper,
+[data-theme="neon-dark"] .wheel-page,
+[data-theme="neon-dark"] .race-page,
+[data-theme="neon-dark"] .shop-page {
+  background: transparent !important;
+}
+
+/* ─── Progress bar unified ─── */
+.quiz-progress .progress-bar,
+.race-progress .progress-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--divider);
+  overflow: hidden;
+}
+
+.quiz-progress .progress-fill,
+.race-progress .progress-fill {
+  background: var(--accent-primary) !important;
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* ─── Reduce rainbow/moving borders in non-neon ─── */
+[data-theme="light-professional"] header::before,
+[data-theme="dark-professional"] header::before {
+  animation: none !important;
+  background: var(--accent-primary) !important;
+}
+
+/* ─── Unified table styles ─── */
+table { border-collapse: collapse; width: 100%; }
+th, td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--divider);
+}
+th {
+  font-size: var(--font-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
