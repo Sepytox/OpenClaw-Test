@@ -1067,6 +1067,13 @@
                     var expanded = navLinksEl.classList.toggle('nav-links-open');
                     hamburger.setAttribute('aria-expanded', expanded);
                 });
+                // Close menu when a nav link is clicked
+                navLinksEl.querySelectorAll('.nav-link').forEach(function(link) {
+                    link.addEventListener('click', function() {
+                        navLinksEl.classList.remove('nav-links-open');
+                        hamburger.setAttribute('aria-expanded', 'false');
+                    });
+                });
             }
 
             // Read URL param for category filter (from landing page tiles)

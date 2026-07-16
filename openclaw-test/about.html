@@ -163,6 +163,13 @@
                 var expanded = navLinks.classList.toggle('nav-links-open');
                 hamburger.setAttribute('aria-expanded', expanded);
             });
+            // Close menu when a nav link is clicked
+            navLinks.querySelectorAll('.nav-link').forEach(function(link) {
+                link.addEventListener('click', function() {
+                    navLinks.classList.remove('nav-links-open');
+                    hamburger.setAttribute('aria-expanded', 'false');
+                });
+            });
         }
     </script>
 </body>
