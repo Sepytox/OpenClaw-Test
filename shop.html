@@ -559,6 +559,10 @@
             color: var(--accent);
             font-variant-numeric: tabular-nums;
             line-height: 1;
+            transition: opacity 0.15s;
+        }
+        .mc-total-val.flash {
+            opacity: 0.4;
         }
         .mc-cart-btn {
             width: 100%;
@@ -1460,9 +1464,15 @@ function mcUpdatePrice() {
         }
     }
 
-    // -- Big total price --
+    // -- Big total price (flash animation on change) --
     const totalEl = document.getElementById('mcTotalPrice');
-    if (totalEl) totalEl.textContent = totalPrice.toLocaleString('de-DE') + ' €';
+    if (totalEl) {
+        totalEl.classList.add('flash');
+        setTimeout(() => {
+            totalEl.textContent = totalPrice.toLocaleString('de-DE') + ' \u20ac';
+            totalEl.classList.remove('flash');
+        }, 80);
+    }
 
     // -- Persist config to localStorage --
     try {
