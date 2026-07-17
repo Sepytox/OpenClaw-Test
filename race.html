@@ -764,9 +764,13 @@ function stepPhysics(state, bike, dt, manual) {
     state.dist += state.speed * dt;
     state.time += dt;
 
-    // Update RPM based on current speed and gear
+    // Update RPM based on current speed and gear.
+    // Use idleRpm+1 as the minimum (not idleRpm) so getPowerAtRpm() — which gates
+    // power on rpm > idleRpm (strict >) — always has a nonzero power band available
+    // when the throttle is applied. At very low speeds the speed-derived RPM is
+    // below idleRpm; clamping to exactly idleRpm would make power=0 forever.
     if (currentGear > 0) {
-        state.rpm = Math.max(bike.idleRpm, Math.min(getRpmFromSpeed(state.speed, currentGear), bike.redline * 1.05));
+        state.rpm = Math.max(bike.idleRpm + 1, Math.min(getRpmFromSpeed(state.speed, currentGear), bike.redline * 1.05));
     } else {
         state.rpm = bike.idleRpm + throttle * 3000;
     }
