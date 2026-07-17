@@ -764,9 +764,13 @@ function stepPhysics(state, bike, dt, manual) {
     state.dist += state.speed * dt;
     state.time += dt;
 
-    // Update RPM based on current speed and gear
+    // Update RPM based on current speed and gear.
+    // Use idleRpm+1 as the minimum (not idleRpm) so getPowerAtRpm() — which gates
+    // power on rpm > idleRpm (strict >) — always has a nonzero power band available
+    // when the throttle is applied. At very low speeds the speed-derived RPM is
+    // below idleRpm; clamping to exactly idleRpm would make power=0 forever.
     if (currentGear > 0) {
-        state.rpm = Math.max(bike.idleRpm, Math.min(getRpmFromSpeed(state.speed, currentGear), bike.redline * 1.05));
+        state.rpm = Math.max(bike.idleRpm + 1, Math.min(getRpmFromSpeed(state.speed, currentGear), bike.redline * 1.05));
     } else {
         state.rpm = bike.idleRpm + throttle * 3000;
     }
@@ -811,15 +815,20 @@ function stepPhysics(state, bike, dt, manual) {
 // RACE LOOP
 // ==========================================
 function raceLoop(ts) {
-    if (!simState.running) return;
+    // In compare mode keep running as long as EITHER bike is still going
+    const anyRunning = simState.running || (raceMode === 'compare' && sim2State.running);
+    if (!anyRunning) return;
     if (simLastT === null) simLastT = ts;
     const dt = Math.min((ts - simLastT) / 1000, 0.05); // cap at 50ms
     simLastT = ts;
 
     const bike1 = RACE_BIKES[currentBike1];
-    const accel = stepPhysics(simState, bike1, dt, raceMode === 'manual');
+    let accel;
+    if (simState.running) {
+        accel = stepPhysics(simState, bike1, dt, raceMode === 'manual');
+    }
 
-    if (raceMode === 'compare') {
+    if (raceMode === 'compare' && sim2State.running) {
         const bike2 = RACE_BIKES[currentBike2];
         stepPhysics(sim2State, bike2, dt, false);
     }
@@ -828,7 +837,9 @@ function raceLoop(ts) {
     drawTrack();
     drawVelocityGraph();
 
-    if (simState.running) {
+    // Schedule next frame only while any bike is still running
+    const stillRunning = simState.running || (raceMode === 'compare' && sim2State.running);
+    if (stillRunning) {
         simAnimId = requestAnimationFrame(raceLoop);
     }
 }
@@ -1151,10 +1162,36 @@ function resetSimState(state) {
 
 function startRace() {
     if (simState.running) return;
+
+    // Always reset physics state so re-starting after a finished race works correctly.
+    // Without this, dist/speed are still at the finish line and stepPhysics would
+    // call finishRace() again on the very first frame.
+    resetSimState(simState);
+    resetSimState(sim2State);
+
+    // Restore the current throttle slider position into both states
+    const throttleVal = parseInt(document.getElementById('throttleSlider').value);
+    simState.throttle = throttleVal / 100;
+    sim2State.throttle = throttleVal / 100;
+
     simState.running = true;
     sim2State.running = raceMode === 'compare';
     simState.gear = raceMode === 'manual' ? 0 : 1;
     sim2State.gear = 1;
+
+    // Seed RPM above idle so getPowerAtRpm() can produce thrust on the first frame.
+    // Without this, rpm stays ≤ idleRpm and the engine never generates force.
+    // In manual mode start at neutral (gear=0) with throttle-blipped RPM;
+    // in auto modes start in gear 1 with RPM just above idle.
+    const b1 = RACE_BIKES[currentBike1];
+    simState.rpm = simState.gear === 0
+        ? b1.idleRpm + simState.throttle * 2000   // neutral blip
+        : b1.idleRpm + 100;                        // just above idle, gear 1 engaged
+    if (raceMode === 'compare') {
+        const b2 = RACE_BIKES[currentBike2];
+        sim2State.rpm = b2.idleRpm + 100;
+    }
+
     simLastT = null;
 
     document.getElementById('raceStartBtn').style.display = 'none';
@@ -1205,7 +1242,8 @@ function resetRace() {
 
 function finishRace(state, bike) {
     state.running = false;
-    if (raceMode !== 'compare' || (state === simState && !sim2State.running)) {
+    // Stop the race UI once ALL bikes have finished
+    if (!simState.running && !sim2State.running) {
         stopRace();
     }
 
