@@ -354,6 +354,31 @@
         @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
         /* GRID BG ANIMATION */
+        /* TRACK PRESET CHIPS */
+        .track-preset-row { display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.25rem; }
+        .track-chip {
+            padding:0.35rem 0.7rem;border-radius:16px;border:1px solid #333;background:transparent;
+            color:#666;font-size:0.78rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;
+        }
+        .track-chip.active { border-color:var(--accent);color:var(--accent);background:var(--accent-dim); }
+        .track-chip:hover:not(.active) { border-color:#555;color:#aaa; }
+
+        /* ENDLESS RESULT BANNER */
+        .endless-result-banner {
+            background: linear-gradient(135deg,#0a0a0a,#1a0a00);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .endless-result-banner.show { display: block; }
+        .endless-result-banner h2 { font-size:0.85rem;color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:0.75rem; }
+        .endless-result-grid { display:flex;flex-wrap:wrap;gap:0.75rem; }
+        .endless-result-item { background:#080808;border:1px solid #1e1e1e;border-radius:8px;padding:0.6rem 1rem;min-width:120px; }
+        .endless-result-item .er-val { font-size:1.3rem;font-weight:800;color:var(--accent); }
+        .endless-result-item .er-lbl { font-size:0.68rem;color:#555;margin-top:0.2rem; }
+
         @keyframes grid-scroll {
             from { background-position: 0 0; }
             to { background-position: 0 40px; }
@@ -389,7 +414,7 @@
 <div class="race-page">
     <div class="page-title">
         <h1>🏁 RACING SIMULATOR</h1>
-        <p>Realistic Physics — RPM · Gears · Torque · 0-400m</p>
+        <p>Realistic Physics — RPM · Gears · Torque · Variable Track Length</p>
     </div>
 
     <!-- BIKE SELECTOR -->
@@ -408,13 +433,24 @@
                     <!-- filled by JS -->
                 </select>
             </div>
-            <div class="selector-group">
+            <div class="selector-group" id="trackConfigWrap">
                 <label>Strecke</label>
-                <select id="trackSelect">
-                    <option value="400">0-400m (Viertel Meile)</option>
-                    <option value="1000">0-1000m (1 km)</option>
-                    <option value="100">0-100 km/h Sprint</option>
-                </select>
+                <div class="track-preset-row" id="trackPresetRow">
+                    <button class="track-chip active" id="chip400" onclick="setTrackPreset(400)">400m</button>
+                    <button class="track-chip" id="chip1000" onclick="setTrackPreset(1000)">1 km</button>
+                    <button class="track-chip" id="chip5000" onclick="setTrackPreset(5000)">5 km</button>
+                    <button class="track-chip" id="chip20000" onclick="setTrackPreset(20000)">20 km</button>
+                    <button class="track-chip" id="chipCustom" onclick="setTrackPreset('custom')">&#9999;&#xFE0F; Eigene</button>
+                    <button class="track-chip" id="chipEndless" onclick="setTrackPreset('endless')">&#8734; Endlos</button>
+                </div>
+                <div id="customLenWrap" style="display:none;margin-top:0.5rem;">
+                    <div style="display:flex;gap:0.5rem;align-items:center;">
+                        <input type="number" id="customLenInput" placeholder="Länge (Meter)" min="100" max="100000" value="2000"
+                               style="width:150px;padding:0.4rem 0.6rem;background:#050505;border:1px solid #333;color:#e0e0e0;border-radius:6px;font-size:0.85rem;outline:none;">
+                        <button onclick="applyCustomLen()"
+                                style="padding:0.4rem 0.85rem;background:var(--accent);color:#000;border:none;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:700;">OK</button>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="mode-toggle-row">
@@ -461,6 +497,12 @@
             <button class="race-stop-btn" id="raceStopBtn" onclick="stopRace()" style="display:none;">⬛ STOP</button>
             <button class="race-stop-btn" onclick="resetRace()" style="border-color:#444;color:#666;">🔄 Reset</button>
         </div>
+    </div>
+
+    <!-- ENDLESS RESULT BANNER -->
+    <div class="endless-result-banner" id="endlessResultBanner">
+        <h2>&#8734; Endlos-Rennen — Ergebnis beim Stopp</h2>
+        <div class="endless-result-grid" id="endlessResultGrid"></div>
     </div>
 
     <!-- SINGLE MODE DASHBOARD -->
@@ -610,7 +652,12 @@ const RACE_BIKES = {
 // Gear ratios (typical sport bike progression)
 const GEAR_RATIOS = [0, 3.2, 2.1, 1.6, 1.28, 1.05, 0.88]; // 0=neutral,1-6
 const FINAL_DRIVE = 2.8;
-const WHEEL_CIRC = 2.0; // meters
+const WHEEL_CIRC = 2.0; // meters, circumference ~0.318m radius
+const WHEEL_RADIUS = WHEEL_CIRC / (2 * Math.PI); // ~0.318m
+
+// Track configuration (global)
+let trackLength = 400;  // metres (used by distance races)
+let isEndlessMode = false;
 
 // Physics state
 let simState = {
@@ -654,20 +701,66 @@ function populateSelects() {
     document.getElementById('bike2Select').value = 'z900';
 }
 populateSelects();
+updateSplitTargets(); // initialise split targets for default 400m track
 
 function updateBike1() { currentBike1 = document.getElementById('bike1Select').value; resetRace(); }
 function updateBike2() { currentBike2 = document.getElementById('bike2Select').value; resetRace(); }
+
+// ==========================================
+// TRACK LENGTH MANAGEMENT
+// ==========================================
+function setTrackPreset(preset) {
+    // Deactivate all chips
+    document.querySelectorAll('.track-chip').forEach(c => c.classList.remove('active'));
+
+    if (preset === 'endless') {
+        isEndlessMode = true;
+        trackLength   = Infinity;
+        const chip = document.getElementById('chipEndless');
+        if (chip) chip.classList.add('active');
+        document.getElementById('customLenWrap').style.display = 'none';
+
+    } else if (preset === 'custom') {
+        document.getElementById('chipCustom').classList.add('active');
+        const wrap = document.getElementById('customLenWrap');
+        wrap.style.display = 'block';
+        // Don’t reset until OK is pressed
+        return;
+
+    } else {
+        isEndlessMode = false;
+        trackLength   = parseInt(preset);
+        const chip = document.getElementById('chip' + preset);
+        if (chip) chip.classList.add('active');
+        document.getElementById('customLenWrap').style.display = 'none';
+    }
+
+    updateSplitTargets();
+    resetRace();
+}
+
+function applyCustomLen() {
+    const val = parseInt(document.getElementById('customLenInput').value);
+    if (!isNaN(val) && val >= 100 && val <= 100000) {
+        isEndlessMode = false;
+        trackLength   = val;
+        updateSplitTargets();
+        resetRace();
+    }
+}
 
 function setMode(mode) {
     raceMode = mode;
     ['single','compare','manual'].forEach(m => {
         document.getElementById('mode' + m.charAt(0).toUpperCase() + m.slice(1)).classList.toggle('active', m === mode);
     });
-    document.getElementById('bike2SelectWrap').style.display = mode === 'compare' ? '' : 'none';
-    document.getElementById('singleDashboard').style.display = mode === 'compare' ? 'none' : '';
+    document.getElementById('bike2SelectWrap').style.display  = mode === 'compare' ? '' : 'none';
+    document.getElementById('singleDashboard').style.display  = mode === 'compare' ? 'none' : '';
     document.getElementById('compareDashboard').style.display = mode === 'compare' ? '' : 'none';
-    document.getElementById('shiftBtnsWrap').style.display = mode === 'manual' ? '' : 'none';
-    document.getElementById('split2Header').style.display = mode === 'compare' ? '' : 'none';
+    document.getElementById('shiftBtnsWrap').style.display    = mode === 'manual' ? '' : 'none';
+    document.getElementById('split2Header').style.display     = mode === 'compare' ? '' : 'none';
+    const banner = document.getElementById('endlessResultBanner');
+    if (banner) banner.classList.remove('show');
     resetRace();
 }
 
@@ -685,25 +778,61 @@ function toggleABS() {
 }
 
 // ==========================================
-// PHYSICS ENGINE
+// PHYSICS ENGINE (torque-based, per-bike drag)
 // ==========================================
+
+// Compute per-bike drag coefficient so each bike reaches its documented vmax.
+// At vmax: thrust_force = drag_force + rolling_resistance
+// drag_force = dragK * vmax²  ⇒  dragK = (thrust - rolling) / vmax²
+function computeAllDragCoeffs() {
+    Object.keys(RACE_BIKES).forEach(key => {
+        const bike = RACE_BIKES[key];
+        const vmaxMs = bike.vmax / 3.6;
+        const powerW = bike.ps * 735.5; // PS → W
+        // Effective thrust at vmax: ~82% of peak power (drivetrain loss + not always peak RPM)
+        const thrustAtVmax = (powerW * 0.82) / vmaxMs;
+        const rollingRes = bike.weight * 9.81 * 0.015;
+        bike.dragK = Math.max(thrustAtVmax - rollingRes, 1) / (vmaxMs * vmaxMs);
+    });
+}
+computeAllDragCoeffs();
+
+// Normalised torque at given RPM (0–1).
+// Torque peaks around 60 % of redline, then drops gently to ~70 % at redline.
+function getTorqueNormalized(rpm, bike) {
+    if (rpm < bike.idleRpm) return 0; // below idle = no torque
+    const peakRpm = bike.redline * 0.60;
+    if (rpm <= peakRpm) {
+        const t = (rpm - bike.idleRpm) / (peakRpm - bike.idleRpm);
+        return 0.55 + 0.45 * Math.pow(Math.min(t, 1), 0.65); // 55 % at idle, 100 % at peak
+    }
+    // Past peak: drop to ~70 % at redline
+    const t = (rpm - peakRpm) / (bike.redline - peakRpm);
+    return Math.max(0.40, 1.0 - 0.30 * t);
+}
+
+// PS display at given RPM (uses torque curve + P = T * ω)
 function getPowerAtRpm(bike, rpm, gear) {
     if (gear === 0 || rpm <= bike.idleRpm) return 0;
-    // Simple power curve: peaks around 80% of redline
-    const peakRpm = bike.redline * 0.8;
-    const normalized = rpm / peakRpm;
-    let powerFactor;
-    if (normalized < 0.3) powerFactor = normalized / 0.3 * 0.6; // build up
-    else if (normalized < 0.7) powerFactor = 0.6 + (normalized - 0.3) / 0.4 * 0.4; // mid power
-    else if (normalized <= 1.0) powerFactor = 1.0; // peak zone
-    else powerFactor = Math.max(0, 1.0 - (normalized - 1.0) * 2); // drop off above redline
-    return bike.ps * powerFactor;
+    const torqueNm = bike.torque * getTorqueNormalized(rpm, bike);
+    const powerKw = (torqueNm * rpm) / 9549.3; // T*ω (kW)
+    return powerKw * 1.3596; // kW → PS
+}
+
+// Wheel drive force [N] from engine torque, limited by tyre adhesion.
+function getWheelForce(bike, rpm, gear, throttle) {
+    if (gear === 0) return 0;
+    const torqueNm = bike.torque * getTorqueNormalized(rpm, bike) * throttle;
+    const gearRatio = GEAR_RATIOS[gear] * FINAL_DRIVE;
+    const wheelForce = (torqueNm * gearRatio) / WHEEL_RADIUS;
+    // Physical traction limit ≋ 1.3 g
+    const maxTraction = bike.weight * 9.81 * 1.3;
+    return Math.min(wheelForce, maxTraction);
 }
 
 function getSpeedFromRpm(rpm, gear) {
     if (gear === 0 || rpm <= 0) return 0;
     const ratio = GEAR_RATIOS[gear] * FINAL_DRIVE;
-    // RPM → wheel RPM → m/s
     const wheelRpm = rpm / ratio;
     return (wheelRpm * WHEEL_CIRC) / 60; // m/s
 }
@@ -716,63 +845,78 @@ function getRpmFromSpeed(speedMs, gear) {
 }
 
 function getAeroDrag(speedMs, bike) {
-    // F_drag = 0.5 * Cd * A * rho * v^2
-    // Simplified: drag coefficient relative to weight
-    const Cd = 0.35;
-    const rho = 1.2;
-    const A = 0.35; // frontal area m²
-    return 0.5 * Cd * A * rho * speedMs * speedMs;
+    return bike.dragK * speedMs * speedMs;
 }
 
 function stepPhysics(state, bike, dt, manual) {
-    if (!state.running) return;
+    if (!state.running) return 0;
 
     const throttle = state.throttle;
-    const gear = state.gear;
+    let gear = state.gear;
 
-    // Auto-shift (not manual)
-    if (!manual && gear > 0) {
-        const rpm = state.rpm;
-        if (rpm > bike.redline * 0.92 && gear < bike.gears) {
-            state.gear++;
-        } else if (rpm < bike.idleRpm * 1.5 && gear > 1 && state.speed > 0) {
-            state.gear--;
-        }
-    }
-
-    // If in neutral and throttle applied, engage gear 1
-    if (gear === 0 && throttle > 0.1 && !manual) {
+    // Engage gear 1 automatically (non-manual)
+    if (gear === 0 && throttle > 0.05 && !manual) {
+        gear = 1;
         state.gear = 1;
     }
 
-    const currentGear = state.gear;
-    const powerW = getPowerAtRpm(bike, state.rpm, currentGear) * 735.5 * throttle; // PS → W
-    const forceThrust = currentGear > 0 && state.speed >= 0 ? powerW / Math.max(state.speed, 1) : 0;
-    const dragForce = getAeroDrag(state.speed, bike);
-    const rollingResistance = bike.weight * 9.81 * 0.015;
-
-    // Traction control: limit if wheelspin (low speed high power)
-    let effectiveThrust = forceThrust;
-    if (state.tcOn && state.speed < 8 && forceThrust > bike.weight * 3) {
-        effectiveThrust = bike.weight * 3;
+    // Step 1: RPM from current speed (before shift decision)
+    // At low speed, simulate clutch slip: engine RPM > wheel-derived RPM
+    let rpm;
+    if (gear > 0) {
+        const rpmFromSpeed = getRpmFromSpeed(state.speed, gear);
+        if (state.speed < 3 && throttle > 0) {
+            // Launch mode: rider slips clutch at ~45 % redline
+            const launchRpm = bike.idleRpm + throttle * (bike.redline * 0.45 - bike.idleRpm);
+            rpm = Math.max(launchRpm, rpmFromSpeed);
+        } else {
+            rpm = rpmFromSpeed;
+        }
+        rpm = Math.max(bike.idleRpm, Math.min(rpm, bike.redline * 1.05));
+    } else {
+        rpm = bike.idleRpm + throttle * 3000;
     }
 
-    const netForce = effectiveThrust - dragForce - rollingResistance;
-    const accelMs2 = netForce / bike.weight;
+    // Step 2: Auto-shift
+    if (!manual && gear > 0) {
+        if (rpm >= bike.redline * 0.88 && gear < bike.gears) {
+            // Shift up
+            gear++;
+            state.gear = gear;
+            rpm = Math.max(bike.idleRpm, getRpmFromSpeed(state.speed, gear));
+        } else if (gear > 1 && state.speed > 0.5) {
+            // Shift down if RPM is too low (below 30 % redline)
+            const rpmIfDown = getRpmFromSpeed(state.speed, gear - 1);
+            if (rpm < bike.redline * 0.30 && rpmIfDown < bike.redline * 0.90) {
+                gear--;
+                state.gear = gear;
+                rpm = Math.max(bike.idleRpm, rpmIfDown);
+            }
+        }
+    }
+    state.rpm = rpm;
 
-    state.speed = Math.max(0, Math.min(state.speed + accelMs2 * dt, bike.vmax / 3.6));
-    state.dist += state.speed * dt;
-    state.time += dt;
+    // Step 3: Forces
+    let wheelForce = getWheelForce(bike, rpm, gear, throttle);
 
-    // Update RPM based on current speed and gear.
-    // Use idleRpm+1 as the minimum (not idleRpm) so getPowerAtRpm() — which gates
-    // power on rpm > idleRpm (strict >) — always has a nonzero power band available
-    // when the throttle is applied. At very low speeds the speed-derived RPM is
-    // below idleRpm; clamping to exactly idleRpm would make power=0 forever.
-    if (currentGear > 0) {
-        state.rpm = Math.max(bike.idleRpm + 1, Math.min(getRpmFromSpeed(state.speed, currentGear), bike.redline * 1.05));
-    } else {
-        state.rpm = bike.idleRpm + throttle * 3000;
+    // Traction control: cap at ~1.2 g during launch
+    if (state.tcOn && state.speed < 8 && wheelForce > bike.weight * 9.81 * 1.2) {
+        wheelForce = bike.weight * 9.81 * 1.2;
+    }
+
+    const dragForce      = getAeroDrag(state.speed, bike);
+    const rollingRes     = bike.weight * 9.81 * 0.015;
+    const netForce       = wheelForce - dragForce - rollingRes;
+    const accelMs2       = netForce / bike.weight;
+
+    // Step 4: Integrate
+    state.speed = Math.max(0, state.speed + accelMs2 * dt);
+    state.dist  += state.speed * dt;
+    state.time  += dt;
+
+    // Step 5: Final RPM from updated speed
+    if (gear > 0) {
+        state.rpm = Math.max(bike.idleRpm, Math.min(getRpmFromSpeed(state.speed, gear), bike.redline));
     }
 
     // 0-100 check
@@ -782,30 +926,25 @@ function stepPhysics(state, bike, dt, manual) {
         state.reached100 = true;
     }
 
-    // Intermediate splits (50m, 100m, 200m, 400m, 1000m)
+    // Splits
     state.splitTargets.forEach(target => {
         if (!state.splits[target] && state.dist >= target) {
             state.splits[target] = state.time;
-            // Flash visual on split
             const tbody = document.getElementById('splitsBody');
             if (tbody) {
                 tbody.style.outline = '2px solid var(--accent)';
-                setTimeout(() => { if(tbody) tbody.style.outline = ''; }, 500);
+                setTimeout(() => { if(tbody) tbody.style.outline = ''; }, 400);
             }
         }
     });
 
-    // Velocity history
-    state.velHistory.push({ t: state.time, v: speedKmh });
-    if (state.velHistory.length > 500) state.velHistory.shift();
+    // Velocity history (capped at 2000 samples)
+    state.velHistory.push({ t: state.time, v: speedKmh, dist: state.dist });
+    if (state.velHistory.length > 2000) state.velHistory.shift();
 
-    // Check finish
-    const trackDist = parseInt(document.getElementById('trackSelect').value);
-    if (trackDist === 100) {
-        // 0-100 mode: stop at 100 km/h
-        if (state.reached100) finishRace(state, bike);
-    } else {
-        if (state.dist >= trackDist) finishRace(state, bike);
+    // Finish check (only in distance mode)
+    if (!isEndlessMode && state.dist >= trackLength) {
+        finishRace(state, bike);
     }
 
     return accelMs2;
@@ -815,20 +954,15 @@ function stepPhysics(state, bike, dt, manual) {
 // RACE LOOP
 // ==========================================
 function raceLoop(ts) {
-    // In compare mode keep running as long as EITHER bike is still going
-    const anyRunning = simState.running || (raceMode === 'compare' && sim2State.running);
-    if (!anyRunning) return;
+    if (!simState.running) return;
     if (simLastT === null) simLastT = ts;
     const dt = Math.min((ts - simLastT) / 1000, 0.05); // cap at 50ms
     simLastT = ts;
 
     const bike1 = RACE_BIKES[currentBike1];
-    let accel;
-    if (simState.running) {
-        accel = stepPhysics(simState, bike1, dt, raceMode === 'manual');
-    }
+    const accel = stepPhysics(simState, bike1, dt, raceMode === 'manual');
 
-    if (raceMode === 'compare' && sim2State.running) {
+    if (raceMode === 'compare') {
         const bike2 = RACE_BIKES[currentBike2];
         stepPhysics(sim2State, bike2, dt, false);
     }
@@ -837,9 +971,7 @@ function raceLoop(ts) {
     drawTrack();
     drawVelocityGraph();
 
-    // Schedule next frame only while any bike is still running
-    const stillRunning = simState.running || (raceMode === 'compare' && sim2State.running);
-    if (stillRunning) {
+    if (simState.running) {
         simAnimId = requestAnimationFrame(raceLoop);
     }
 }
@@ -972,67 +1104,120 @@ function drawTrack() {
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
 
-    const trackLen = parseInt(document.getElementById('trackSelect').value);
-
-    // Track background
     ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, W, H);
 
-    // Road
     const roadY = H * 0.35;
-    const roadH = H * 0.3;
+    const roadH = H * 0.30;
+
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(0, roadY, W, roadH);
-    // Road lines
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([20, 15]);
-    ctx.beginPath();
-    ctx.moveTo(0, roadY + roadH/2);
-    ctx.lineTo(W, roadY + roadH/2);
-    ctx.stroke();
-    ctx.setLineDash([]);
 
-    // Distance markers
-    const markers = [100, 200, 400, 1000].filter(m => m <= trackLen);
-    markers.forEach(m => {
-        const x = (m / trackLen) * W;
+    if (isEndlessMode) {
+        // ---- ENDLESS: scrolling road ----
+        const dist = simState.dist;
+        const viewRange = Math.max(500, dist * 0.5 + 200); // visible metres
+
+        // Animated centre line
+        ctx.strokeStyle = '#2e2e2e';
+        ctx.lineWidth = 1;
+        const dashLen = 28, gapLen = 18;
+        const scrollOff = -(dist % (dashLen + gapLen)) / (dashLen + gapLen) * (dashLen + gapLen);
+        ctx.setLineDash([dashLen, gapLen]);
+        ctx.lineDashOffset = scrollOff;
+        ctx.beginPath();
+        ctx.moveTo(0, roadY + roadH / 2);
+        ctx.lineTo(W, roadY + roadH / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Distance markers
+        const step = viewRange <= 600 ? 100 : viewRange <= 2000 ? 500 : viewRange <= 10000 ? 1000 : 5000;
+        const startMark = Math.floor(dist / step) * step;
+        for (let d = startMark; d <= startMark + viewRange * 1.2; d += step) {
+            const relPos = (d - dist) / viewRange;
+            const x = relPos * W * 0.85 + W * 0.1;
+            if (x < 0 || x > W) continue;
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x, roadY);
+            ctx.lineTo(x, roadY + roadH);
+            ctx.stroke();
+            ctx.fillStyle = '#444';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(d >= 1000 ? (d / 1000).toFixed(1) + 'km' : d + 'm', x, roadY - 4);
+        }
+
+        // ∞ label + distance counter
+        ctx.fillStyle = '#ff6600';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'left';
+        const distLabel = dist >= 1000 ? (dist / 1000).toFixed(2) + ' km' : dist.toFixed(0) + ' m';
+        ctx.fillText('∞ ' + distLabel, 10, H - 8);
+
+        // Bike(s) at fixed horizontal position
+        drawBikeMarker(ctx, W * 0.18, roadY + roadH / 2, '#ff6600', '1');
+        if (raceMode === 'compare') {
+            const gap = sim2State.dist - simState.dist;
+            const relOff = Math.max(-0.15, Math.min(0.15, gap / viewRange));
+            drawBikeMarker(ctx, W * (0.18 + relOff), roadY + roadH / 2, '#ff8800', '2');
+        }
+
+    } else {
+        // ---- DISTANCE RACE: fixed track ----
+        const trackLen = trackLength;
+
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 1;
+        ctx.setLineDash([20, 15]);
         ctx.beginPath();
-        ctx.moveTo(x, roadY);
-        ctx.lineTo(x, roadY + roadH);
+        ctx.moveTo(0, roadY + roadH / 2);
+        ctx.lineTo(W, roadY + roadH / 2);
         ctx.stroke();
-        ctx.fillStyle = '#444';
-        ctx.font = '10px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(m + 'm', x, roadY - 4);
-    });
+        ctx.setLineDash([]);
 
-    // Finish line
-    const finX = W - 4;
-    ctx.strokeStyle = '#ff6600';
-    ctx.lineWidth = 3;
-    ctx.shadowColor = '#ff6600';
-    ctx.shadowBlur = 8;
-    ctx.beginPath();
-    ctx.moveTo(finX, roadY - 5);
-    ctx.lineTo(finX, roadY + roadH + 5);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#ff6600';
-    ctx.font = 'bold 10px sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText('🏁 FINISH', finX - 2, roadY - 8);
+        // Marker interval based on track length
+        const mInterval = trackLen <= 400 ? 100 : trackLen <= 1000 ? 200 : trackLen <= 5000 ? 1000 : 5000;
+        for (let m = mInterval; m < trackLen; m += mInterval) {
+            const x = (m / trackLen) * W;
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x, roadY);
+            ctx.lineTo(x, roadY + roadH);
+            ctx.stroke();
+            ctx.fillStyle = '#444';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(m >= 1000 ? (m / 1000).toFixed(0) + 'km' : m + 'm', x, roadY - 4);
+        }
 
-    // Bike 1
-    const b1x = Math.min((simState.dist / trackLen) * W, W - 20);
-    drawBikeMarker(ctx, b1x, roadY + roadH/2, '#ff6600', '1');
+        // Finish line
+        const finX = W - 4;
+        ctx.strokeStyle = '#ff6600';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#ff6600';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.moveTo(finX, roadY - 5);
+        ctx.lineTo(finX, roadY + roadH + 5);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ff6600';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'right';
+        const finLbl = trackLen >= 1000 ? (trackLen / 1000).toFixed(0) + 'km 🏁' : trackLen + 'm 🏁';
+        ctx.fillText('FINISH ' + finLbl, finX - 2, roadY - 8);
 
-    // Bike 2
-    if (raceMode === 'compare') {
-        const b2x = Math.min((sim2State.dist / trackLen) * W, W - 20);
-        drawBikeMarker(ctx, b2x, roadY + roadH/2, '#ff8800', '2');
+        // Bike(s)
+        const b1x = Math.min((simState.dist / trackLen) * W, W - 20);
+        drawBikeMarker(ctx, b1x, roadY + roadH / 2, '#ff6600', '1');
+        if (raceMode === 'compare') {
+            const b2x = Math.min((sim2State.dist / trackLen) * W, W - 20);
+            drawBikeMarker(ctx, b2x, roadY + roadH / 2, '#ff8800', '2');
+        }
     }
 }
 
@@ -1106,16 +1291,32 @@ function drawVelocityGraph() {
 // ==========================================
 // SPLITS TABLE
 // ==========================================
+function getSplitTargets() {
+    const ALL = [50, 100, 200, 400, 1000, 2000, 5000, 10000, 20000];
+    if (isEndlessMode) return ALL;
+    const filtered = ALL.filter(t => t < trackLength);
+    if (!filtered.includes(trackLength)) filtered.push(trackLength);
+    return filtered;
+}
+
+function updateSplitTargets() {
+    const targets = getSplitTargets();
+    simState.splitTargets  = [...targets];
+    sim2State.splitTargets = [...targets];
+}
+
 function updateSplits() {
     const tbody = document.getElementById('splitsBody');
-    const splits = [50, 100, 200, 400, 1000];
-    const trackLen = parseInt(document.getElementById('trackSelect').value);
+    const targets = simState.splitTargets || getSplitTargets();
     let html = '';
-    splits.filter(s => s <= trackLen).forEach(d => {
+    targets.forEach(d => {
         const t1 = simState.splits[d];
         const t2 = sim2State.splits[d];
-        const col2 = raceMode === 'compare' && t2 !== undefined ? `<td class="split-time">${t2.toFixed(3)}s</td>` : (raceMode === 'compare' ? '<td>—</td>' : '');
-        html += `<tr><td>${d}m</td><td class="split-time">${t1 !== undefined ? t1.toFixed(3)+'s' : '—'}</td>${col2}</tr>`;
+        const distLbl = d >= 1000 ? (d / 1000).toFixed(0) + 'km' : d + 'm';
+        const col2 = raceMode === 'compare'
+            ? `<td class="split-time">${t2 !== undefined ? t2.toFixed(3) + 's' : '—'}</td>`
+            : '';
+        html += `<tr><td>${distLbl}</td><td class="split-time">${t1 !== undefined ? t1.toFixed(3) + 's' : '—'}</td>${col2}</tr>`;
     });
     tbody.innerHTML = html || '<tr><td colspan="3" style="color:#333;text-align:center;padding:1rem;">Noch kein Rennen</td></tr>';
 }
@@ -1124,7 +1325,7 @@ function updateSplits() {
 // CONTROLS
 // ==========================================
 function updateThrottle(val) {
-    simState.throttle = val / 100;
+    simState.throttle  = val / 100;
     sim2State.throttle = val / 100;
     document.getElementById('throttleVal').textContent = val + '%';
     if (!simState.running && val > 10) startRace();
@@ -1151,112 +1352,142 @@ function showShiftWarning() {
 // RACE LIFECYCLE
 // ==========================================
 function resetSimState(state) {
+    const targets = getSplitTargets();
+    const tcOn  = simState ? simState.tcOn  : true;
+    const absOn = simState ? simState.absOn : true;
     Object.assign(state, {
         running: false, time: 0, dist: 0, speed: 0, rpm: 0, gear: 0,
         throttle: 0, t100: null, reached100: false,
         velHistory: [], splits: {},
-        splitTargets: [50, 100, 200, 400, 1000],
-        tcOn: simState.tcOn, absOn: simState.absOn
+        splitTargets: targets,
+        tcOn, absOn
     });
 }
 
 function startRace() {
     if (simState.running) return;
+    // Hide endless result if shown
+    const banner = document.getElementById('endlessResultBanner');
+    if (banner) banner.classList.remove('show');
 
-    // Always reset physics state so re-starting after a finished race works correctly.
-    // Without this, dist/speed are still at the finish line and stepPhysics would
-    // call finishRace() again on the very first frame.
-    resetSimState(simState);
-    resetSimState(sim2State);
-
-    // Restore the current throttle slider position into both states
-    const throttleVal = parseInt(document.getElementById('throttleSlider').value);
-    simState.throttle = throttleVal / 100;
-    sim2State.throttle = throttleVal / 100;
-
-    simState.running = true;
+    simState.running  = true;
     sim2State.running = raceMode === 'compare';
-    simState.gear = raceMode === 'manual' ? 0 : 1;
-    sim2State.gear = 1;
-
-    // Seed RPM above idle so getPowerAtRpm() can produce thrust on the first frame.
-    // Without this, rpm stays ≤ idleRpm and the engine never generates force.
-    // In manual mode start at neutral (gear=0) with throttle-blipped RPM;
-    // in auto modes start in gear 1 with RPM just above idle.
-    const b1 = RACE_BIKES[currentBike1];
-    simState.rpm = simState.gear === 0
-        ? b1.idleRpm + simState.throttle * 2000   // neutral blip
-        : b1.idleRpm + 100;                        // just above idle, gear 1 engaged
-    if (raceMode === 'compare') {
-        const b2 = RACE_BIKES[currentBike2];
-        sim2State.rpm = b2.idleRpm + 100;
-    }
-
+    simState.gear     = raceMode === 'manual' ? 0 : 1;
+    sim2State.gear    = 1;
+    // Keep throttle + TC/ABS from state
     simLastT = null;
 
     document.getElementById('raceStartBtn').style.display = 'none';
-    document.getElementById('raceStopBtn').style.display = '';
+    document.getElementById('raceStopBtn').style.display  = '';
     if (raceMode === 'manual') {
-        document.getElementById('shiftUpBtn').disabled = false;
+        document.getElementById('shiftUpBtn').disabled   = false;
         document.getElementById('shiftDownBtn').disabled = false;
     }
-
     simAnimId = requestAnimationFrame(raceLoop);
 }
 
 function stopRace() {
-    simState.running = false;
+    const wasRunning = simState.running || sim2State.running;
+    simState.running  = false;
     sim2State.running = false;
-    if (simAnimId) cancelAnimationFrame(simAnimId);
+    if (simAnimId) { cancelAnimationFrame(simAnimId); simAnimId = null; }
+
     document.getElementById('raceStartBtn').style.display = '';
-    document.getElementById('raceStopBtn').style.display = 'none';
-    document.getElementById('shiftUpBtn').disabled = true;
+    document.getElementById('raceStopBtn').style.display  = 'none';
+    document.getElementById('shiftUpBtn').disabled   = true;
     document.getElementById('shiftDownBtn').disabled = true;
     document.getElementById('bodyEl').classList.remove('moving');
+
+    // Endless mode: show final result when user hits STOP
+    if (isEndlessMode && (wasRunning || simState.time > 0)) {
+        showEndlessResult();
+    }
     updateSplits();
+}
+
+function showEndlessResult() {
+    const banner = document.getElementById('endlessResultBanner');
+    const grid   = document.getElementById('endlessResultGrid');
+    if (!banner || !grid) return;
+
+    const s = simState;
+    const speedKmh = s.speed * 3.6;
+    const maxSpeed = s.velHistory.length > 0 ? Math.max(...s.velHistory.map(h => h.v)) : speedKmh;
+    const distLabel = s.dist >= 1000 ? (s.dist / 1000).toFixed(2) + ' km' : s.dist.toFixed(0) + ' m';
+
+    let html = [
+        { val: s.time.toFixed(2) + 's',           lbl: 'Fahrzeit'           },
+        { val: distLabel,                           lbl: 'Distanz'            },
+        { val: speedKmh.toFixed(0) + ' km/h',      lbl: 'Tempo beim Stopp'   },
+        { val: maxSpeed.toFixed(0) + ' km/h',      lbl: 'Topspeed'           },
+        { val: s.t100 ? s.t100.toFixed(2) + 's' : '—', lbl: '0–100 km/h'    },
+        { val: s.gear === 0 ? 'N' : String(s.gear), lbl: 'Gang beim Stopp'   },
+    ].map(it => `<div class="endless-result-item"><div class="er-val">${it.val}</div><div class="er-lbl">${it.lbl}</div></div>`).join('');
+
+    // Compare bike result
+    if (raceMode === 'compare') {
+        const s2 = sim2State;
+        const mxS2 = s2.velHistory.length > 0 ? Math.max(...s2.velHistory.map(h => h.v)) : s2.speed * 3.6;
+        const d2lbl = s2.dist >= 1000 ? (s2.dist / 1000).toFixed(2) + ' km' : s2.dist.toFixed(0) + ' m';
+        html += `<div class="endless-result-item" style="border-color:#ff8800;">`
+             + `<div class="er-val" style="color:#ff8800">${(s2.speed*3.6).toFixed(0)} km/h</div>`
+             + `<div class="er-lbl">Bike 2 — ${d2lbl}</div></div>`;
+    }
+
+    grid.innerHTML = html;
+    banner.classList.add('show');
+    saveRecord(s, RACE_BIKES[currentBike1]);
+    if (raceMode === 'compare') saveRecord(sim2State, RACE_BIKES[currentBike2]);
+}
+
+function saveRecord(state, bike) {
+    if (!state.t100) return;
+    const bikeKey = state === simState ? currentBike1 : currentBike2;
+    const best = records[bikeKey];
+    if (!best || state.t100 < best) {
+        records[bikeKey] = state.t100;
+        localStorage.setItem('kawasaki_records', JSON.stringify(records));
+        updateRecordDisplay();
+    }
 }
 
 function resetRace() {
     stopRace();
+    const banner = document.getElementById('endlessResultBanner');
+    if (banner) banner.classList.remove('show');
+
     resetSimState(simState);
     resetSimState(sim2State);
+    // Restore TC/ABS toggles
+    simState.tcOn  = document.getElementById('tcToggle').classList.contains('on');
+    simState.absOn = document.getElementById('absToggle').classList.contains('on');
+
     document.getElementById('throttleSlider').value = 0;
     document.getElementById('throttleVal').textContent = '0%';
     drawGauge('rpmGauge', 0, 14000, '#ff8800', '0');
     drawGauge('speedGauge', 0, 300, '#ff6600', '0');
-    if (document.getElementById('speedDisplay')) {
-        ['speedDisplay','rpmDisplay','timeDisplay','distDisplay','accelDisplay'].forEach(id => {
-            const el = document.getElementById(id); if(el) el.textContent = '0';
-        });
-        document.getElementById('gearDisplay').textContent = 'N';
-        document.getElementById('time100Display').textContent = '—';
-        document.getElementById('powerDisplay').textContent = '0';
-        document.getElementById('rpmBarFill').style.width = '0%';
-        document.getElementById('shiftIndicator').className = 'shift-indicator normal';
-        document.getElementById('shiftIndicator').textContent = '—';
-    }
+    const ids = ['speedDisplay','rpmDisplay','timeDisplay','distDisplay','accelDisplay'];
+    ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
+    const el = (id) => document.getElementById(id);
+    if (el('gearDisplay'))     el('gearDisplay').textContent = 'N';
+    if (el('time100Display'))  el('time100Display').textContent = '—';
+    if (el('powerDisplay'))    el('powerDisplay').textContent = '0';
+    if (el('rpmBarFill'))      el('rpmBarFill').style.width = '0%';
+    if (el('shiftIndicator')) { el('shiftIndicator').className = 'shift-indicator normal'; el('shiftIndicator').textContent = '—'; }
     drawTrack();
     drawVelocityGraph();
     updateSplits();
 }
 
 function finishRace(state, bike) {
+    if (isEndlessMode) return; // Never auto-finish in endless mode
     state.running = false;
-    // Stop the race UI once ALL bikes have finished
-    if (!simState.running && !sim2State.running) {
-        stopRace();
-    }
 
-    // Save record
-    const bikeKey = state === simState ? currentBike1 : currentBike2;
-    if (state.t100) {
-        const best = records[bikeKey] || Infinity;
-        if (state.t100 < best) {
-            records[bikeKey] = state.t100;
-            localStorage.setItem('kawasaki_records', JSON.stringify(records));
-            updateRecordDisplay();
-        }
-    }
+    // Stop animation when all active bikes have finished
+    const allDone = !simState.running && (raceMode !== 'compare' || !sim2State.running);
+    if (allDone) stopRace();
+
+    saveRecord(state, bike);
     updateSplits();
 }
 
