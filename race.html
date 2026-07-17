@@ -1174,6 +1174,20 @@ function startRace() {
     sim2State.running = raceMode === 'compare';
     simState.gear = raceMode === 'manual' ? 0 : 1;
     sim2State.gear = 1;
+
+    // Seed RPM above idle so getPowerAtRpm() can produce thrust on the first frame.
+    // Without this, rpm stays ≤ idleRpm and the engine never generates force.
+    // In manual mode start at neutral (gear=0) with throttle-blipped RPM;
+    // in auto modes start in gear 1 with RPM just above idle.
+    const b1 = RACE_BIKES[currentBike1];
+    simState.rpm = simState.gear === 0
+        ? b1.idleRpm + simState.throttle * 2000   // neutral blip
+        : b1.idleRpm + 100;                        // just above idle, gear 1 engaged
+    if (raceMode === 'compare') {
+        const b2 = RACE_BIKES[currentBike2];
+        sim2State.rpm = b2.idleRpm + 100;
+    }
+
     simLastT = null;
 
     document.getElementById('raceStartBtn').style.display = 'none';
