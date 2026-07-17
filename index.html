@@ -203,12 +203,44 @@
 .maint-km-input:focus {
     border-color: var(--accent);
 }
+/* ---- Dark mode: already inherited from var(--bg)/var(--card-bg) ---- */
+/* Explicit dark overrides for table striping */
+[data-theme="dark"] .maint-table tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.02);
+}
+[data-theme="light"] .maint-table tbody tr:nth-child(even) {
+    background: rgba(0,0,0,0.02);
+}
+[data-theme="light"] .maint-section .maint-select,
+[data-theme="light"] .maint-km-input {
+    background: #fff;
+}
+[data-theme="light"] .maint-info-bar {
+    background: #f0f0f0;
+}
+[data-theme="light"] .maint-status.overdue { background: rgba(34,197,94,0.1); }
+[data-theme="light"] .maint-status.soon    { background: rgba(234,179,8,0.1); }
+[data-theme="light"] .maint-status.later   { background: #e5e5e5; color: #666; }
+[data-theme="light"] .maint-service-chip {
+    background: rgba(255,102,0,0.08);
+}
+/* ---- Responsive layout ---- */
+@media (max-width: 768px) {
+    .maint-controls { flex-wrap: wrap; }
+    .maint-field { flex: 1 1 calc(50% - 0.5rem); min-width: 140px; }
+    .maint-info-bar { gap: 0.75rem; }
+    .maint-info-divider { display: none; }
+}
 @media (max-width: 600px) {
     .maint-controls { flex-direction: column; }
-    .maint-field { min-width: 100%; }
-    .maint-info-bar { gap: 0.75rem; }
+    .maint-field { min-width: 100%; flex: 1 1 100%; }
+    .maint-info-bar { gap: 0.75rem; flex-wrap: wrap; }
+    .maint-info-item { flex: 1 1 calc(50% - 0.5rem); }
     .maint-table th, .maint-table td { padding: 0.5rem 0.6rem; font-size: 0.78rem; }
+    /* Hide estimated month on very small screens */
     .maint-table th:nth-child(3), .maint-table td:nth-child(3) { display: none; }
+    /* Wrap service chips better */
+    .maint-service-chip { font-size: 0.68rem; padding: 0.1rem 0.35rem; }
 }
     </style>
 </head>
