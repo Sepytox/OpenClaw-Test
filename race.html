@@ -1158,6 +1158,18 @@ function resetSimState(state) {
 
 function startRace() {
     if (simState.running) return;
+
+    // Always reset physics state so re-starting after a finished race works correctly.
+    // Without this, dist/speed are still at the finish line and stepPhysics would
+    // call finishRace() again on the very first frame.
+    resetSimState(simState);
+    resetSimState(sim2State);
+
+    // Restore the current throttle slider position into both states
+    const throttleVal = parseInt(document.getElementById('throttleSlider').value);
+    simState.throttle = throttleVal / 100;
+    sim2State.throttle = throttleVal / 100;
+
     simState.running = true;
     sim2State.running = raceMode === 'compare';
     simState.gear = raceMode === 'manual' ? 0 : 1;
