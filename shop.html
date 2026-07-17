@@ -278,6 +278,339 @@
         .combo-meta { display:flex;gap:1rem;font-size:0.75rem; }
         .combo-price { color: var(--accent); font-weight: 700; }
         .combo-gains { color: var(--accent); }
+
+        /* ================================================
+           MODELL-KONFIGURATOR Styles
+           ================================================ */
+        .model-configurator {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 0 2rem;
+        }
+        .model-config-header {
+            padding: 1.5rem 0 1rem;
+            border-top: 2px solid var(--accent);
+            margin-top: 2rem;
+        }
+        .model-config-header h2 {
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+        .model-config-sub {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+        .model-config-bike-row {
+            margin-bottom: 1.5rem;
+        }
+        .mc-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            max-width: 340px;
+        }
+        .mc-field label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .mc-select {
+            padding: 0.6rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            transition: border-color 0.2s;
+        }
+        .mc-select:focus { border-color: var(--accent); }
+
+        /* Body: 2-col layout */
+        .model-config-body {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 1.5rem;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .model-config-body { grid-template-columns: 1fr; }
+            .model-config-right { order: -1; } /* price card on top on mobile */
+        }
+
+        /* Section headings */
+        .mc-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+        .mc-section-title {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Color palette */
+        .mc-color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+        .mc-color-swatch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .mc-color-swatch:hover { transform: scale(1.08); }
+        .mc-color-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            transition: border-color 0.15s, box-shadow 0.15s;
+            position: relative;
+        }
+        .mc-color-swatch.selected .mc-color-circle {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent), 0 4px 12px rgba(255,102,0,0.3);
+        }
+        .mc-color-swatch.selected .mc-color-circle::after {
+            content: '\2713';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+            font-weight: 900;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+        }
+        .mc-color-name {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
+            max-width: 60px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .mc-color-add {
+            font-size: 0.65rem;
+            color: var(--accent);
+            text-align: center;
+        }
+
+        /* Addons */
+        .mc-addons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .mc-addon-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .mc-addon-item:hover {
+            border-color: var(--border-hover);
+            background: var(--accent-dim);
+        }
+        .mc-addon-item:has(.mc-addon-check:checked) {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+        }
+        .mc-addon-check {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .mc-addon-icon {
+            font-size: 1.3rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .mc-addon-info { flex: 1; }
+        .mc-addon-name {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .mc-addon-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .mc-addon-price {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--accent);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Price card */
+        .mc-price-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 80px;
+        }
+        .mc-summary-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .mc-summary-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        .mc-summary-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem;
+        }
+        .mc-detail-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--accent-dim);
+            color: var(--accent);
+            border: 1px solid var(--border-hover);
+        }
+        .mc-summary-addons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-bottom: 1rem;
+            min-height: 0.5rem;
+        }
+        .mc-addon-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            background: rgba(0,200,255,0.08);
+            color: #00c8ff;
+            border: 1px solid rgba(0,200,255,0.2);
+        }
+        .mc-price-breakdown {
+            border-top: 1px solid var(--border);
+            padding-top: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .mc-price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            margin-bottom: 0.35rem;
+        }
+        .mc-total-price {
+            border-top: 2px solid var(--accent);
+            padding-top: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .mc-total-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.2rem;
+        }
+        .mc-total-val {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--accent);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            transition: opacity 0.15s;
+        }
+        .mc-total-val.flash {
+            opacity: 0.4;
+        }
+        .mc-cart-btn {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            letter-spacing: 0.5px;
+        }
+        .mc-cart-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .mc-cart-btn:active { transform: translateY(0); }
+        .mc-cart-feedback {
+            margin-top: 0.6rem;
+            font-size: 0.82rem;
+            color: #22c55e;
+            text-align: center;
+            min-height: 1.2rem;
+        }
+
+        /* Light mode overrides */
+        [data-theme="light"] .mc-select,
+        [data-theme="light"] .mc-section {
+            background: #fff;
+        }
+        [data-theme="light"] .mc-addon-item:has(.mc-addon-check:checked) {
+            background: rgba(255,102,0,0.06);
+        }
+        [data-theme="light"] .mc-price-card {
+            background: #fff;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        [data-theme="light"] .mc-color-swatch.selected .mc-color-circle {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--accent);
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 600px) {
+            .mc-field { max-width: 100%; }
+            .mc-color-palette { gap: 0.5rem; }
+            .mc-color-circle { width: 38px; height: 38px; }
+            .mc-addon-item { gap: 0.5rem; padding: 0.6rem; }
+            .mc-total-val { font-size: 1.8rem; }
+        }
     </style>
 </head>
 <body>
@@ -423,6 +756,127 @@
             </div>
         </div>
     </div>
+
+    <!-- ===== MODELL-KONFIGURATOR ===== -->
+    <div class="model-configurator" id="modelConfigurator">
+        <div class="model-config-header">
+            <h2>🎨 Modell-Konfigurator</h2>
+            <p class="model-config-sub">Wähle Farbe & Ausstattung — der Preis passt sich live an.</p>
+        </div>
+
+        <!-- Bike select for configurator -->
+        <div class="model-config-bike-row">
+            <div class="mc-field">
+                <label for="mcBikeSelect">Motorrad auswählen</label>
+                <select id="mcBikeSelect" class="mc-select" aria-label="Motorrad für Konfigurator">
+                    <!-- filled by JS -->
+                </select>
+            </div>
+        </div>
+
+        <div class="model-config-body">
+            <!-- LEFT: Color + Addons -->
+            <div class="model-config-left">
+                <!-- Color palette -->
+                <div class="mc-section">
+                    <h3 class="mc-section-title">🎨 Farbe wählen</h3>
+                    <div class="mc-color-palette" id="mcColorPalette" role="radiogroup" aria-label="Farbauswahl">
+                        <!-- filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Equipment addons -->
+                <div class="mc-section">
+                    <h3 class="mc-section-title">⚙️ Ausstattung</h3>
+                    <div class="mc-addons" id="mcAddons">
+                        <label class="mc-addon-item">
+                            <input type="checkbox" class="mc-addon-check" data-addon="abs" data-price="800">
+                            <div class="mc-addon-icon">🛑</div>
+                            <div class="mc-addon-info">
+                                <div class="mc-addon-name">ABS</div>
+                                <div class="mc-addon-desc">Anti-Blockier-System</div>
+                            </div>
+                            <div class="mc-addon-price">+800 €</div>
+                        </label>
+                        <label class="mc-addon-item">
+                            <input type="checkbox" class="mc-addon-check" data-addon="quickshifter" data-price="1200">
+                            <div class="mc-addon-icon">⚡</div>
+                            <div class="mc-addon-info">
+                                <div class="mc-addon-name">Quickshifter</div>
+                                <div class="mc-addon-desc">Schalten ohne Kupplung</div>
+                            </div>
+                            <div class="mc-addon-price">+1.200 €</div>
+                        </label>
+                        <label class="mc-addon-item">
+                            <input type="checkbox" class="mc-addon-check" data-addon="windscreen" data-price="400">
+                            <div class="mc-addon-icon">💨</div>
+                            <div class="mc-addon-info">
+                                <div class="mc-addon-name">Windschild</div>
+                                <div class="mc-addon-desc">Komfort bei hohen Geschwindigkeiten</div>
+                            </div>
+                            <div class="mc-addon-price">+400 €</div>
+                        </label>
+                        <label class="mc-addon-item">
+                            <input type="checkbox" class="mc-addon-check" data-addon="heatedgrips" data-price="600">
+                            <div class="mc-addon-icon">🧤</div>
+                            <div class="mc-addon-info">
+                                <div class="mc-addon-name">Beheizte Griffe</div>
+                                <div class="mc-addon-desc">Warm auch im Winter</div>
+                            </div>
+                            <div class="mc-addon-price">+600 €</div>
+                        </label>
+                        <label class="mc-addon-item">
+                            <input type="checkbox" class="mc-addon-check" data-addon="navigation" data-price="2000">
+                            <div class="mc-addon-icon">🗺️</div>
+                            <div class="mc-addon-info">
+                                <div class="mc-addon-name">Navigation System</div>
+                                <div class="mc-addon-desc">Integriertes GPS + Display</div>
+                            </div>
+                            <div class="mc-addon-price">+2.000 €</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Live price display -->
+            <div class="model-config-right">
+                <div class="mc-price-card">
+                    <div class="mc-summary-title">Deine Konfiguration</div>
+                    <div class="mc-summary-name" id="mcSummaryName">Kawasaki Ninja ZX-10R</div>
+                    <div class="mc-summary-details" id="mcSummaryDetails">
+                        <span class="mc-detail-chip" id="mcSummaryColor">— Metallic Black</span>
+                    </div>
+                    <div class="mc-summary-addons" id="mcSummaryAddons"></div>
+
+                    <div class="mc-price-breakdown">
+                        <div class="mc-price-row">
+                            <span>Basis-Preis</span>
+                            <span id="mcBasePrice">—</span>
+                        </div>
+                        <div class="mc-price-row" id="mcColorPriceRow" style="display:none;">
+                            <span id="mcColorPriceLabel">Farb-Aufschlag</span>
+                            <span id="mcColorPriceVal">—</span>
+                        </div>
+                        <div class="mc-price-row" id="mcAddonPriceRow" style="display:none;">
+                            <span>Ausstattungs-Aufschläge</span>
+                            <span id="mcAddonPriceVal">—</span>
+                        </div>
+                    </div>
+
+                    <div class="mc-total-price">
+                        <div class="mc-total-label">Gesamtpreis</div>
+                        <div class="mc-total-val" id="mcTotalPrice">--</div>
+                    </div>
+
+                    <button class="mc-cart-btn" id="mcCartBtn" onclick="mcAddToCart()">
+                        🛒 In den Warenkorb
+                    </button>
+                    <div class="mc-cart-feedback" id="mcCartFeedback"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -775,6 +1229,313 @@ updateLiveSpecs();
         btn.textContent = next === 'dark' ? '☀️' : '🌙';
     });
 })();
+</script>
+
+<!-- ===== MODELL-KONFIGURATOR LOGIC ===== -->
+<script>
+/* ==========================================
+   Modell-Konfigurator
+   Farbe + Ausstattung wählen, Preis live kalkulieren
+   Daten: SHOP_BIKES erweitert mit colors[]
+   ========================================== */
+
+// ---- Extend SHOP_BIKES with color options ----
+// Standard colors for all bikes (3 included free, 2 metallic = +500 EUR each)
+const BIKE_COLORS_DEFAULT = [
+    { name: 'Metallic Black',  hex: '#1a1a1a', priceAdd: 0 },
+    { name: 'Pearl White',     hex: '#f8f8f8', priceAdd: 0 },
+    { name: 'Candy Red',       hex: '#dc143c', priceAdd: 0 },
+    { name: 'Metallic Blue',   hex: '#1565c0', priceAdd: 500 },
+    { name: 'Racing Green',    hex: '#1b5e20', priceAdd: 500 }
+];
+
+// Bike-specific color overrides (only for bikes that should have unique palettes)
+const BIKE_COLORS_OVERRIDE = {
+    h2:    [
+        { name: 'Mirror Black',  hex: '#0d0d0d', priceAdd: 0 },
+        { name: 'Titanium',      hex: '#607d8b', priceAdd: 0 },
+        { name: 'Pearl White',   hex: '#f8f8f8', priceAdd: 0 },
+        { name: 'Carbon Edition',hex: '#2d2d2d', priceAdd: 1000 },
+        { name: 'Candy Red',     hex: '#dc143c', priceAdd: 500 }
+    ],
+    zx10r: [
+        { name: 'Lime Green',    hex: '#39ff14', priceAdd: 0 },
+        { name: 'Raven Black',   hex: '#0d0d0d', priceAdd: 0 },
+        { name: 'Pearl White',   hex: '#f8f8f8', priceAdd: 0 },
+        { name: 'Metallic Blue', hex: '#1565c0', priceAdd: 500 },
+        { name: 'Winter Test',   hex: '#a0a0a0', priceAdd: 500 }
+    ],
+    zx6r: [
+        { name: 'Lime Green',    hex: '#39ff14', priceAdd: 0 },
+        { name: 'Raven Black',   hex: '#0d0d0d', priceAdd: 0 },
+        { name: 'Pearl White',   hex: '#f8f8f8', priceAdd: 0 },
+        { name: 'Candy Red',     hex: '#dc143c', priceAdd: 500 }
+    ],
+    z900:  [
+        { name: 'Metallic Black',hex: '#1a1a1a', priceAdd: 0 },
+        { name: 'Flame Green',   hex: '#00c853', priceAdd: 0 },
+        { name: 'Pearl White',   hex: '#f8f8f8', priceAdd: 0 },
+        { name: 'Sunset Orange', hex: '#ff6600', priceAdd: 500 }
+    ],
+    zh2:   [
+        { name: 'Dark Matte',    hex: '#1a1a1a', priceAdd: 0 },
+        { name: 'Carbon Black',  hex: '#2d2d2d', priceAdd: 0 },
+        { name: 'Candy Red',     hex: '#8b0000', priceAdd: 500 },
+        { name: 'Pearl White',   hex: '#f8f8f8', priceAdd: 500 }
+    ],
+    w800:  [
+        { name: 'Vintage Brown', hex: '#8b6914', priceAdd: 0 },
+        { name: 'Classic Black', hex: '#1a1a1a', priceAdd: 0 },
+        { name: 'Cafe White',    hex: '#f8f8f8', priceAdd: 0 },
+        { name: 'British Green', hex: '#2e7d32', priceAdd: 500 }
+    ],
+    versys1000: [
+        { name: 'Tourer Grey',   hex: '#607d8b', priceAdd: 0 },
+        { name: 'Metallic Black',hex: '#1a1a1a', priceAdd: 0 },
+        { name: 'Pearl White',   hex: '#f8f8f8', priceAdd: 0 },
+        { name: 'Candy Orange',  hex: '#ff6600', priceAdd: 500 },
+        { name: 'Metallic Blue', hex: '#1565c0', priceAdd: 500 }
+    ]
+};
+
+// Helper: get colors for a given SHOP_BIKES key
+function getBikeColors(bikeKey) {
+    return BIKE_COLORS_OVERRIDE[bikeKey] || BIKE_COLORS_DEFAULT;
+}
+
+// Addon definitions (matches HTML checkboxes)
+const MC_ADDONS = [
+    { id: 'abs',         label: 'ABS',              emoji: '\ud83d\uded1', price: 800 },
+    { id: 'quickshifter',label: 'Quickshifter',     emoji: '\u26a1',      price: 1200 },
+    { id: 'windscreen',  label: 'Windschild',        emoji: '\ud83d\udca8', price: 400 },
+    { id: 'heatedgrips', label: 'Beheizte Griffe',  emoji: '\ud83e\udde4', price: 600 },
+    { id: 'navigation',  label: 'Navigation',        emoji: '\ud83d\uddfa\ufe0f', price: 2000 }
+];
+
+// ---- State ----
+let mcCurrentBike = 'zx10r';
+let mcSelectedColor = null;  // color object
+let mcSelectedAddons = new Set();
+
+// ---- Init configurator ----
+function mcInit() {
+    // Populate bike select from SHOP_BIKES
+    const sel = document.getElementById('mcBikeSelect');
+    if (!sel) return;
+    sel.innerHTML = Object.keys(SHOP_BIKES).map(k =>
+        `<option value="${k}">${SHOP_BIKES[k].icon} ${SHOP_BIKES[k].name}</option>`
+    ).join('');
+
+    // Restore last configuration from localStorage
+    try {
+        const saved = localStorage.getItem('vroooom_config_state');
+        if (saved) {
+            const state = JSON.parse(saved);
+            if (state.bikeKey && SHOP_BIKES[state.bikeKey]) {
+                mcCurrentBike = state.bikeKey;
+                sel.value = state.bikeKey;
+            }
+            if (state.colorIdx !== null && state.colorIdx !== undefined) {
+                mcSelectedColor = state.colorIdx;
+            }
+            if (state.addons && Array.isArray(state.addons)) {
+                mcSelectedAddons.clear();
+                state.addons.forEach(a => mcSelectedAddons.add(a));
+            }
+        }
+    } catch(e) {}
+
+    // Sync with main bike selector if URL param present (overrides localStorage)
+    const params = new URLSearchParams(window.location.search);
+    const bikeParam = params.get('bike');
+    if (bikeParam && SHOP_BIKES[bikeParam]) {
+        mcCurrentBike = bikeParam;
+        sel.value = bikeParam;
+    } else if (!mcCurrentBike) {
+        mcCurrentBike = 'zx10r';
+        sel.value = 'zx10r';
+    }
+
+    sel.addEventListener('change', () => {
+        mcCurrentBike = sel.value;
+        mcSelectedColor = null;
+        mcSelectedAddons.clear();
+        // Uncheck all addon checkboxes
+        document.querySelectorAll('.mc-addon-check').forEach(cb => cb.checked = false);
+        mcRenderColors();
+        mcUpdatePrice();
+    });
+
+    // Addon checkbox listeners
+    document.querySelectorAll('.mc-addon-check').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const addonId = cb.getAttribute('data-addon');
+            if (cb.checked) mcSelectedAddons.add(addonId);
+            else mcSelectedAddons.delete(addonId);
+            mcUpdatePrice();
+        });
+    });
+
+    // Restore addon checkboxes from localStorage
+    mcSelectedAddons.forEach(addonId => {
+        const cb = document.querySelector(`.mc-addon-check[data-addon="${addonId}"]`);
+        if (cb) cb.checked = true;
+    });
+
+    mcRenderColors();
+    mcUpdatePrice();
+}
+
+// ---- Render color swatches ----
+function mcRenderColors() {
+    const palette = document.getElementById('mcColorPalette');
+    if (!palette) return;
+    const colors = getBikeColors(mcCurrentBike);
+
+    // Auto-select first color
+    if (!mcSelectedColor) mcSelectedColor = colors[0];
+
+    palette.innerHTML = colors.map((color, idx) => {
+        const isSelected = mcSelectedColor && mcSelectedColor.name === color.name;
+        const contrastBorder = color.hex === '#f8f8f8' || color.hex === '#ffffff'
+            ? 'border: 3px solid #ccc;' : '';
+        return `<div class="mc-color-swatch${isSelected ? ' selected' : ''}" 
+                    role="radio" 
+                    aria-checked="${isSelected}"
+                    aria-label="${color.name}${color.priceAdd > 0 ? ' (+' + color.priceAdd + ' EUR)' : ''}"
+                    tabindex="0"
+                    onclick="mcSelectColor(${idx})"
+                    onkeydown="if(event.key==='Enter'||event.key===' ')mcSelectColor(${idx})">
+            <div class="mc-color-circle" style="background:${color.hex};${contrastBorder}"></div>
+            <div class="mc-color-name">${color.name}</div>
+            ${color.priceAdd > 0 ? `<div class="mc-color-add">+${color.priceAdd.toLocaleString('de-DE')} €</div>` : '<div class="mc-color-add">inklusive</div>'}
+        </div>`;
+    }).join('');
+}
+
+// ---- Select a color by index ----
+function mcSelectColor(colorIndex) {
+    const colors = getBikeColors(mcCurrentBike);
+    mcSelectedColor = colors[colorIndex];
+    mcRenderColors();
+    mcUpdatePrice();
+}
+
+// ---- Live price calculation + summary update ----
+function mcUpdatePrice() {
+    const bike = SHOP_BIKES[mcCurrentBike];
+    if (!bike) return;
+
+    const basePrice = bike.price;
+    const colorAdd = mcSelectedColor ? mcSelectedColor.priceAdd : 0;
+
+    // Sum addon prices from checked checkboxes
+    let addonTotal = 0;
+    const activeAddons = [];
+    document.querySelectorAll('.mc-addon-check').forEach(cb => {
+        if (cb.checked) {
+            const price = parseInt(cb.getAttribute('data-price'), 10);
+            const addonId = cb.getAttribute('data-addon');
+            addonTotal += price;
+            const addonDef = MC_ADDONS.find(a => a.id === addonId);
+            if (addonDef) activeAddons.push(addonDef);
+        }
+    });
+
+    const totalPrice = basePrice + colorAdd + addonTotal;
+
+    // -- Update summary name --
+    const summaryName = document.getElementById('mcSummaryName');
+    if (summaryName) summaryName.textContent = bike.icon + ' ' + bike.name;
+
+    // -- Update color chip --
+    const colorChip = document.getElementById('mcSummaryColor');
+    if (colorChip && mcSelectedColor) {
+        colorChip.innerHTML = `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${mcSelectedColor.hex};border:1px solid #666;margin-right:4px;"></span>${mcSelectedColor.name}`;
+    }
+
+    // -- Update addon chips --
+    const addonsEl = document.getElementById('mcSummaryAddons');
+    if (addonsEl) {
+        addonsEl.innerHTML = activeAddons.map(a =>
+            `<span class="mc-addon-chip">${a.emoji} ${a.label}</span>`
+        ).join('');
+    }
+
+    // -- Price breakdown rows --
+    const basePriceEl = document.getElementById('mcBasePrice');
+    if (basePriceEl) basePriceEl.textContent = basePrice.toLocaleString('de-DE') + ' €';
+
+    const colorPriceRow = document.getElementById('mcColorPriceRow');
+    const colorPriceVal = document.getElementById('mcColorPriceVal');
+    const colorPriceLabel = document.getElementById('mcColorPriceLabel');
+    if (colorPriceRow) {
+        if (colorAdd > 0) {
+            colorPriceRow.style.display = '';
+            if (colorPriceVal) colorPriceVal.textContent = '+' + colorAdd.toLocaleString('de-DE') + ' €';
+            if (colorPriceLabel && mcSelectedColor) colorPriceLabel.textContent = mcSelectedColor.name;
+        } else {
+            colorPriceRow.style.display = 'none';
+        }
+    }
+
+    const addonPriceRow = document.getElementById('mcAddonPriceRow');
+    const addonPriceVal = document.getElementById('mcAddonPriceVal');
+    if (addonPriceRow) {
+        if (addonTotal > 0) {
+            addonPriceRow.style.display = '';
+            if (addonPriceVal) addonPriceVal.textContent = '+' + addonTotal.toLocaleString('de-DE') + ' €';
+        } else {
+            addonPriceRow.style.display = 'none';
+        }
+    }
+
+    // -- Big total price (flash animation on change) --
+    const totalEl = document.getElementById('mcTotalPrice');
+    if (totalEl) {
+        totalEl.classList.add('flash');
+        setTimeout(() => {
+            totalEl.textContent = totalPrice.toLocaleString('de-DE') + ' \u20ac';
+            totalEl.classList.remove('flash');
+        }, 80);
+    }
+
+    // -- Persist config to localStorage --
+    try {
+        localStorage.setItem('vroooom_config_state', JSON.stringify({
+            bike: mcCurrentBike,
+            color: mcSelectedColor ? mcSelectedColor.name : null,
+            addons: [...mcSelectedAddons],
+            total: totalPrice
+        }));
+    } catch(e) {}
+}
+
+// ---- Add to cart (placeholder) ----
+function mcAddToCart() {
+    const bike = SHOP_BIKES[mcCurrentBike];
+    const total = parseInt(
+        document.getElementById('mcTotalPrice').textContent.replace(/[^\d]/g, ''), 10
+    );
+    const feedback = document.getElementById('mcCartFeedback');
+    const btn = document.getElementById('mcCartBtn');
+
+    // Visual feedback
+    btn.textContent = '✅ Hinzugefügt!';
+    if (feedback) feedback.textContent = bike.name + ' wurde in den Warenkorb gelegt.';
+
+    setTimeout(() => {
+        btn.textContent = '\ud83d\uded2 In den Warenkorb';
+        if (feedback) feedback.textContent = '';
+    }, 2500);
+}
+
+// ---- Start configurator when DOM is ready ----
+document.addEventListener('DOMContentLoaded', mcInit);
+// Fallback for inline script after DOM
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(mcInit, 0);
+}
 </script>
     <script src="settings.js"></script>
 </body>

@@ -7,6 +7,242 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+/* ====================================================
+   WARTUNGSRECHNER — Maintenance Calculator Styles
+   ==================================================== */
+.maintenance-section {
+    margin: 2.5rem 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem 1.5rem;
+}
+.maintenance-section h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+}
+.maintenance-section .maint-subtitle {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+}
+.maint-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+}
+.maint-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 160px;
+}
+.maint-field label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.maint-select {
+    padding: 0.55rem 0.9rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 0.92rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+}
+.maint-select:focus {
+    border-color: var(--accent);
+}
+.maint-info-bar {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem 1.1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+.maint-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+.maint-info-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-subtle);
+}
+.maint-info-val {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+.maint-info-val.accent {
+    color: var(--accent);
+}
+.maint-info-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--border);
+}
+/* Results table */
+.maint-table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+.maint-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.maint-table thead tr {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+.maint-table th {
+    padding: 0.65rem 0.9rem;
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.maint-table td {
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text);
+}
+.maint-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.maint-table tbody tr:hover {
+    background: var(--accent-dim);
+}
+/* Status badges */
+.maint-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.maint-status.overdue {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+.maint-status.soon {
+    background: rgba(234, 179, 8, 0.12);
+    color: #eab308;
+    border: 1px solid rgba(234, 179, 8, 0.25);
+}
+.maint-status.later {
+    background: var(--bg);
+    color: var(--text-subtle);
+    border: 1px solid var(--border);
+}
+.maint-service-type {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+}
+.maint-service-chip {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid var(--border-hover);
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+.maint-placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+.maint-current-km {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+.maint-km-input {
+    padding: 0.55rem 0.9rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 120px;
+}
+.maint-km-input:focus {
+    border-color: var(--accent);
+}
+/* ---- Dark mode: already inherited from var(--bg)/var(--card-bg) ---- */
+/* Explicit dark overrides for table striping */
+[data-theme="dark"] .maint-table tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.02);
+}
+[data-theme="light"] .maint-table tbody tr:nth-child(even) {
+    background: rgba(0,0,0,0.02);
+}
+[data-theme="light"] .maint-section .maint-select,
+[data-theme="light"] .maint-km-input {
+    background: #fff;
+}
+[data-theme="light"] .maint-info-bar {
+    background: #f0f0f0;
+}
+[data-theme="light"] .maint-status.overdue { background: rgba(34,197,94,0.1); }
+[data-theme="light"] .maint-status.soon    { background: rgba(234,179,8,0.1); }
+[data-theme="light"] .maint-status.later   { background: #e5e5e5; color: #666; }
+[data-theme="light"] .maint-service-chip {
+    background: rgba(255,102,0,0.08);
+}
+/* ---- Responsive layout ---- */
+@media (max-width: 768px) {
+    .maint-controls { flex-wrap: wrap; }
+    .maint-field { flex: 1 1 calc(50% - 0.5rem); min-width: 140px; }
+    .maint-info-bar { gap: 0.75rem; }
+    .maint-info-divider { display: none; }
+}
+@media (max-width: 600px) {
+    .maint-controls { flex-direction: column; }
+    .maint-field { min-width: 100%; flex: 1 1 100%; }
+    .maint-info-bar { gap: 0.75rem; flex-wrap: wrap; }
+    .maint-info-item { flex: 1 1 calc(50% - 0.5rem); }
+    .maint-table th, .maint-table td { padding: 0.5rem 0.6rem; font-size: 0.78rem; }
+    /* Hide estimated month on very small screens */
+    .maint-table th:nth-child(3), .maint-table td:nth-child(3) { display: none; }
+    /* Wrap service chips better */
+    .maint-service-chip { font-size: 0.68rem; padding: 0.1rem 0.35rem; }
+}
+    </style>
 </head>
 <body>
     <nav class="site-nav">
@@ -99,6 +335,84 @@
             <section class="advice-section" id="adviceSection" aria-label="Kaufberatung">
                 <h2 class="advice-title">🧭 Kaufberatung: Welches Motorrad für wen?</h2>
                 <div class="advice-grid" id="adviceGrid"></div>
+            </section>
+
+            <!-- ===== WARTUNGSRECHNER ===== -->
+            <section class="maintenance-section" id="maintenanceSection" aria-label="Wartungsrechner">
+                <h2>🔧 Wartungsrechner</h2>
+                <p class="maint-subtitle">Wähle dein Modell und Kilometerstand — wir berechnen die nächsten 5 Service-Termine.</p>
+
+                <div class="maint-controls">
+                    <div class="maint-field">
+                        <label for="maintBikeSelect">Motorrad-Modell</label>
+                        <select id="maintBikeSelect" class="maint-select" aria-label="Motorrad für Wartungsrechner wählen">
+                            <option value="">-- Modell wählen --</option>
+                            <!-- filled by JS from BIKES array -->
+                        </select>
+                    </div>
+                    <div class="maint-field">
+                        <label for="maintYear">Baujahr</label>
+                        <select id="maintYear" class="maint-select" aria-label="Baujahr wählen">
+                            <option value="">-- Baujahr --</option>
+                            <!-- filled by JS: 1960-2026 -->
+                        </select>
+                    </div>
+                    <div class="maint-field">
+                        <label for="maintCurrentKm">Aktueller Kilometerstand</label>
+                        <input type="number" id="maintCurrentKm" class="maint-km-input" placeholder="z.B. 12500" min="0" max="999999" aria-label="Aktueller Kilometerstand" style="width:100%;">
+                    </div>
+                    <div class="maint-field" style="flex:0 0 auto;">
+                        <label>&nbsp;</label>
+                        <button class="btn" id="maintCalcBtn" onclick="calculateMaintenance()" style="height:2.45rem;">Berechnen →</button>
+                    </div>
+                </div>
+
+                <!-- Info bar: shows detected cc, era, base interval -->
+                <div class="maint-info-bar" id="maintInfoBar" style="display:none;">
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Modell</span>
+                        <span class="maint-info-val" id="maintInfoName">—</span>
+                    </div>
+                    <div class="maint-info-divider"></div>
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Hubraum</span>
+                        <span class="maint-info-val accent" id="maintInfoCC">—</span>
+                    </div>
+                    <div class="maint-info-divider"></div>
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Era</span>
+                        <span class="maint-info-val" id="maintInfoEra">—</span>
+                    </div>
+                    <div class="maint-info-divider"></div>
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Basis-Intervall</span>
+                        <span class="maint-info-val accent" id="maintInfoInterval">—</span>
+                    </div>
+                    <div class="maint-info-divider"></div>
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Modifier</span>
+                        <span class="maint-info-val" id="maintInfoModifier">—</span>
+                    </div>
+                </div>
+
+                <!-- Results table -->
+                <div class="maint-table-wrap">
+                    <table class="maint-table" id="maintTable" aria-label="Service-Termin-Tabelle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Kilometerstand</th>
+                                <th>Geschätzter Monat</th>
+                                <th>Service-Typ</th>
+                                <th>Status</th>
+                                <th>Kosten-Schätzung</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maintTableBody">
+                            <tr><td colspan="6" class="maint-placeholder">🔧 Wähle Modell, Baujahr und Kilometerstand — dann auf Berechnen klicken.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section class="closing">
@@ -1329,7 +1643,304 @@
             Favorites.renderAll();
             FavoritesSection.render();
             Reviews.updateAllBadges();
+            MaintenanceCalc.init();
         })();
+    </script>
+
+    <!-- ===== WARTUNGSRECHNER LOGIC ===== -->
+    <script>
+    /* ==========================================
+       Maintenance Calculator
+       Berechnet Serviceintervalle basierend auf:
+       - Baujahr -> Era (Klassiker/Modern/Neu)
+       - Hubraum -> aus BIKES-Array
+       - Modifiers für >1000cc und <300cc
+       ========================================== */
+    var MaintenanceCalc = (function() {
+
+        /* ---- Service types per interval number ---- */
+        var SERVICE_SCHEDULE = [
+            // Service 1
+            [
+                { type: 'Ölwechsel', emoji: '🛢️' },
+                { type: 'Luftfilter Check', emoji: '💨' },
+                { type: 'Reifendruck', emoji: '🟡' }
+            ],
+            // Service 2
+            [
+                { type: 'Ölwechsel', emoji: '🛢️' },
+                { type: 'Zundkerzen', emoji: '⚡' },
+                { type: 'Bremsflüssigkeit', emoji: '🟥' },
+                { type: 'Kettencheck', emoji: '🔗' }
+            ],
+            // Service 3
+            [
+                { type: 'Ölwechsel', emoji: '🛢️' },
+                { type: 'Luftfilter Wechsel', emoji: '💨' },
+                { type: 'Ölfilter', emoji: '🛢️' },
+                { type: 'Ventile einstellen', emoji: '🔧' }
+            ],
+            // Service 4
+            [
+                { type: 'Ölwechsel', emoji: '🛢️' },
+                { type: 'Zuendkerzen', emoji: '⚡' },
+                { type: 'Kette + Ritzel', emoji: '⚙️' },
+                { type: 'Kühlmittel Check', emoji: '🟦' }
+            ],
+            // Service 5
+            [
+                { type: 'Großinspektion', emoji: '🔬' },
+                { type: 'Ölwechsel komplett', emoji: '🛢️' },
+                { type: 'Brems-/Kuppl.-Fl.', emoji: '🟥' },
+                { type: 'Zahnriemen/Kette', emoji: '🔗' },
+                { type: 'Alle Filter', emoji: '💨' }
+            ]
+        ];
+
+        /* ---- Cost estimates per service number (EUR) ---- */
+        var SERVICE_COSTS = [
+            { min: 80, max: 150 },   // Service 1
+            { min: 150, max: 280 },  // Service 2
+            { min: 200, max: 350 },  // Service 3
+            { min: 180, max: 300 },  // Service 4
+            { min: 350, max: 600 }   // Service 5
+        ];
+
+        /* ---- Populate model select from BIKES array ---- */
+        function populateBikeSelect() {
+            var sel = document.getElementById('maintBikeSelect');
+            if (!sel) return;
+            // Build sorted list by name
+            var keys = Object.keys(BIKES).sort(function(a, b) {
+                return BIKES[a].name.localeCompare(BIKES[b].name);
+            });
+            keys.forEach(function(key) {
+                var opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = BIKES[key].icon + ' ' + BIKES[key].name
+                    + ' (' + BIKES[key].extendedSpecs['Hubraum'] + ')';
+                sel.appendChild(opt);
+            });
+        }
+
+        /* ---- Populate year select: 1960-2026 desc ---- */
+        function populateYearSelect() {
+            var sel = document.getElementById('maintYear');
+            if (!sel) return;
+            for (var y = 2026; y >= 1960; y--) {
+                var opt = document.createElement('option');
+                opt.value = String(y);
+                opt.textContent = String(y);
+                sel.appendChild(opt);
+            }
+        }
+
+        /* ---- Get cc for a selected BIKES key ---- */
+        function getCCForBike(bikeKey) {
+            var bike = BIKES[bikeKey];
+            if (!bike) return null;
+            // cc is stored in extendedSpecs["Hubraum"] as "NNNN cc"
+            var hubraum = bike.extendedSpecs['Hubraum'];
+            var match = hubraum ? hubraum.match(/(\d+)/) : null;
+            return match ? parseInt(match[1], 10) : null;
+        }
+
+        /* ---- Determine era from year ---- */
+        function getEra(year) {
+            if (year < 1980) return { label: 'Klassiker (vor 1980)', base: 5000 };
+            if (year <= 2010) return { label: 'Modern (1980–2010)', base: 10000 };
+            return { label: 'Neu (2010+)', base: 15000 };
+        }
+
+        /* ---- Apply cc modifier ---- */
+        function getModifier(cc) {
+            if (cc > 1000) return { label: '>1000cc: -10% (aggressiv)', factor: 0.9 };
+            if (cc < 300)  return { label: '<300cc: +20% (Anfänger)', factor: 1.2 };
+            return { label: 'Standard (300–1000cc)', factor: 1.0 };
+        }
+
+        /* ---- Format date: "MM/YYYY" from months offset ---- */
+        function offsetDate(monthsFromNow) {
+            var d = new Date();
+            d.setMonth(d.getMonth() + monthsFromNow);
+            return ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear();
+        }
+
+        /* ---- Main calculation ---- */
+        function calculate(bikeKey, year, currentKm) {
+            var cc = getCCForBike(bikeKey);
+            if (!cc) return null;
+            var bike = BIKES[bikeKey];
+            var era = getEra(year);
+            var modifier = getModifier(cc);
+
+            // Final service interval in km (rounded to nearest 500)
+            var intervalKm = Math.round((era.base * modifier.factor) / 500) * 500;
+            // Time between services: always 12 months (annual)
+            var intervalMonths = 12;
+
+            // Generate 5 service rows
+            var services = [];
+            for (var i = 0; i < 5; i++) {
+                var serviceKm = currentKm + intervalKm * (i + 1);
+                var serviceDate = offsetDate(intervalMonths * (i + 1));
+                var cost = SERVICE_COSTS[i];
+
+                // Status: #1 = overdue (next service), #2 = soon, rest = later
+                var status;
+                if (i === 0) status = 'overdue';
+                else if (i === 1) status = 'soon';
+                else status = 'later';
+
+                services.push({
+                    num: i + 1,
+                    km: serviceKm,
+                    date: serviceDate,
+                    types: SERVICE_SCHEDULE[i],
+                    status: status,
+                    costMin: cost.min,
+                    costMax: cost.max
+                });
+            }
+
+            return {
+                bikeName: bike.name,
+                cc: cc,
+                era: era,
+                modifier: modifier,
+                intervalKm: intervalKm,
+                services: services
+            };
+        }
+
+        /* ---- Render results to table ---- */
+        function render(result) {
+            var tbody = document.getElementById('maintTableBody');
+            var infoBar = document.getElementById('maintInfoBar');
+
+            if (!result) {
+                tbody.innerHTML = '<tr><td colspan="6" class="maint-placeholder">⚠️ Fehler bei der Berechnung. Bitte alle Felder ausfüllen.</td></tr>';
+                infoBar.style.display = 'none';
+                return;
+            }
+
+            // Update info bar
+            document.getElementById('maintInfoName').textContent = result.bikeName;
+            document.getElementById('maintInfoCC').textContent = result.cc + ' cc';
+            document.getElementById('maintInfoEra').textContent = result.era.label;
+            document.getElementById('maintInfoInterval').textContent = result.intervalKm.toLocaleString('de-DE') + ' km';
+            document.getElementById('maintInfoModifier').textContent = result.modifier.label;
+            infoBar.style.display = '';
+
+            // Build table rows
+            var rows = result.services.map(function(svc) {
+                var statusLabel, statusClass;
+                if (svc.status === 'overdue') {
+                    statusLabel = '✅ Nächster Termin';
+                    statusClass = 'overdue';
+                } else if (svc.status === 'soon') {
+                    statusLabel = '⚠️ Bald fällig';
+                    statusClass = 'soon';
+                } else {
+                    statusLabel = '⏳ Später';
+                    statusClass = 'later';
+                }
+
+                var typesHtml = svc.types.map(function(t) {
+                    return '<span class="maint-service-chip">' + t.emoji + ' ' + t.type + '</span>';
+                }).join('');
+
+                return '<tr>' +
+                    '<td><strong>' + svc.num + '</strong></td>' +
+                    '<td><strong>' + svc.km.toLocaleString('de-DE') + ' km</strong></td>' +
+                    '<td>' + svc.date + '</td>' +
+                    '<td><div class="maint-service-type">' + typesHtml + '</div></td>' +
+                    '<td><span class="maint-status ' + statusClass + '">' + statusLabel + '</span></td>' +
+                    '<td>~' + svc.costMin + '–' + svc.costMax + ' €</td>' +
+                    '</tr>';
+            });
+
+            tbody.innerHTML = rows.join('');
+        }
+
+        /* ---- Public: init ---- */
+        function init() {
+            populateBikeSelect();
+            populateYearSelect();
+
+            // Restore last configuration from localStorage
+            try {
+                var saved = localStorage.getItem('vroooom_maint_state');
+                if (saved) {
+                    var state = JSON.parse(saved);
+                    if (state.bikeKey && document.getElementById('maintBikeSelect').querySelector('[value="' + state.bikeKey + '"]')) {
+                        document.getElementById('maintBikeSelect').value = state.bikeKey;
+                    }
+                    if (state.year) {
+                        document.getElementById('maintYear').value = state.year;
+                    }
+                    if (state.km !== undefined) {
+                        document.getElementById('maintCurrentKm').value = state.km;
+                    }
+                    // Auto-calculate with restored state
+                    if (state.bikeKey && state.year && state.km !== undefined) {
+                        calculateMaintenance();
+                    }
+                }
+            } catch(e) {}
+
+            // Allow Enter key to trigger calculation
+            var kmInput = document.getElementById('maintCurrentKm');
+            if (kmInput) {
+                kmInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') calculateMaintenance();
+                });
+            }
+
+            // Auto-recalc when bike changes (updates cc info)
+            var bikeSelect = document.getElementById('maintBikeSelect');
+            if (bikeSelect) {
+                bikeSelect.addEventListener('change', function() {
+                    var km = parseInt(document.getElementById('maintCurrentKm').value, 10);
+                    var year = parseInt(document.getElementById('maintYear').value, 10);
+                    if (bikeSelect.value && year && km >= 0) calculateMaintenance();
+                });
+            }
+        }
+
+        return { init: init, calculate: calculate, render: render };
+    })();
+
+    /* ---- Init MaintenanceCalc on page load ---- */
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            MaintenanceCalc.init();
+        });
+    } else {
+        MaintenanceCalc.init();
+    }
+
+    /* ---- Global function called by button onclick ---- */
+    function calculateMaintenance() {
+        var bikeKey = document.getElementById('maintBikeSelect').value;
+        var year = parseInt(document.getElementById('maintYear').value, 10);
+        var km = parseInt(document.getElementById('maintCurrentKm').value, 10);
+
+        if (!bikeKey || isNaN(year) || isNaN(km) || km < 0) {
+            var tbody = document.getElementById('maintTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="maint-placeholder">⚠️ Bitte Modell, Baujahr und Kilometerstand auswählen.</td></tr>';
+            document.getElementById('maintInfoBar').style.display = 'none';
+            return;
+        }
+
+        var result = MaintenanceCalc.calculate(bikeKey, year, km);
+        MaintenanceCalc.render(result);
+
+        // Persist last config in localStorage (optional UX improvement)
+        try {
+            localStorage.setItem('vroooom_maint_state', JSON.stringify({ bikeKey: bikeKey, year: year, km: km }));
+        } catch(e) {}
+    }
     </script>
     <script src="settings.js"></script>
 </body>
