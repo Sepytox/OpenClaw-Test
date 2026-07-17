@@ -1326,13 +1326,33 @@ function mcInit() {
         `<option value="${k}">${SHOP_BIKES[k].icon} ${SHOP_BIKES[k].name}</option>`
     ).join('');
 
-    // Sync with main bike selector if URL param present
+    // Restore last configuration from localStorage
+    try {
+        const saved = localStorage.getItem('vroooom_config_state');
+        if (saved) {
+            const state = JSON.parse(saved);
+            if (state.bikeKey && SHOP_BIKES[state.bikeKey]) {
+                mcCurrentBike = state.bikeKey;
+                sel.value = state.bikeKey;
+            }
+            if (state.colorIdx !== null && state.colorIdx !== undefined) {
+                mcSelectedColor = state.colorIdx;
+            }
+            if (state.addons && Array.isArray(state.addons)) {
+                mcSelectedAddons.clear();
+                state.addons.forEach(a => mcSelectedAddons.add(a));
+            }
+        }
+    } catch(e) {}
+
+    // Sync with main bike selector if URL param present (overrides localStorage)
     const params = new URLSearchParams(window.location.search);
     const bikeParam = params.get('bike');
     if (bikeParam && SHOP_BIKES[bikeParam]) {
         mcCurrentBike = bikeParam;
         sel.value = bikeParam;
-    } else {
+    } else if (!mcCurrentBike) {
+        mcCurrentBike = 'zx10r';
         sel.value = 'zx10r';
     }
 
@@ -1354,6 +1374,12 @@ function mcInit() {
             else mcSelectedAddons.delete(addonId);
             mcUpdatePrice();
         });
+    });
+
+    // Restore addon checkboxes from localStorage
+    mcSelectedAddons.forEach(addonId => {
+        const cb = document.querySelector(`.mc-addon-check[data-addon="${addonId}"]`);
+        if (cb) cb.checked = true;
     });
 
     mcRenderColors();

@@ -1868,6 +1868,27 @@
             populateBikeSelect();
             populateYearSelect();
 
+            // Restore last configuration from localStorage
+            try {
+                var saved = localStorage.getItem('vroooom_maint_state');
+                if (saved) {
+                    var state = JSON.parse(saved);
+                    if (state.bikeKey && document.getElementById('maintBikeSelect').querySelector('[value="' + state.bikeKey + '"]')) {
+                        document.getElementById('maintBikeSelect').value = state.bikeKey;
+                    }
+                    if (state.year) {
+                        document.getElementById('maintYear').value = state.year;
+                    }
+                    if (state.km !== undefined) {
+                        document.getElementById('maintCurrentKm').value = state.km;
+                    }
+                    // Auto-calculate with restored state
+                    if (state.bikeKey && state.year && state.km !== undefined) {
+                        calculateMaintenance();
+                    }
+                }
+            } catch(e) {}
+
             // Allow Enter key to trigger calculation
             var kmInput = document.getElementById('maintCurrentKm');
             if (kmInput) {
@@ -1889,6 +1910,15 @@
 
         return { init: init, calculate: calculate, render: render };
     })();
+
+    /* ---- Init MaintenanceCalc on page load ---- */
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            MaintenanceCalc.init();
+        });
+    } else {
+        MaintenanceCalc.init();
+    }
 
     /* ---- Global function called by button onclick ---- */
     function calculateMaintenance() {
