@@ -811,15 +811,20 @@ function stepPhysics(state, bike, dt, manual) {
 // RACE LOOP
 // ==========================================
 function raceLoop(ts) {
-    if (!simState.running) return;
+    // In compare mode keep running as long as EITHER bike is still going
+    const anyRunning = simState.running || (raceMode === 'compare' && sim2State.running);
+    if (!anyRunning) return;
     if (simLastT === null) simLastT = ts;
     const dt = Math.min((ts - simLastT) / 1000, 0.05); // cap at 50ms
     simLastT = ts;
 
     const bike1 = RACE_BIKES[currentBike1];
-    const accel = stepPhysics(simState, bike1, dt, raceMode === 'manual');
+    let accel;
+    if (simState.running) {
+        accel = stepPhysics(simState, bike1, dt, raceMode === 'manual');
+    }
 
-    if (raceMode === 'compare') {
+    if (raceMode === 'compare' && sim2State.running) {
         const bike2 = RACE_BIKES[currentBike2];
         stepPhysics(sim2State, bike2, dt, false);
     }
@@ -828,7 +833,9 @@ function raceLoop(ts) {
     drawTrack();
     drawVelocityGraph();
 
-    if (simState.running) {
+    // Schedule next frame only while any bike is still running
+    const stillRunning = simState.running || (raceMode === 'compare' && sim2State.running);
+    if (stillRunning) {
         simAnimId = requestAnimationFrame(raceLoop);
     }
 }
@@ -1205,7 +1212,8 @@ function resetRace() {
 
 function finishRace(state, bike) {
     state.running = false;
-    if (raceMode !== 'compare' || (state === simState && !sim2State.running)) {
+    // Stop the race UI once ALL bikes have finished
+    if (!simState.running && !sim2State.running) {
         stopRace();
     }
 
