@@ -1611,7 +1611,274 @@
             Favorites.renderAll();
             FavoritesSection.render();
             Reviews.updateAllBadges();
+            MaintenanceCalc.init();
         })();
+    </script>
+
+    <!-- ===== WARTUNGSRECHNER LOGIC ===== -->
+    <script>
+    /* ==========================================
+       Maintenance Calculator
+       Berechnet Serviceintervalle basierend auf:
+       - Baujahr -> Era (Klassiker/Modern/Neu)
+       - Hubraum -> aus BIKES-Array
+       - Modifiers für >1000cc und <300cc
+       ========================================== */
+    var MaintenanceCalc = (function() {
+
+        /* ---- Service types per interval number ---- */
+        var SERVICE_SCHEDULE = [
+            // Service 1
+            [
+                { type: 'Ölwechsel', emoji: '🛢️' },
+                { type: 'Luftfilter Check', emoji: '💨' },
+                { type: 'Reifendruck', emoji: '🟡' }
+            ],
+            // Service 2
+            [
+                { type: 'Ölwechsel', emoji: '🛢️' },
+                { type: 'Zundkerzen', emoji: '⚡' },
+                { type: 'Bremsflüssigkeit', emoji: '🟥' },
+                { type: 'Kettencheck', emoji: '🔗' }
+            ],
+            // Service 3
+            [
+                { type: 'Ölwechsel', emoji: '🛢️' },
+                { type: 'Luftfilter Wechsel', emoji: '💨' },
+                { type: 'Ölfilter', emoji: '🛢️' },
+                { type: 'Ventile einstellen', emoji: '🔧' }
+            ],
+            // Service 4
+            [
+                { type: 'Ölwechsel', emoji: '🛢️' },
+                { type: 'Zuendkerzen', emoji: '⚡' },
+                { type: 'Kette + Ritzel', emoji: '⚙️' },
+                { type: 'Kühlmittel Check', emoji: '🟦' }
+            ],
+            // Service 5
+            [
+                { type: 'Großinspektion', emoji: '🔬' },
+                { type: 'Ölwechsel komplett', emoji: '🛢️' },
+                { type: 'Brems-/Kuppl.-Fl.', emoji: '🟥' },
+                { type: 'Zahnriemen/Kette', emoji: '🔗' },
+                { type: 'Alle Filter', emoji: '💨' }
+            ]
+        ];
+
+        /* ---- Cost estimates per service number (EUR) ---- */
+        var SERVICE_COSTS = [
+            { min: 80, max: 150 },   // Service 1
+            { min: 150, max: 280 },  // Service 2
+            { min: 200, max: 350 },  // Service 3
+            { min: 180, max: 300 },  // Service 4
+            { min: 350, max: 600 }   // Service 5
+        ];
+
+        /* ---- Populate model select from BIKES array ---- */
+        function populateBikeSelect() {
+            var sel = document.getElementById('maintBikeSelect');
+            if (!sel) return;
+            // Build sorted list by name
+            var keys = Object.keys(BIKES).sort(function(a, b) {
+                return BIKES[a].name.localeCompare(BIKES[b].name);
+            });
+            keys.forEach(function(key) {
+                var opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = BIKES[key].icon + ' ' + BIKES[key].name
+                    + ' (' + BIKES[key].extendedSpecs['Hubraum'] + ')';
+                sel.appendChild(opt);
+            });
+        }
+
+        /* ---- Populate year select: 1960-2026 desc ---- */
+        function populateYearSelect() {
+            var sel = document.getElementById('maintYear');
+            if (!sel) return;
+            for (var y = 2026; y >= 1960; y--) {
+                var opt = document.createElement('option');
+                opt.value = String(y);
+                opt.textContent = String(y);
+                sel.appendChild(opt);
+            }
+        }
+
+        /* ---- Get cc for a selected BIKES key ---- */
+        function getCCForBike(bikeKey) {
+            var bike = BIKES[bikeKey];
+            if (!bike) return null;
+            // cc is stored in extendedSpecs["Hubraum"] as "NNNN cc"
+            var hubraum = bike.extendedSpecs['Hubraum'];
+            var match = hubraum ? hubraum.match(/(\d+)/) : null;
+            return match ? parseInt(match[1], 10) : null;
+        }
+
+        /* ---- Determine era from year ---- */
+        function getEra(year) {
+            if (year < 1980) return { label: 'Klassiker (vor 1980)', base: 5000 };
+            if (year <= 2010) return { label: 'Modern (1980–2010)', base: 10000 };
+            return { label: 'Neu (2010+)', base: 15000 };
+        }
+
+        /* ---- Apply cc modifier ---- */
+        function getModifier(cc) {
+            if (cc > 1000) return { label: '>1000cc: -10% (aggressiv)', factor: 0.9 };
+            if (cc < 300)  return { label: '<300cc: +20% (Anfänger)', factor: 1.2 };
+            return { label: 'Standard (300–1000cc)', factor: 1.0 };
+        }
+
+        /* ---- Format date: "MM/YYYY" from months offset ---- */
+        function offsetDate(monthsFromNow) {
+            var d = new Date();
+            d.setMonth(d.getMonth() + monthsFromNow);
+            return ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear();
+        }
+
+        /* ---- Main calculation ---- */
+        function calculate(bikeKey, year, currentKm) {
+            var cc = getCCForBike(bikeKey);
+            if (!cc) return null;
+            var bike = BIKES[bikeKey];
+            var era = getEra(year);
+            var modifier = getModifier(cc);
+
+            // Final service interval in km (rounded to nearest 500)
+            var intervalKm = Math.round((era.base * modifier.factor) / 500) * 500;
+            // Time between services: always 12 months (annual)
+            var intervalMonths = 12;
+
+            // Generate 5 service rows
+            var services = [];
+            for (var i = 0; i < 5; i++) {
+                var serviceKm = currentKm + intervalKm * (i + 1);
+                var serviceDate = offsetDate(intervalMonths * (i + 1));
+                var cost = SERVICE_COSTS[i];
+
+                // Status: #1 = overdue (next service), #2 = soon, rest = later
+                var status;
+                if (i === 0) status = 'overdue';
+                else if (i === 1) status = 'soon';
+                else status = 'later';
+
+                services.push({
+                    num: i + 1,
+                    km: serviceKm,
+                    date: serviceDate,
+                    types: SERVICE_SCHEDULE[i],
+                    status: status,
+                    costMin: cost.min,
+                    costMax: cost.max
+                });
+            }
+
+            return {
+                bikeName: bike.name,
+                cc: cc,
+                era: era,
+                modifier: modifier,
+                intervalKm: intervalKm,
+                services: services
+            };
+        }
+
+        /* ---- Render results to table ---- */
+        function render(result) {
+            var tbody = document.getElementById('maintTableBody');
+            var infoBar = document.getElementById('maintInfoBar');
+
+            if (!result) {
+                tbody.innerHTML = '<tr><td colspan="6" class="maint-placeholder">⚠️ Fehler bei der Berechnung. Bitte alle Felder ausfüllen.</td></tr>';
+                infoBar.style.display = 'none';
+                return;
+            }
+
+            // Update info bar
+            document.getElementById('maintInfoName').textContent = result.bikeName;
+            document.getElementById('maintInfoCC').textContent = result.cc + ' cc';
+            document.getElementById('maintInfoEra').textContent = result.era.label;
+            document.getElementById('maintInfoInterval').textContent = result.intervalKm.toLocaleString('de-DE') + ' km';
+            document.getElementById('maintInfoModifier').textContent = result.modifier.label;
+            infoBar.style.display = '';
+
+            // Build table rows
+            var rows = result.services.map(function(svc) {
+                var statusLabel, statusClass;
+                if (svc.status === 'overdue') {
+                    statusLabel = '✅ Nächster Termin';
+                    statusClass = 'overdue';
+                } else if (svc.status === 'soon') {
+                    statusLabel = '⚠️ Bald fällig';
+                    statusClass = 'soon';
+                } else {
+                    statusLabel = '⏳ Später';
+                    statusClass = 'later';
+                }
+
+                var typesHtml = svc.types.map(function(t) {
+                    return '<span class="maint-service-chip">' + t.emoji + ' ' + t.type + '</span>';
+                }).join('');
+
+                return '<tr>' +
+                    '<td><strong>' + svc.num + '</strong></td>' +
+                    '<td><strong>' + svc.km.toLocaleString('de-DE') + ' km</strong></td>' +
+                    '<td>' + svc.date + '</td>' +
+                    '<td><div class="maint-service-type">' + typesHtml + '</div></td>' +
+                    '<td><span class="maint-status ' + statusClass + '">' + statusLabel + '</span></td>' +
+                    '<td>~' + svc.costMin + '–' + svc.costMax + ' €</td>' +
+                    '</tr>';
+            });
+
+            tbody.innerHTML = rows.join('');
+        }
+
+        /* ---- Public: init ---- */
+        function init() {
+            populateBikeSelect();
+            populateYearSelect();
+
+            // Allow Enter key to trigger calculation
+            var kmInput = document.getElementById('maintCurrentKm');
+            if (kmInput) {
+                kmInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') calculateMaintenance();
+                });
+            }
+
+            // Auto-recalc when bike changes (updates cc info)
+            var bikeSelect = document.getElementById('maintBikeSelect');
+            if (bikeSelect) {
+                bikeSelect.addEventListener('change', function() {
+                    var km = parseInt(document.getElementById('maintCurrentKm').value, 10);
+                    var year = parseInt(document.getElementById('maintYear').value, 10);
+                    if (bikeSelect.value && year && km >= 0) calculateMaintenance();
+                });
+            }
+        }
+
+        return { init: init, calculate: calculate, render: render };
+    })();
+
+    /* ---- Global function called by button onclick ---- */
+    function calculateMaintenance() {
+        var bikeKey = document.getElementById('maintBikeSelect').value;
+        var year = parseInt(document.getElementById('maintYear').value, 10);
+        var km = parseInt(document.getElementById('maintCurrentKm').value, 10);
+
+        if (!bikeKey || isNaN(year) || isNaN(km) || km < 0) {
+            var tbody = document.getElementById('maintTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" class="maint-placeholder">⚠️ Bitte Modell, Baujahr und Kilometerstand auswählen.</td></tr>';
+            document.getElementById('maintInfoBar').style.display = 'none';
+            return;
+        }
+
+        var result = MaintenanceCalc.calculate(bikeKey, year, km);
+        MaintenanceCalc.render(result);
+
+        // Persist last config in localStorage (optional UX improvement)
+        try {
+            localStorage.setItem('vroooom_maint_state', JSON.stringify({ bikeKey: bikeKey, year: year, km: km }));
+        } catch(e) {}
+    }
     </script>
     <script src="settings.js"></script>
 </body>
