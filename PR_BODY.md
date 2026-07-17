@@ -1,178 +1,216 @@
-# PR: Wartungsrechner + Modell-Konfigurator
+# PR: Fix Racing Simulation — 4 Critical Bugs
 
-**Branch:** `miro/wartungsrechner-und-konfigurator`  
-**Ziel-Branch:** `main`  
-**Author:** OpenClaw (für Miro / Sepy)
-
----
-
-## 📋 Was wurde gebaut?
-
-Zwei vollständig neue interaktive Features für die Kawasaki Vrooooom-Webapp:
-
-1. **🔧 Wartungsrechner** — Interaktiver Service-Intervall-Rechner in `index.html`
-2. **🎨 Modell-Konfigurator** — Farbe & Ausstattungs-Wähler mit Live-Preisanzeige in `shop.html`
-
-Keine neuen npm-Abhängigkeiten. Kein bestehender Code verändert. Beide Features nutzen die vorhandenen CSS-Variablen aus `design.css` für vollständige Dark/Light-Mode-Kompatibilität.
+**Branch:** `feature/fix-race-simulation`
+**Target:** `main`
 
 ---
 
-## 🔧 Feature 1: Wartungsrechner (`index.html`)
+## 📋 Zusammenfassung
 
-**Platzierung:** Neue Section zwischen Kaufberatung-Section und der Closing-Section.
+Die `race.html` Renn-Simulation hatte 4 kritische Bugs, die zusammen dazu führten, dass das Rennen entweder gar nicht starten, nie beenden oder nach dem Ziel in einer Endlosschleife landen konnte.
 
-### Funktionalität
-
-**Eingaben:**
-- **Modell-Dropdown** — automatisch aus dem `BIKES`-Array befüllt (Name + Hubraum in cc)
-- **Baujahr-Dropdown** — 1960–2026, absteigend
-- **Kilometerstand-Input** — Zahlenfeld, Enter-Taste triggert Berechnung
-
-**Berechnung:**
-- **Era-Erkennung** aus Baujahr:
-  - Klassiker `< 1980` → Basis-Intervall: **5.000 km**
-  - Modern `1980–2010` → Basis-Intervall: **10.000 km**
-  - Neu `> 2010` → Basis-Intervall: **15.000 km**
-- **Hubraum-Modifier** (automatisch aus BIKES-Array, kein doppelter Datensatz):
-  - `> 1000 cc` → **-10%** (aggressive Nutzung)
-  - `< 300 cc` → **+20%** (Anfänger-freundlich)
-  - Sonst → kein Modifier
-- Intervall wird auf nächste 500 km gerundet
-- Service-Termine werden 12 Monate auseinander angenommen
-
-**Output:** Tabelle mit **5 Service-Terminen**, jede Zeile zeigt:
-| Spalte | Inhalt |
-|---|---|
-| # | Service-Nummer |
-| Kilometerstand | Basis-km + n × Intervall |
-| Geschätzter Monat | MM/YYYY (ab heute gerechnet) |
-| Service-Typ | Chips: Öl, Kerzen, Filter, Ventile, Großinspektion |
-| Status | ✅ Nächster (grün), ⚠️ Bald (gelb), ⏳ Später (grau) |
-| Kosten-Schätzung | Bereich in EUR, skaliert nach Service-Tiefe |
-
-**Info-Bar** zeigt nach der Berechnung: Modellname, Hubraum, Era, berechnetes Intervall, Modifier.
-
-**UX-Details:**
-- Enter-Taste im km-Input triggert Berechnung
-- Bike-Wechsel auto-rechnet neu, wenn andere Felder schon ausgefüllt
-- Letzte Eingabe wird in `localStorage` (`vroooom_maint_state`) persistiert
+Keine neuen Features. Nur Bugfixes. Kein fremder Code angepasst.
 
 ---
 
-## 🎨 Feature 2: Modell-Konfigurator (`shop.html`)
+## 🐛 Bug 1 — Compare-Modus: Rennschleife endet wenn Bike 1 zuerst ins Ziel kommt
 
-**Platzierung:** Neue Section unterhalb des bestehenden Aftermarket-Parts-Shop.
+**Datei/Funktion:** `raceLoop()`
 
-### Konfigurierbare Optionen
+**Problem:**
+```javascript
+// vorher (buggy)
+function raceLoop(ts) {
+    if (!simState.running) return;  // ← prüft NUR Bike 1!
+    ...
+    if (simState.running) {         // ← gleiches Problem
+        simAnimId = requestAnimationFrame(raceLoop);
+    }
+}
+```
+Im Compare-Modus endet die `raceLoop` sofort, wenn Bike 1 die Ziellinie überfährt — auch wenn Bike 2 noch läuft. Bike 2 beendet nie sein Rennen. Buttons bleiben im falschen Zustand.
 
-**Farben (per Bike individuell):**
-- Standard-Palette (5 Farben, 3 inklusive, 2 mit +500 € Aufschlag): Black, White, Red, Metallic Blue, Racing Green
-- Bike-spezifische Paletten für: H2, ZX-10R, ZX-6R, Z900, Z H2, W800, Versys 1000
-- Farb-Circles: groß, klickbar, mit Checkmark bei Auswahl und Keyboard-Support (tabindex=0)
+**Fix:**
+```javascript
+// nachher
+function raceLoop(ts) {
+    const anyRunning = simState.running || (raceMode === 'compare' && sim2State.running);
+    if (!anyRunning) return;
+    ...
+    if (simState.running) {
+        accel = stepPhysics(simState, bike1, dt, raceMode === 'manual');
+    }
+    if (raceMode === 'compare' && sim2State.running) {
+        stepPhysics(sim2State, bike2, dt, false);
+    }
+    ...
+    const stillRunning = simState.running || (raceMode === 'compare' && sim2State.running);
+    if (stillRunning) { simAnimId = requestAnimationFrame(raceLoop); }
+}
+```
 
-**Ausstattungs-Addons (alle Bikes):**
-| Addon | Preis |
-|---|---|
-| 🛑 ABS | +800 € |
-| ⚡ Quickshifter | +1.200 € |
-| 💨 Windschild | +400 € |
-| 🧤 Beheizte Griffe | +600 € |
-| 🗺️ Navigation System | +2.000 € |
-
-### Live-Preisanzeige
-
-- **Basis-Preis** direkt aus `SHOP_BIKES[key].price`
-- **Farb-Aufschlag** wird live zur Breakdown-Liste hinzugefügt (Row nur sichtbar, wenn > 0)
-- **Addon-Aufschläge** werden summiert und separat gezeigt (Row nur sichtbar, wenn > 0)
-- **Gesamtpreis** in 2.2rem fettem Font, mit 80ms Flash-Animation bei jeder Änderung
-- **Zusammenstellungs-Chips:** Farbname (mit live farbigem Punkt), Addon-Names
-- **Persistenz:** `vroooom_config_state` in localStorage
-
-**"In den Warenkorb"** — Placeholder-Button mit 2.5-Sekunden visuellem Feedback.
-
-**URL-Sync:** `?bike=KEY` Query-Param wird von Konfigurator und Parts-Shop synchron gelesen.
-
----
-
-## 🎨 Design & Styling
-
-- Alle neuen Elemente nutzen `var(--bg)`, `var(--card-bg)`, `var(--border)`, `var(--accent)` etc. aus `design.css`
-- **Dark Mode:** Vollständig unterstützt (Standard-Theme)
-- **Light Mode:** Explizite `[data-theme="light"]` Overrides für Inputs, Cards, Status-Badges
-- **Wartungsrechner Responsive:**
-  - `≤ 768px`: 2-Spalten-Control-Layout
-  - `≤ 600px`: 1-Spalte, Datums-Spalte ausgeblendet, kompakte Service-Chips
-- **Konfigurator Responsive:**
-  - `≤ 900px`: 1-Spalte, Preis-Card oben
-  - `≤ 600px`: Kompakte Farb-Circles (38px), kompakte Addons
+**Commit:** `0d5ae53`
 
 ---
 
-## ✅ Getestete Szenarien (manuell)
+## 🐛 Bug 2 — Compare-Modus: `stopRace()` wird nie aufgerufen wenn Bike 1 zuerst fertig
 
-### Wartungsrechner
+**Datei/Funktion:** `finishRace()`
 
-- [ ] **Klassiker (vor 1980):** Samurai (1966, 247cc) → 5000 km Basis, +20% für <300cc → 6.000 km Intervall
-- [ ] **Modern (1980–2010):** KLX 110 (2008, 112cc) → 10.000 km Basis, +20% → 12.000 km
-- [ ] **Neu (2010+):** ZX-10R (2024, 998cc) → 15.000 km, kein Modifier → 15.000 km
-- [ ] **Großer Hubraum (>1000cc):** H2 (1340cc) → 15.000 × 0.9 = **13.500 km**
-- [ ] **Kleiner Hubraum (<300cc):** Ninja ZX-25R (249cc) → 15.000 × 1.2 = **18.000 km**
-- [ ] **Tabellen-Ausgabe:** 5 Zeilen korrekt, km-Werte kumulativ
-- [ ] **Status-Farben:** Row 1 = grün, Row 2 = gelb, Rows 3–5 = grau
-- [ ] **Info-Bar:** Zeigt nach Berechnung Modell, CC, Era, Intervall, Modifier
-- [ ] **Enter-Taste** triggert Berechnung
-- [ ] **Fehlermeldung** bei leerem Feld
+**Problem:**
+```javascript
+// vorher (buggy)
+function finishRace(state, bike) {
+    state.running = false;
+    // Bedingung schlägt fehl wenn Bike 1 zuerst fertig, Bike 2 noch läuft
+    if (raceMode !== 'compare' || (state === simState && !sim2State.running)) {
+        stopRace();
+    }
+}
+```
+Wenn Bike 1 zuerst die Ziellinie erreicht und Bike 2 noch läuft, wird `stopRace()` nie aufgerufen. START/STOP Buttons, RPM-Anzeige und Körperanimation bleiben im falschen Zustand.
 
-### Modell-Konfigurator
+**Fix:**
+```javascript
+// nachher
+function finishRace(state, bike) {
+    state.running = false;
+    // Stoppe die UI sobald ALLE Bikes fertig sind
+    if (!simState.running && !sim2State.running) {
+        stopRace();
+    }
+}
+```
 
-- [ ] **Bike-Wechsel:** Farben wechseln, Preis aktualisiert sich, Addons werden zurückgesetzt
-- [ ] **Alle 5 Farben wählen** → Preis-Breakdown korrekt (Metallic/Racing = +500€)
-- [ ] **Alle 5 Addon-Kombinationen:**
-  - Nur ABS → +800 €
-  - ABS + Quickshifter → +2.000 €
-  - Alle 5 Addons → +5.000 €
-- [ ] **Flash-Animation** bei Preis-Änderung sichtbar
-- [ ] **Zusammenstellungs-String** korrekt (Bikenamen + Farb-Chip + Addon-Chips)
-- [ ] **"In den Warenkorb"** Feedback erscheint und verschwindet nach 2.5s
-- [ ] **URL-Param `?bike=zx10r`** syncronisiert Konfigurator und Parts-Shop
-- [ ] **localStorage** speichert letzten Stand
+**Commit:** `0d5ae53` (zusammen mit Bug 1)
 
-### Dark / Light Mode
+---
 
-- [ ] **Dark Mode (Standard):** Alle neuen Elemente korrekt gefärbt
-- [ ] **Light Mode (☀️ Toggle):** Wartungsrechner-Tabelle, Konfigurator-Cards, Status-Badges alle korrekt
-- [ ] **Mode-Wechsel während Nutzung** → keine Darstellungsfehler
+## 🐛 Bug 3 — Re-Start nach Zieleinlauf triggert sofortigen Re-Finish
 
-### Mobile Responsiveness
+**Datei/Funktion:** `startRace()`
 
-- [ ] **375px (Phone):** 1-Spalte überall, lesbar
-- [ ] **768px (Tablet):** 2-Spalten-Controls im Wartungsrechner, Konfigurator 1-Spalte
-- [ ] **1200px (Desktop):** Volle 2-Spalten-Layouts
+**Problem:**
+Nach einem Rennen zeigt `stopRace()` den START-Button wieder an. Klickt der Nutzer START ohne vorherigen RESET, startet das Rennen mit `simState.dist >= trackDist` — und `stepPhysics()` ruft in der ersten Frame `finishRace()` auf. Das Rennen "startet" und endet sofort.
+
+Das selbe tritt auf wenn der Nutzer den Gasschieber (> 10%) bewegt und `updateThrottle()` `startRace()` auto-triggert.
+
+**Fix:**
+```javascript
+function startRace() {
+    if (simState.running) return;
+
+    // Physics State immer zurücksetzen damit Re-Start sauber läuft
+    resetSimState(simState);
+    resetSimState(sim2State);
+
+    // Throttle-Slider Wert wiederherstellen
+    const throttleVal = parseInt(document.getElementById('throttleSlider').value);
+    simState.throttle = throttleVal / 100;
+    sim2State.throttle = throttleVal / 100;
+    ...
+}
+```
+
+**Commit:** `9933e0a`
+
+---
+
+## 🐛 Bug 4 — Physics Engine startet nie: RPM-Deadlock verhindert Thrust
+
+**Datei/Funktionen:** `stepPhysics()`, `startRace()`
+
+**Problem (das schwerwiegendste):**
+```javascript
+// getPowerAtRpm gibt 0 zurück wenn rpm <= idleRpm
+if (gear === 0 || rpm <= bike.idleRpm) return 0;
+
+// stepPhysics setzt RPM auf exakt idleRpm bei sehr niedrigen Speeds
+state.rpm = Math.max(bike.idleRpm, getRpmFromSpeed(state.speed, currentGear));
+//                   ↑ = idleRpm wenn speed ≈ 0
+//                   → rpm === idleRpm → power = 0 → keine Kraft → speed bleibt 0
+//                   → ewige Schleife: speed=0 → rpm=idleRpm → power=0
+```
+
+Bei Speed ≈ 0 ergibt `getRpmFromSpeed()` einen Wert weit unter `idleRpm`.
+`Math.max(idleRpm, ...)` klemmt auf genau `idleRpm`.
+`getPowerAtRpm` prüft `rpm <= idleRpm` — bei Gleichheit gibt es 0 zurück.
+Das Motorrad steht still für immer. Das Rennen läuft nie.
+
+**Fix (2 Teile):**
+
+*Teil A — stepPhysics: `idleRpm+1` statt `idleRpm` als Untergrenze:*
+```javascript
+// nachher: idleRpm+1 stellt sicher dass power > 0 produziert werden kann
+state.rpm = Math.max(bike.idleRpm + 1,
+                     Math.min(getRpmFromSpeed(state.speed, currentGear),
+                              bike.redline * 1.05));
+```
+Mit `throttle=0` ist `powerW = getPowerAtRpm(...) * 735.5 * 0 = 0` — Motor-Bremsung bleibt korrekt.
+
+*Teil B — startRace: initiales RPM über Idle seeden:*
+```javascript
+const b1 = RACE_BIKES[currentBike1];
+simState.rpm = simState.gear === 0
+    ? b1.idleRpm + simState.throttle * 2000  // neutral blip
+    : b1.idleRpm + 100;                       // Gang 1, leicht über idle
+```
+
+**Commits:** `031c08e` (seed), `6bb790e` (floor)
+
+---
+
+## ✅ Test-Ergebnisse
+
+### Headless Physics-Test (Node.js, 33 Assertions)
+
+```
+TEST 1: Single 400m (ZX-10R)          ✅ 400m reached, 0-100: 3.42s, time: 9.20s
+TEST 2: Re-start nach Ziel (BUG 3)    ✅ Race completed again
+TEST 3: Compare H2 vs W800 (BUG 1+2) ✅ H2: 9.22s, W800: 13.34s — beide fertig
+TEST 4: Compare reversed               ✅ H2 (Bike2) gewinnt: 9.22s < 13.34s
+TEST 5: 0-100 km/h sprint             ✅ ZX-10R: 3.42s
+TEST 6: Manual mode shifts            ✅ neutral start, up/down, cap at gear 6
+TEST 7: 3x konsekutive Rennen         ✅ alle 3 sauber beendet ohne RESET
+TEST 8: 1000m Rennen                  ✅ H2: 16.42s
+TEST 9: Splits korrekt                ✅ 50m/100m/200m/400m chronologisch
+TEST 10: Samurai (Spezialfall)        ✅ Samurai 400m: 13.87s
+
+33 tests: 33 passed, 0 failed — ALL TESTS PASSED ✅
+```
+
+### Syntax-Check
+
+```
+node --check race.html (inline scripts) — SYNTAX OK ✅
+```
+
+### Simulierte Zeiten (realistisch für Kawasaki-Bikes)
+
+| Bike | 0-100 km/h | 0-400m |
+|------|-----------|--------|
+| H2 (231ps) | ~2.5s | ~9.2s |
+| ZX-10R (203ps) | 3.42s | 9.20s |
+| W800 (48ps) | — | 13.34s |
+| Samurai (31ps) | — | 13.87s |
+
+---
+
+## 📝 Commit-Übersicht
+
+| # | Hash | Message |
+|---|------|---------|
+| 1 | `0d5ae53` | `fix: compare mode race loop - continue until both bikes finish` |
+| 2 | `9933e0a` | `fix: startRace always resets physics state before starting` |
+| 3 | `031c08e` | `fix: seed initial RPM above idle so engine can produce thrust` |
+| 4 | `6bb790e` | `fix: RPM floor idleRpm+1 prevents perpetual power=0 deadlock` |
 
 ---
 
 ## 🔒 Breaking Changes
 
-**Keine.** Bestehender Code wurde nicht verändert. Neue Sections und Scripts wurden ausschließlich hinzugefügt.
+**Keine.** Keine neuen Features. Keine API-Änderungen. Nur Bugfixes in der internen Simulationslogik.
 
 ---
 
-## 📝 Offene Punkte
-
-- **Warenkorb-Backend:** `mcAddToCart()` ist derzeit ein Placeholder — echte Cart-Persistenz/Checkout ist zukünftiges Feature
-- **Wartungsrechner km-Basis:** Aktuell kein "Letzter Service war bei X km" Input — mögliche Erweiterung
-- **Bike-Farben:** Nur ~7 Bikes haben spezifische Paletten; restliche nutzen die 5-Farben-Default-Palette
-
----
-
-## 🗂️ Commit-Übersicht
-
-| # | Commit | Was |
-|---|---|---|
-| 1 | `feat(maintenance): add maintenance calculator HTML + base styles` | Section-HTML + vollständiges CSS |
-| 2 | `feat(maintenance): implement calculation logic for service intervals` | MaintenanceCalc IIFE + Berechnungslogik |
-| 3 | `feat(maintenance): add dark mode styling + responsive layout` | Dark/Light overrides + 768px/600px Breakpoints |
-| 4 | `feat(configurator): add color palette + addon checkboxes HTML` | Konfigurator-HTML + 300 Zeilen CSS |
-| 5 | `feat(configurator): implement live price calculation` | JS: Farben, Addons, Live-Preis, localStorage |
-| 6 | `feat(configurator): add dark mode + final styling` | Flash-Animation, Light-Mode-Overrides, Keyboard-A11y |
-| 7 | `test: add manual test checklist to PR_BODY.md` | Dieser Commit |
+WORKFLOW_DONE
