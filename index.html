@@ -7,6 +7,210 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+/* ====================================================
+   WARTUNGSRECHNER — Maintenance Calculator Styles
+   ==================================================== */
+.maintenance-section {
+    margin: 2.5rem 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.75rem 1.5rem;
+}
+.maintenance-section h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+}
+.maintenance-section .maint-subtitle {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
+}
+.maint-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+}
+.maint-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 160px;
+}
+.maint-field label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+.maint-select {
+    padding: 0.55rem 0.9rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 0.92rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+}
+.maint-select:focus {
+    border-color: var(--accent);
+}
+.maint-info-bar {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem 1.1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+.maint-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+.maint-info-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-subtle);
+}
+.maint-info-val {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+.maint-info-val.accent {
+    color: var(--accent);
+}
+.maint-info-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--border);
+}
+/* Results table */
+.maint-table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+.maint-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.maint-table thead tr {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+}
+.maint-table th {
+    padding: 0.65rem 0.9rem;
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.maint-table td {
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+    color: var(--text);
+}
+.maint-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.maint-table tbody tr:hover {
+    background: var(--accent-dim);
+}
+/* Status badges */
+.maint-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.maint-status.overdue {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+.maint-status.soon {
+    background: rgba(234, 179, 8, 0.12);
+    color: #eab308;
+    border: 1px solid rgba(234, 179, 8, 0.25);
+}
+.maint-status.later {
+    background: var(--bg);
+    color: var(--text-subtle);
+    border: 1px solid var(--border);
+}
+.maint-service-type {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+}
+.maint-service-chip {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid var(--border-hover);
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+.maint-placeholder {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+.maint-current-km {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+.maint-km-input {
+    padding: 0.55rem 0.9rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 120px;
+}
+.maint-km-input:focus {
+    border-color: var(--accent);
+}
+@media (max-width: 600px) {
+    .maint-controls { flex-direction: column; }
+    .maint-field { min-width: 100%; }
+    .maint-info-bar { gap: 0.75rem; }
+    .maint-table th, .maint-table td { padding: 0.5rem 0.6rem; font-size: 0.78rem; }
+    .maint-table th:nth-child(3), .maint-table td:nth-child(3) { display: none; }
+}
+    </style>
 </head>
 <body>
     <nav class="site-nav">
@@ -99,6 +303,84 @@
             <section class="advice-section" id="adviceSection" aria-label="Kaufberatung">
                 <h2 class="advice-title">🧭 Kaufberatung: Welches Motorrad für wen?</h2>
                 <div class="advice-grid" id="adviceGrid"></div>
+            </section>
+
+            <!-- ===== WARTUNGSRECHNER ===== -->
+            <section class="maintenance-section" id="maintenanceSection" aria-label="Wartungsrechner">
+                <h2>🔧 Wartungsrechner</h2>
+                <p class="maint-subtitle">Wähle dein Modell und Kilometerstand — wir berechnen die nächsten 5 Service-Termine.</p>
+
+                <div class="maint-controls">
+                    <div class="maint-field">
+                        <label for="maintBikeSelect">Motorrad-Modell</label>
+                        <select id="maintBikeSelect" class="maint-select" aria-label="Motorrad für Wartungsrechner wählen">
+                            <option value="">-- Modell wählen --</option>
+                            <!-- filled by JS from BIKES array -->
+                        </select>
+                    </div>
+                    <div class="maint-field">
+                        <label for="maintYear">Baujahr</label>
+                        <select id="maintYear" class="maint-select" aria-label="Baujahr wählen">
+                            <option value="">-- Baujahr --</option>
+                            <!-- filled by JS: 1960-2026 -->
+                        </select>
+                    </div>
+                    <div class="maint-field">
+                        <label for="maintCurrentKm">Aktueller Kilometerstand</label>
+                        <input type="number" id="maintCurrentKm" class="maint-km-input" placeholder="z.B. 12500" min="0" max="999999" aria-label="Aktueller Kilometerstand" style="width:100%;">
+                    </div>
+                    <div class="maint-field" style="flex:0 0 auto;">
+                        <label>&nbsp;</label>
+                        <button class="btn" id="maintCalcBtn" onclick="calculateMaintenance()" style="height:2.45rem;">Berechnen →</button>
+                    </div>
+                </div>
+
+                <!-- Info bar: shows detected cc, era, base interval -->
+                <div class="maint-info-bar" id="maintInfoBar" style="display:none;">
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Modell</span>
+                        <span class="maint-info-val" id="maintInfoName">—</span>
+                    </div>
+                    <div class="maint-info-divider"></div>
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Hubraum</span>
+                        <span class="maint-info-val accent" id="maintInfoCC">—</span>
+                    </div>
+                    <div class="maint-info-divider"></div>
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Era</span>
+                        <span class="maint-info-val" id="maintInfoEra">—</span>
+                    </div>
+                    <div class="maint-info-divider"></div>
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Basis-Intervall</span>
+                        <span class="maint-info-val accent" id="maintInfoInterval">—</span>
+                    </div>
+                    <div class="maint-info-divider"></div>
+                    <div class="maint-info-item">
+                        <span class="maint-info-label">Modifier</span>
+                        <span class="maint-info-val" id="maintInfoModifier">—</span>
+                    </div>
+                </div>
+
+                <!-- Results table -->
+                <div class="maint-table-wrap">
+                    <table class="maint-table" id="maintTable" aria-label="Service-Termin-Tabelle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Kilometerstand</th>
+                                <th>Geschätzter Monat</th>
+                                <th>Service-Typ</th>
+                                <th>Status</th>
+                                <th>Kosten-Schätzung</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maintTableBody">
+                            <tr><td colspan="6" class="maint-placeholder">🔧 Wähle Modell, Baujahr und Kilometerstand — dann auf Berechnen klicken.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
             <section class="closing">
