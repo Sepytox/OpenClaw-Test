@@ -619,6 +619,7 @@
     <!-- RECORDS -->
     <div class="records-section">
         <h2>🏆 Rekorde (localStorage)</h2>
+        <div class="highscore-readout" id="highscoreReadout" style="margin:0 0 0.75rem;padding:0.55rem 0.9rem;border:1px solid var(--accent);border-radius:8px;font-weight:600;display:inline-block;">🏁 Highscore: noch keiner</div>
         <div class="record-list" id="recordList">
             <div style="color:#333;font-size:0.85rem;">Noch keine Rennen gefahren</div>
         </div>
@@ -1488,7 +1489,41 @@ function finishRace(state, bike) {
     if (allDone) stopRace();
 
     saveRecord(state, bike);
+    saveHighscore(state, bike);
     updateSplits();
+}
+
+// ==========================================
+// HIGHSCORE — best (fastest) finish time, persisted in localStorage
+// ==========================================
+function updateHighscoreDisplay() {
+    const el = document.getElementById('highscoreReadout');
+    if (!el) return;
+    let hs = null;
+    try { hs = JSON.parse(localStorage.getItem('raceHighscore') || 'null'); } catch (e) { hs = null; }
+    if (hs && typeof hs.time === 'number') {
+        el.textContent = '🏁 Highscore: ' + hs.time.toFixed(2) + 's'
+            + (hs.bike ? ' — ' + hs.bike : '')
+            + (hs.dist ? ' (' + hs.dist + ')' : '');
+    } else {
+        el.textContent = '🏁 Highscore: noch keiner';
+    }
+}
+
+function saveHighscore(state, bike) {
+    // Only distance-mode runs produce a real finish time.
+    if (isEndlessMode) return;
+    if (!state || typeof state.time !== 'number' || state.time <= 0) return;
+    let hs = null;
+    try { hs = JSON.parse(localStorage.getItem('raceHighscore') || 'null'); } catch (e) { hs = null; }
+    if (!hs || typeof hs.time !== 'number' || state.time < hs.time) {
+        const distLabel = state.dist >= 1000
+            ? (state.dist / 1000).toFixed(2) + ' km'
+            : state.dist.toFixed(0) + ' m';
+        hs = { time: state.time, bike: bike ? bike.name : '', dist: distLabel };
+        localStorage.setItem('raceHighscore', JSON.stringify(hs));
+    }
+    updateHighscoreDisplay();
 }
 
 function updateRecordDisplay() {
@@ -1511,6 +1546,7 @@ function updateRecordDisplay() {
     }).join('');
 }
 updateRecordDisplay();
+updateHighscoreDisplay();
 
 // Keyboard shortcuts — Arrow Up/Down = throttle, Q/A = shift (manual mode)
 // H = toggle help overlay

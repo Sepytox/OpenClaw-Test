@@ -131,6 +131,12 @@
         </div>
       </div>
 
+      <!-- Master volume (persisted in localStorage) -->
+      <div class="sc-master-volume" style="display:flex;align-items:center;gap:0.6rem;justify-content:center;margin-top:0.35rem;font-size:0.82rem;color:var(--text-muted);">
+        <label for="volumeSlider" class="sc-master-volume-label">🔊 Lautstärke</label>
+        <input type="range" class="sc-volume" id="volumeSlider" min="0" max="100" value="80" aria-label="Lautstärke einstellen" style="flex:1;max-width:220px;">
+      </div>
+
       <!-- Audio Status -->
       <div id="scPlayerStatus" style="font-size:0.78rem;color:var(--text-muted);text-align:center;min-height:1.2em;margin-top:0.25rem;transition:opacity 0.3s;"></div>
 

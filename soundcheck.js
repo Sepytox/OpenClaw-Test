@@ -94,6 +94,7 @@
   var audioCtx = null;
   var analyser = null;
   var gainNode = null;
+  var masterVolume = 0.8; // 0..1, persisted via localStorage 'soundcheckVolume' (0..100)
   var currentSource = null;
   var isPlaying = false;
   var currentBike = null;
@@ -113,7 +114,7 @@
     if (!audioCtx) {
       audioCtx = new AudioCtx();
       gainNode = audioCtx.createGain();
-      gainNode.gain.value = 0.8;
+      gainNode.gain.value = masterVolume;
       analyser = audioCtx.createAnalyser();
       analyser.fftSize = 512;
       analyser.smoothingTimeConstant = 0.8;
@@ -1084,15 +1085,53 @@
   /* ============================================================
      VOLUME CONTROL
      ============================================================ */
+  /**
+   * Apply a master volume (0..100) to the gain node, any playing audio element,
+   * and keep both volume sliders in sync.
+   */
+  function applyVolume(vol) {
+    vol = Math.max(0, Math.min(100, isNaN(vol) ? 80 : vol));
+    masterVolume = vol / 100;
+    if (gainNode) gainNode.gain.value = masterVolume;
+    if (currentAudioEl) currentAudioEl.volume = masterVolume;
+
+    var masterSlider = document.getElementById('volumeSlider');
+    if (masterSlider && String(masterSlider.value) !== String(vol)) masterSlider.value = vol;
+    var playerSlider = document.getElementById('playerVolume');
+    if (playerSlider) playerSlider.value = masterVolume;
+    return vol;
+  }
+
   function initVolumeControl() {
     var volumeSlider = document.getElementById('playerVolume');
     if (!volumeSlider) return;
 
     volumeSlider.addEventListener('input', function() {
-      if (gainNode) {
-        gainNode.gain.value = parseFloat(volumeSlider.value);
-      }
+      var vol = Math.round(parseFloat(volumeSlider.value) * 100);
+      applyVolume(vol);
+      try { localStorage.setItem('soundcheckVolume', vol); } catch(e) {}
     });
+  }
+
+  /**
+   * Persistent master volume slider (id="volumeSlider", 0..100).
+   * Restores the saved value on load and stores changes in localStorage.
+   */
+  function initPersistentVolume() {
+    var stored = null;
+    try { stored = localStorage.getItem('soundcheckVolume'); } catch(e) {}
+    var vol = stored !== null ? parseInt(stored, 10) : 80;
+    if (isNaN(vol)) vol = 80;
+    applyVolume(vol);
+
+    var slider = document.getElementById('volumeSlider');
+    if (slider) {
+      slider.value = vol;
+      slider.addEventListener('input', function() {
+        var v = applyVolume(parseInt(slider.value, 10));
+        try { localStorage.setItem('soundcheckVolume', v); } catch(e) {}
+      });
+    }
   }
 
   /* ============================================================
@@ -1237,6 +1276,7 @@
     }
 
     initVolumeControl();
+    initPersistentVolume();
     initTimeline();
     initRewindForward();
 
