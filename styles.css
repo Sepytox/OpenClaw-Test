@@ -980,3 +980,64 @@ footer {
   .modal-header h2 { font-size: 1.2em; }
   .gallery-viewport { height: 135px; }
 }
+
+/* ==========================================================================
+   Dark mode (legacy body.dark-mode class)
+   Driven by the theme toggle in index.html. These rules mirror the
+   data-theme="dark" palette so the toggle works via the classic
+   body.dark-mode approach as well as the data-theme attribute.
+   ========================================================================== */
+
+/* Header bar layout holding the nav links and the theme toggle */
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  transition: background 0.2s, transform 0.2s;
+}
+.theme-toggle:hover { transform: scale(1.12); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Page background + base text in dark mode */
+body.dark-mode {
+  background: #1a1a2e;
+  color: #e8e8f0;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Header/nav in dark mode */
+body.dark-mode header,
+body.dark-mode nav {
+  background: #16213e;
+  color: #e8e8f0;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Main content area in dark mode */
+body.dark-mode main {
+  background: #1a1a2e;
+  color: #e8e8f0;
+}
+
+/* Cards in dark mode */
+body.dark-mode .fact-card {
+  background: #16213e;
+  border-color: #0f3460;
+  color: #e8e8f0;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+body.dark-mode .fact-card h3 { color: #ffffff; }
+body.dark-mode .fact-card strong { color: #ffffff; }
