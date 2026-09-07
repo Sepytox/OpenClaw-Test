@@ -204,8 +204,10 @@ footer {
   border: 1px solid var(--border);
   color: var(--text);
   padding: 18px 20px;
-  border-radius: 14px;
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  border-radius: var(--radius-lg, 14px);
+  transition: border-color var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-base, 0.25s) var(--ease-standard, ease),
+              box-shadow var(--dur-base, 0.25s) var(--ease-standard, ease);
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -214,11 +216,28 @@ footer {
   animation: cardFadeUp 0.35s ease backwards;
 }
 
-.fact-card:hover {
+.fact-card:hover,
+.fact-card:focus-within {
   border-color: var(--border-hover);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow);
+  transform: translateY(-6px) scale(1.012);
+  box-shadow: var(--shadow-lg, var(--shadow));
 }
+
+.fact-card:active { transform: translateY(-3px) scale(1.005); }
+
+/* Quickstats + hint reveal a little more elegantly on hover */
+.fact-card .card-quickstats,
+.fact-card .card-hint {
+  transition: opacity var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.fact-card:hover .card-hint {
+  transform: translateY(-1px);
+}
+.fact-card:hover .card-quickstats .qstat {
+  transform: translateY(-1px);
+}
+.qstat { transition: transform var(--dur-fast, 0.15s) var(--ease-standard, ease), border-color var(--dur-fast, 0.15s) var(--ease-standard, ease); }
 
 .fact-card h3 {
   font-size: 1.15em;
@@ -741,17 +760,24 @@ footer {
 .advice-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md, 12px);
   padding: 16px;
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition: border-color var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-base, 0.25s) var(--ease-standard, ease),
+              box-shadow var(--dur-base, 0.25s) var(--ease-standard, ease);
 }
-.advice-card:hover, .advice-card:focus {
+.advice-card:hover, .advice-card:focus-visible {
   border-color: var(--border-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--shadow-lg, var(--shadow));
   outline: none;
 }
+.advice-card:active { transform: translateY(-1px) scale(1.0); }
+.advice-card .advice-emoji {
+  transition: transform var(--dur-base, 0.25s) var(--ease-spring, ease);
+}
+.advice-card:hover .advice-emoji { transform: scale(1.15) rotate(-4deg); }
 .advice-emoji { font-size: 2em; margin-bottom: 5px; display: block; }
 .advice-card-title { font-size: 1em; margin-bottom: 3px; color: var(--text); font-weight: 700; }
 .advice-bike-name { font-size: 0.9em; color: var(--text-muted); margin-bottom: 5px; }
