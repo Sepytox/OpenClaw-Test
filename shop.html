@@ -626,6 +626,7 @@
     <a href="shop.html" class="active">Aftermarket</a>
     <a href="quiz.html">Quiz</a>
     <a href="wheel.html">Wheel</a>
+    <a href="garage.html">🏠 Garage</a>
     <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
 </nav>
 
@@ -756,6 +757,7 @@
                 <button class="cart-btn cart-btn-outline" onclick="clearCart()">🗑️ Alles entfernen</button>
                 <button class="cart-btn cart-btn-outline" onclick="shareConfig()">📤 Teilen</button>
             </div>
+            <p class="garage-hint" style="margin-top:0.65rem;"><a href="garage.html" class="btn btn-outline" style="font-size:0.82rem;">🏠 In deiner Garage ansehen</a></p>
         </div>
     </div>
 
@@ -1181,6 +1183,11 @@ function saveConfig() {
     const btn = event.target;
     btn.textContent = '✅ Gespeichert!';
     setTimeout(() => { btn.textContent = '💾 Konfiguration speichern'; }, 2000);
+
+    try {
+        if (typeof window.VroooomStats !== 'undefined') window.VroooomStats.recordShopConfigSaved();
+        if (typeof window.VroooomAchievements !== 'undefined') window.VroooomAchievements.checkNow({ shopConfigPartsCount: selected.length });
+    } catch (e) { /* Gamification-Hook darf das Speichern nie blockieren */ }
 }
 
 function loadConfig() {
@@ -1541,6 +1548,8 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
     setTimeout(mcInit, 0);
 }
 </script>
+    <script src="stats.js"></script>
+    <script src="achievements.js"></script>
     <script src="theme-toggle.js"></script>
     <script src="settings.js"></script>
     <script src="scroll-reveal.js"></script>
