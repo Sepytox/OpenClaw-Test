@@ -131,6 +131,25 @@ summary:focus-visible,
   }
 }
 
+/* ── Scroll-Reveal (Eintritts-Animationen, siehe scroll-reveal.js) ───
+   Ohne die Klasse "reveal-ready" auf <html> (nur von scroll-reveal.js
+   gesetzt, sofern IntersectionObserver verfügbar ist und keine
+   reduzierte Bewegung gewünscht wird) bleiben ".js-reveal"-Elemente
+   normal sichtbar — kein JS/kein Observer bedeutet daher nie
+   dauerhaft verstecktes Inhalt. */
+.reveal-ready .js-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--dur-slow, 0.4s) var(--ease-out, ease),
+              transform var(--dur-slow, 0.4s) var(--ease-out, ease);
+  will-change: opacity, transform;
+}
+
+.reveal-ready .js-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* ── Navigation ─────────────────────────────────────────────── */
 .site-nav {
   background: var(--nav-bg);
