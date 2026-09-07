@@ -166,6 +166,13 @@
         }
         @media (max-width: 750px) { .result-panel { max-width: 100%; } }
 
+        /* Zeiger auf kleinen Viewports enger positionieren, damit er nicht
+           über den rechten Rand hinausragt (8px Mobile-Overflow, siehe
+           Mängelliste 8.). Desktop-Darstellung bleibt unverändert. */
+        @media (max-width: 480px) {
+            .wheel-pointer { right: -16px; }
+        }
+
         .result-panel h2 {
             font-size: 1rem;
             color: #666;
