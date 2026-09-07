@@ -254,7 +254,7 @@
         <a href="shop.html">Aftermarket</a>
         <a href="quiz.html">Quiz</a>
         <a href="wheel.html">Wheel</a>
-        <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
+        <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">☀️</button>
     </nav>
     <div class="container">
         <main>
@@ -1622,34 +1622,55 @@
 
         /* ==========================================
            Theme Toggle (Dark / Light)
-           One unified toggle drives BOTH the legacy body.dark-mode
-           class and the site-wide data-theme attribute, and persists
-           to localStorage under 'darkMode' (true/false) and 'theme'
-           (dark/light) so preferences stay consistent across pages.
+           Quelle der Wahrheit ist ausschliesslich das data-theme-Attribut
+           (wie in settings.js), NICHT die alte body.dark-mode-Klasse.
+           Grund (Mängelliste 1.2): settings.js entfernt die Legacy-Klasse
+           bei jedem Laden synchron wieder, wodurch ein auf der Klasse
+           basierendes Toggle beim ersten Klick den falschen Zustand
+           berechnet hätte. Die Klasse wird hier bewusst nicht mehr
+           gesetzt, damit immer die korrekte design.css-Palette
+           (dunkel #080808 / hell) greift. Der 'darkMode'-localStorage-Key
+           bleibt für Abwärtskompatibilität erhalten.
            ========================================== */
         function updateToggleButton(isDark) {
             var btn = document.getElementById('themeToggle');
             if (!btn) return;
             btn.textContent = isDark ? '☀️' : '🌙';
-            btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-            btn.setAttribute('title', isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+            btn.setAttribute('aria-label', isDark ? 'Zu Hellmodus wechseln' : 'Zu Dunkelmodus wechseln');
+            btn.setAttribute('title', isDark ? 'Hellmodus aktivieren' : 'Dunkelmodus aktivieren');
         }
 
+        /**
+         * Wendet das Dark/Light-Theme konsistent über das data-theme-Attribut
+         * an und hält den Toggle-Button aktuell. Entfernt bewusst die alte
+         * body.dark-mode-Klasse aus dem Render-Pfad (siehe Kommentar oben).
+         * @param {boolean} isDark - Ob der dunkle Modus aktiv sein soll.
+         */
         function applyDarkMode(isDark) {
-            document.body.classList.toggle('dark-mode', isDark);
+            document.body.classList.remove('dark-mode');
             document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
             updateToggleButton(isDark);
         }
 
+        /**
+         * Wechselt zwischen Dark- und Light-Mode. Ermittelt den aktuellen
+         * Zustand über das data-theme-Attribut (nicht über die Legacy-Klasse,
+         * die settings.js bei jedem Laden entfernt) und schreibt beide
+         * localStorage-Keys ('darkMode' und 'theme') für Kompatibilität.
+         * @returns {boolean} Ob nach dem Wechsel der Dark-Mode aktiv ist.
+         */
         function toggleDarkMode() {
-            var isDark = document.body.classList.toggle('dark-mode');
+            var wasDark = document.documentElement.getAttribute('data-theme') !== 'light';
+            var isDark = !wasDark;
             localStorage.setItem('darkMode', isDark);
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-            updateToggleButton(isDark);
+            applyDarkMode(isDark);
             return isDark;
         }
 
+        /**
+         * Stellt die gespeicherte Theme-Präferenz beim Laden der Seite wieder her.
+         */
         function initDarkMode() {
             var saved = localStorage.getItem('darkMode');
             var isDark;
@@ -1672,7 +1693,9 @@
             Favorites.renderAll();
             FavoritesSection.render();
             Reviews.updateAllBadges();
-            MaintenanceCalc.init();
+            // MaintenanceCalc wird erst im unteren <script>-Block definiert
+            // (siehe "Init MaintenanceCalc on page load" weiter unten) —
+            // hier NICHT erneut aufrufen, sonst ReferenceError (Mängelliste 1.1).
         })();
     </script>
 
