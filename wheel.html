@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="bikes-data.js"></script>
     <style>
             color: var(--accent);
             background: var(--accent-dim);
@@ -364,27 +365,42 @@
 
 <script>
 // ==========================================
-// BIKE DATA
+// BIKE DATA — aus der geteilten Quelle bikes-data.js abgeleitet
 // ==========================================
-const WHEEL_BIKES = [
-    { key: 'h2',          name: 'Ninja H2',       icon: '⚡', color: '#0f2027', ps: 231, vmax: 300, accel: 3.0, weight: 216, price: 33000, sub: 'Supercharged Hypersport' },
-    { key: 'zx10r',       name: 'ZX-10R',         icon: '🏆', color: '#0b8043', ps: 203, vmax: 299, accel: 2.9, weight: 186, price: 20400, sub: 'Superbike-Weltmeister' },
-    { key: 'zh2',         name: 'Z H2',            icon: '👹', color: '#8b0000', ps: 200, vmax: 290, accel: 3.2, weight: 239, price: 22900, sub: 'Supercharged Naked' },
-    { key: 'h2sx',        name: 'H2 SX',           icon: '🚀', color: '#16222a', ps: 200, vmax: 299, accel: 3.1, weight: 240, price: 25500, sub: 'Supercharged Tourer' },
-    { key: 'hybrid1200',  name: 'Ninja Hybrid',    icon: '🆕', color: '#42275a', ps: 220, vmax: 280, accel: 3.2, weight: 227, price: 35000, sub: 'Hybrid 2026' },
-    { key: 'zx6r',        name: 'ZX-6R',           icon: '🔥', color: '#8b3a00', ps: 130, vmax: 260, accel: 3.5, weight: 193, price: 12900, sub: '636cc Supersport' },
-    { key: 'z900',        name: 'Z900',            icon: '💪', color: '#00c853', ps: 125, vmax: 248, accel: 3.4, weight: 193, price: 10200, sub: 'Aggressive Naked' },
-    { key: 'versys1000',  name: 'Versys 1000',     icon: '🌍', color: '#355c7d', ps: 120, vmax: 220, accel: 3.9, weight: 235, price: 13500, sub: 'Adventure Tourer' },
-    { key: 'ninja650',    name: 'Ninja 650',       icon: '🎯', color: '#243b55', ps: 68,  vmax: 200, accel: 4.5, weight: 172, price: 8200,  sub: 'Mid-Range Sportler' },
-    { key: 'z650',        name: 'Z650',            icon: '🟢', color: '#38ef7d', ps: 68,  vmax: 190, accel: 4.2, weight: 168, price: 7700,  sub: 'Einsteiger Naked' },
-    { key: 'ninja400',    name: 'Ninja 400',       icon: '🏍️', color: '#26d0ce', ps: 45,  vmax: 190, accel: 4.8, weight: 168, price: 6500,  sub: 'Anfänger Sportler' },
-    { key: 'zx25r',       name: 'ZX-25R',          icon: '🎆', color: '#1565c0', ps: 51,  vmax: 215, accel: 5.0, weight: 182, price: 9800,  sub: '250cc 4-Zylinder' },
-    { key: 'eliminator400', name: 'Eliminator',    icon: '😎', color: '#870000', ps: 45,  vmax: 165, accel: 5.5, weight: 176, price: 6700,  sub: 'Cruiser Klassiker' },
-    { key: 'w800',        name: 'W800',            icon: '🕰️', color: '#603813', ps: 48,  vmax: 170, accel: 6.0, weight: 202, price: 10500, sub: 'Retro Klassiker' },
-    { key: 'klx300',      name: 'KLX 300',         icon: '⛰️', color: '#2c3e50', ps: 27,  vmax: 137, accel: 7.5, weight: 137, price: 6200,  sub: 'Dual-Sport Enduro' },
-    { key: 'kx450',       name: 'KX 450',          icon: '🏟️', color: '#1b5e20', ps: 62,  vmax: 150, accel: 3.8, weight: 110, price: 9500,  sub: 'MX Rennmaschine' },
-    { key: 'samurai',     name: 'Samurai',         icon: '⏰', color: '#4b1248', ps: 31,  vmax: 160, accel: 0,   weight: 145, price: 8000,  sub: 'Klassiker 1960er' }
+// Reihenfolge/Auswahl entspricht dem bisherigen Glücksrad-Sortiment.
+const WHEEL_BIKE_KEYS = [
+    'h2', 'zx10r', 'zh2', 'h2sx', 'hybrid1200', 'zx6r', 'z900', 'versys1000',
+    'ninja650', 'z650', 'ninja400', 'zx25r', 'eliminator400', 'w800',
+    'klx300', 'kx450', 'samurai'
 ];
+
+/**
+ * Baut die Glücksrad-Segmente aus SHARED_BIKES (bikes-data.js) — keine
+ * eigene, doppelte Bike-Liste mehr im Wheel-Code. Enthält alle für die
+ * Ergebnis-Karte benötigten Felder (PS, Preis, Kategorie).
+ * @param {string[]} keys - Bike-IDs, die im Glücksrad vertreten sind.
+ * @returns {Array<Object>} Liste von Segment-Objekten für das Glücksrad.
+ */
+function buildWheelBikes(keys) {
+    return keys.map(function(key) {
+        const b = SHARED_BIKES[key];
+        return {
+            key: b.id,
+            name: b.name,
+            shortName: b.name.replace(/^Kawasaki\s+/, ''),
+            icon: b.icon,
+            sub: b.sub,
+            category: b.category,
+            ps: b.ps,
+            vmax: b.vmax,
+            accel: b.accel,
+            weight: b.weight,
+            price: b.price
+        };
+    });
+}
+
+const WHEEL_BIKES = buildWheelBikes(WHEEL_BIKE_KEYS);
 
 const NUM_BIKES = WHEEL_BIKES.length;
 const SLICE_ANGLE = (2 * Math.PI) / NUM_BIKES;
@@ -490,8 +506,8 @@ function drawWheel() {
         ctx.fillStyle = '#fff';
         ctx.shadowColor = SEGMENT_BORDERS[i % SEGMENT_BORDERS.length];
         ctx.shadowBlur = 6;
-        // Short name for wheel
-        const shortName = bike.name.length > 10 ? bike.name.slice(0, 10) : bike.name;
+        // Short name for wheel (ohne "Kawasaki"-Präfix, sonst gekürzt)
+        const shortName = bike.shortName.length > 10 ? bike.shortName.slice(0, 10) : bike.shortName;
         ctx.fillText(shortName, 0, 0);
         ctx.restore();
     });
@@ -579,21 +595,31 @@ function determineResult() {
     updateHistory();
 }
 
+/**
+ * Zeigt die Ergebnis-Info-Karte für das gewonnene Motorrad an, inklusive
+ * Leistung, Höchstgeschwindigkeit, Beschleunigung, Gewicht, Kategorie und
+ * Preis (€, de-DE formatiert).
+ * @param {Object} bike - Segment-Objekt aus WHEEL_BIKES.
+ * @returns {void}
+ */
 function showResult(bike) {
     document.getElementById('resultEmpty').style.display = 'none';
     const display = document.getElementById('resultBike');
     display.className = 'result-bike-display active';
 
     document.getElementById('resIcon').textContent = bike.icon;
-    document.getElementById('resBikeName').textContent = 'Kawasaki ' + bike.name;
+    document.getElementById('resBikeName').textContent = bike.name;
     document.getElementById('resBikeSub').textContent = bike.sub;
 
+    const priceFormatted = bike.price.toLocaleString('de-DE') + ' €';
     const specs = document.getElementById('resSpecs');
     specs.innerHTML = [
         { val: bike.ps + ' PS', lbl: 'Leistung' },
         { val: bike.vmax + ' km/h', lbl: 'Vmax' },
         { val: bike.accel > 0 ? bike.accel + 's' : '—', lbl: '0-100 km/h' },
-        { val: bike.weight + ' kg', lbl: 'Gewicht' }
+        { val: bike.weight + ' kg', lbl: 'Gewicht' },
+        { val: bike.category, lbl: 'Kategorie' },
+        { val: priceFormatted, lbl: 'Preis' }
     ].map(s => `<div class="result-spec-item"><div class="result-spec-val">${s.val}</div><div class="result-spec-lbl">${s.lbl}</div></div>`).join('');
 }
 
