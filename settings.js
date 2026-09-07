@@ -87,6 +87,54 @@
   /* Apply immediately (before DOM ready to avoid flash) */
   applyAll();
 
+  /* ── Seitenbesuch-Tracking (Gamification) ───────────────────────
+   * Läuft auf JEDER Seite, die settings.js einbindet — auch auf
+   * soundcheck.html (geschützte Datei, wird hier bewusst NICHT
+   * angefasst). Dieser Block ist komplett eigenständig: er hängt
+   * NICHT von stats.js/achievements.js ab, da beide auf
+   * soundcheck.html nicht geladen werden. Er darf niemals einen
+   * Fehler nach außen werfen (try/catch), damit bestehende Seiten
+   * nie blockiert werden. */
+  var VISITED_PAGES_KEY = 'vroooom_stats_visitedPages';
+
+  /**
+   * Ermittelt den normalisierten Seiten-Schlüssel aus dem aktuellen
+   * Pfad (z. B. "soundcheck" für "/soundcheck.html", "index" für "/"
+   * oder "/index.html").
+   * @returns {string} Seiten-Schlüssel ohne Verzeichnis/Endung.
+   */
+  function currentPageKey() {
+    var path = window.location.pathname || '';
+    var base = path.substring(path.lastIndexOf('/') + 1);
+    base = base.replace(/\.html?$/i, '');
+    return base || 'index';
+  }
+
+  /**
+   * Trägt den Besuch der aktuellen Seite mit Zeitstempel in
+   * vroooom_stats_visitedPages ein und stößt (falls verfügbar) eine
+   * erneute Achievement-Prüfung für "alle Mini-Apps besucht" an.
+   * Rein additiv, defensiv gegen fehlendes/korruptes localStorage.
+   * @returns {void}
+   */
+  function recordPageVisit() {
+    try {
+      var key = currentPageKey();
+      var raw = localStorage.getItem(VISITED_PAGES_KEY);
+      var visits = {};
+      try { visits = raw ? JSON.parse(raw) : {}; } catch (e) { visits = {}; }
+      if (!visits || typeof visits !== 'object') visits = {};
+      visits[key] = new Date().toISOString();
+      localStorage.setItem(VISITED_PAGES_KEY, JSON.stringify(visits));
+      if (window.VroooomAchievements && typeof window.VroooomAchievements.checkAllAppsVisited === 'function') {
+        window.VroooomAchievements.checkAllAppsVisited();
+      }
+    } catch (e) {
+      /* Seitenbesuch-Tracking darf nie eine bestehende Seite blockieren */
+    }
+  }
+  recordPageVisit();
+
   /* ── Build Settings Panel HTML ──────────────────────────────── */
   function themeOption(value, icon, previewClass, name, desc) {
     var active = state.theme === value ? ' active' : '';
