@@ -625,10 +625,40 @@
         /* ==========================================
            Bike Database — 19 Kawasaki Modelle
            ========================================== */
+
+        /**
+         * Erzeugt ein selbst gezeichnetes SVG-Platzhalterbild (Gradient +
+         * einfache Motorrad-Silhouette + Modellname) als Data-URI. Ersetzt
+         * den früheren externen placehold.co-Aufruf, damit die Galerie ohne
+         * jegliche externe Bild-Requests funktioniert.
+         * @param {string} name - Anzuzeigender Modellname.
+         * @param {string} g1 - Erste Gradient-Hexfarbe (ohne '#').
+         * @param {string} g2 - Zweite Gradient-Hexfarbe (ohne '#').
+         * @returns {string} data:image/svg+xml,... Data-URI.
+         */
+        function makeBikeSvg(name, g1, g2) {
+            var svg =
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200">' +
+                '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+                '<stop offset="0%" stop-color="#' + g1 + '"/>' +
+                '<stop offset="100%" stop-color="#' + g2 + '"/>' +
+                '</linearGradient></defs>' +
+                '<rect width="520" height="200" fill="url(#g)"/>' +
+                '<g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55">' +
+                '<circle cx="150" cy="150" r="28"/>' +
+                '<circle cx="380" cy="150" r="28"/>' +
+                '<path d="M150 150 L232 98 L302 98 L380 150 M232 98 L212 58 L262 58 M302 98 L322 66 L364 78 M150 150 L302 98"/>' +
+                '</g>' +
+                '<text x="260" y="188" font-family="Segoe UI, sans-serif" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="0.92">' +
+                name.replace(/&/g, '&amp;').replace(/</g, '&lt;') +
+                '</text>' +
+                '</svg>';
+            return 'data:image/svg+xml,' + encodeURIComponent(svg);
+        }
+
         function makeSlides(name, emoji, g1, g2) {
-            var enc = encodeURIComponent(name);
             return [
-                { type: 'img', src: 'https://placehold.co/520x200/' + g1 + '/ffffff?text=' + enc, caption: name + ' – Seitenansicht', gradient: 'linear-gradient(135deg, #' + g1 + ', #' + g2 + ')' },
+                { type: 'img', src: makeBikeSvg(name, g1, g2), caption: name + ' – Seitenansicht', gradient: 'linear-gradient(135deg, #' + g1 + ', #' + g2 + ')' },
                 { type: 'emoji', emoji: emoji, caption: name + ' unterwegs', gradient: 'linear-gradient(135deg, #' + g2 + ', #' + g1 + ')' },
                 { type: 'emoji', emoji: '🔧', caption: 'Technik im Detail', gradient: 'linear-gradient(135deg, #232526, #414345)' }
             ];

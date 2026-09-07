@@ -355,7 +355,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            opacity: 0;
+            animation: recIconFadeIn var(--dur-slow, 0.4s) var(--ease-out, ease) forwards;
+            transition: transform var(--dur-slow, 0.4s) var(--ease-standard, ease);
         }
+        @keyframes recIconFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .recommendation-card:hover .recommendation-icon-wrap img { transform: scale(1.08); }
         .recommendation-info { flex: 1; min-width: 0; }
         .recommendation-title {
             font-size: 0.75rem;

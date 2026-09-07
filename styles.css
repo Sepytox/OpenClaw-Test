@@ -505,6 +505,21 @@ footer {
 .gallery-slide-active { opacity: 1; visibility: visible; animation: slideFadeIn 0.35s ease; }
 @keyframes slideFadeIn { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
 
+/* Consistent aspect ratio, rounded corners, gentle fade-in on load and a
+   subtle zoom on hover for every gallery image (self-authored SVG or
+   local asset — no external image requests). */
+.gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-md, 10px);
+  opacity: 0;
+  animation: imgFadeIn var(--dur-slow, 0.4s) var(--ease-out, ease) forwards;
+  transition: transform var(--dur-slow, 0.4s) var(--ease-standard, ease);
+}
+.gallery:hover .gallery-img { transform: scale(1.05); }
+@keyframes imgFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 .gallery-emoji { font-size: 3.5em; }
 .gallery-caption { font-size: 0.9em; background: rgba(0,0,0,0.4); padding: 3px 12px; border-radius: 20px; }
 
