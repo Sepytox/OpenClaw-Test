@@ -243,6 +243,87 @@
     /* Wrap service chips better */
     .maint-service-chip { font-size: 0.68rem; padding: 0.1rem 0.35rem; }
 }
+
+/* ====================================================
+   HERO — reine CSS-Grafik (Gradient + Muster), kein
+   externes Bild. Rein präsentational, ändert kein
+   Verhalten der übrigen Seite.
+   ==================================================== */
+.hero {
+    position: relative;
+    overflow: hidden;
+    padding: 4.5rem 1.5rem 4rem;
+    text-align: center;
+    isolation: isolate;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(circle at 15% 20%, var(--accent-dim), transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(255,102,0,0.14), transparent 50%),
+        repeating-linear-gradient(135deg, var(--accent-dim) 0 2px, transparent 2px 42px),
+        var(--bg);
+}
+
+.hero-inner {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.hero-eyebrow {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full, 999px);
+    padding: 0.35rem 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.hero-title {
+    font-size: var(--font-hero, clamp(2.1rem, 5vw, 3.4rem));
+    font-weight: 800;
+    line-height: var(--line-height-tight, 1.15);
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.hero-accent {
+    color: var(--accent);
+}
+
+.hero-tagline {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 620px;
+    margin: 0 auto 1.75rem;
+}
+
+.hero-cta-row {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-cta,
+.hero-cta-secondary {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.5rem;
+}
+
+@media (max-width: 600px) {
+    .hero { padding: 3rem 1rem 2.5rem; }
+    .hero-cta-row { flex-direction: column; align-items: stretch; }
+}
     </style>
 </head>
 <body>
@@ -256,6 +337,23 @@
         <a href="wheel.html">Wheel</a>
         <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">☀️</button>
     </nav>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero js-reveal">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-inner">
+            <p class="hero-eyebrow">🏍️ Der Kawasaki Guide</p>
+            <h1 class="hero-title">Finde dein perfektes <span class="hero-accent">Kawasaki</span></h1>
+            <p class="hero-tagline">19 Modelle im direkten Vergleich — vom günstigen Einsteiger-Bike bis zum
+                300&nbsp;km/h-Hypersportler. Specs, Kaufberatung, Wartungsrechner und Community-Bewertungen an
+                einem Ort.</p>
+            <div class="hero-cta-row">
+                <a href="#bikesGrid" class="btn hero-cta">🔍 Modelle entdecken</a>
+                <a href="quiz.html" class="btn btn-outline hero-cta-secondary">🎯 Welches Kawasaki bin ich?</a>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
         <main>
             <!-- ===== SEARCH & FILTER ===== -->
@@ -308,7 +406,7 @@
                 </div>
             </section>
 
-            <section class="intro">
+            <section class="intro js-reveal">
                 <h2>Über Kawasaki</h2>
                 <p>Kawasaki ist eine der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren. Hier findest du <strong>19 Modelle</strong> — vom Einsteiger-Bike bis zum 300-km/h-Hypersportler.</p>
             </section>
@@ -333,13 +431,13 @@
             </div>
 
             <!-- ===== KAUFBERATUNG SECTION ===== -->
-            <section class="advice-section" id="adviceSection" aria-label="Kaufberatung">
+            <section class="advice-section js-reveal" id="adviceSection" aria-label="Kaufberatung">
                 <h2 class="advice-title">🧭 Kaufberatung: Welches Motorrad für wen?</h2>
                 <div class="advice-grid" id="adviceGrid"></div>
             </section>
 
             <!-- ===== WARTUNGSRECHNER ===== -->
-            <section class="maintenance-section" id="maintenanceSection" aria-label="Wartungsrechner">
+            <section class="maintenance-section js-reveal" id="maintenanceSection" aria-label="Wartungsrechner">
                 <h2>🔧 Wartungsrechner</h2>
                 <p class="maint-subtitle">Wähle dein Modell und Kilometerstand — wir berechnen die nächsten 5 Service-Termine.</p>
 
@@ -416,7 +514,7 @@
                 </div>
             </section>
 
-            <section class="closing">
+            <section class="closing js-reveal">
                 <h2>Kawasaki - Tradition trifft Zukunft</h2>
                 <p>Von klassischen Modellen bis zu High-Tech Superbikes - Kawasaki bleibt eine der Top-Adressen für Motorrad-Enthusiasten weltweit.</p>
                 <div class="legendary-sounds-teaser" style="margin-top:24px;padding:20px 24px;border:1px solid #00FFE0;border-radius:10px;background:rgba(0,255,224,0.05);text-align:center;">
@@ -527,10 +625,40 @@
         /* ==========================================
            Bike Database — 19 Kawasaki Modelle
            ========================================== */
+
+        /**
+         * Erzeugt ein selbst gezeichnetes SVG-Platzhalterbild (Gradient +
+         * einfache Motorrad-Silhouette + Modellname) als Data-URI. Ersetzt
+         * den früheren externen Platzhalterbild-Dienst-Aufruf, damit die
+         * Galerie ohne jegliche externe Bild-Requests funktioniert.
+         * @param {string} name - Anzuzeigender Modellname.
+         * @param {string} g1 - Erste Gradient-Hexfarbe (ohne '#').
+         * @param {string} g2 - Zweite Gradient-Hexfarbe (ohne '#').
+         * @returns {string} data:image/svg+xml,... Data-URI.
+         */
+        function makeBikeSvg(name, g1, g2) {
+            var svg =
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200">' +
+                '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+                '<stop offset="0%" stop-color="#' + g1 + '"/>' +
+                '<stop offset="100%" stop-color="#' + g2 + '"/>' +
+                '</linearGradient></defs>' +
+                '<rect width="520" height="200" fill="url(#g)"/>' +
+                '<g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55">' +
+                '<circle cx="150" cy="150" r="28"/>' +
+                '<circle cx="380" cy="150" r="28"/>' +
+                '<path d="M150 150 L232 98 L302 98 L380 150 M232 98 L212 58 L262 58 M302 98 L322 66 L364 78 M150 150 L302 98"/>' +
+                '</g>' +
+                '<text x="260" y="188" font-family="Segoe UI, sans-serif" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="0.92">' +
+                name.replace(/&/g, '&amp;').replace(/</g, '&lt;') +
+                '</text>' +
+                '</svg>';
+            return 'data:image/svg+xml,' + encodeURIComponent(svg);
+        }
+
         function makeSlides(name, emoji, g1, g2) {
-            var enc = encodeURIComponent(name);
             return [
-                { type: 'img', src: 'https://placehold.co/520x200/' + g1 + '/ffffff?text=' + enc, caption: name + ' – Seitenansicht', gradient: 'linear-gradient(135deg, #' + g1 + ', #' + g2 + ')' },
+                { type: 'img', src: makeBikeSvg(name, g1, g2), caption: name + ' – Seitenansicht', gradient: 'linear-gradient(135deg, #' + g1 + ', #' + g2 + ')' },
                 { type: 'emoji', emoji: emoji, caption: name + ' unterwegs', gradient: 'linear-gradient(135deg, #' + g2 + ', #' + g1 + ')' },
                 { type: 'emoji', emoji: '🔧', caption: 'Technik im Detail', gradient: 'linear-gradient(135deg, #232526, #414345)' }
             ];
@@ -1995,5 +2123,6 @@
     }
     </script>
     <script src="settings.js"></script>
+    <script src="scroll-reveal.js"></script>
 </body>
 </html>

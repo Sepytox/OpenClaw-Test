@@ -355,7 +355,12 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            opacity: 0;
+            animation: recIconFadeIn var(--dur-slow, 0.4s) var(--ease-out, ease) forwards;
+            transition: transform var(--dur-slow, 0.4s) var(--ease-standard, ease);
         }
+        @keyframes recIconFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .recommendation-card:hover .recommendation-icon-wrap img { transform: scale(1.08); }
         .recommendation-info { flex: 1; min-width: 0; }
         .recommendation-title {
             font-size: 0.75rem;
@@ -493,7 +498,7 @@
 
     <!-- INTRO -->
     <div id="introSection">
-        <div class="intro-card">
+        <div class="intro-card js-reveal">
             <h2>🏍️ Bereit für den Quiz?</h2>
             <p>Beantworte 10 Fragen über deinen Fahrstil, deine Persönlichkeit und Vorlieben. Wir matchen dich mit dem perfekten Kawasaki Motorrad!</p>
             <div class="intro-features">
@@ -539,7 +544,7 @@
 
     <!-- RESULTS -->
     <div id="resultsSection">
-        <div class="result-card">
+        <div class="result-card js-reveal">
             <div class="result-badge">Dein Match</div>
             <span class="result-bike-icon" id="resultIcon">🏍️</span>
             <div class="result-bike-name" id="resultName">—</div>
@@ -950,5 +955,6 @@ function restartQuiz() {
 </script>
     <script src="theme-toggle.js"></script>
     <script src="settings.js"></script>
+    <script src="scroll-reveal.js"></script>
 </body>
 </html>

@@ -3,6 +3,43 @@
    Dark/Light Mode via CSS Custom Properties
    ============================================================ */
 
+/* === DESIGN TOKENS (theme-unabhängig) ===
+   Abstände, Radien, Timing/Easing — Grundlage für konsistente
+   Hover-Effekte, Micro-Interactions und Eintritts-Animationen. */
+:root {
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Radius scale */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* Motion: durations + easing curves (nur transform/opacity animiert) */
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 400ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Typography scale */
+  --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-hero: clamp(2.1rem, 5vw, 3.4rem);
+  --font-h1: clamp(1.6rem, 4vw, 2.5rem);
+  --font-h2: clamp(1.25rem, 2.6vw, 1.75rem);
+  --line-height-body: 1.65;
+  --line-height-tight: 1.2;
+}
+
 /* === DARK MODE (default) === */
 :root {
   --bg: #080808;
@@ -16,8 +53,16 @@
   --accent: #ff6600;
   --accent-hover: #ff8800;
   --accent-dim: rgba(255, 102, 0, 0.12);
-  --nav-bg: rgba(8,8,8,0.97);
+  --nav-bg: rgba(8,8,8,0.88);
   --shadow: 0 2px 12px rgba(0,0,0,0.4);
+
+  /* Elevation + glow tokens (dark) */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.35);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.45);
+  --shadow-lg: 0 20px 44px rgba(0,0,0,0.55);
+  --shadow-glow: 0 0 0 1px rgba(255,102,0,0.35), 0 8px 28px rgba(255,102,0,0.18);
+  --glass-bg: rgba(20,20,20,0.55);
+  --glass-border: rgba(255,255,255,0.08);
 }
 
 /* === LIGHT MODE === */
@@ -33,21 +78,82 @@
   --accent: #ff6600;
   --accent-hover: #e55a00;
   --accent-dim: rgba(255, 102, 0, 0.08);
-  --nav-bg: rgba(245,245,245,0.97);
+  --nav-bg: rgba(245,245,245,0.88);
   --shadow: 0 2px 12px rgba(0,0,0,0.1);
+
+  /* Elevation + glow tokens (light) */
+  --shadow-sm: 0 1px 4px rgba(20,20,20,0.06);
+  --shadow-md: 0 8px 24px rgba(20,20,20,0.10);
+  --shadow-lg: 0 20px 44px rgba(20,20,20,0.14);
+  --shadow-glow: 0 0 0 1px rgba(255,102,0,0.25), 0 8px 24px rgba(255,102,0,0.14);
+  --glass-bg: rgba(255,255,255,0.55);
+  --glass-border: rgba(20,20,20,0.08);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { -webkit-text-size-adjust: 100%; }
+
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font-sans);
+  line-height: var(--line-height-body);
   min-height: 100vh;
-  transition: background 0.2s, color 0.2s;
+  transition: background var(--dur-base) var(--ease-standard), color var(--dur-base) var(--ease-standard);
+}
+
+h1, h2, h3, h4 { line-height: var(--line-height-tight); }
+
+/* Visible keyboard focus for every interactive element (touch users are
+   unaffected — :focus-visible only engages for keyboard/programmatic focus). */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Respect OS-level "reduce motion" — only transform/opacity are animated
+   anywhere in this design system, so shrinking durations to ~0 removes all
+   motion without ever hiding content permanently. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Scroll-Reveal (Eintritts-Animationen, siehe scroll-reveal.js) ───
+   Ohne die Klasse "reveal-ready" auf <html> (nur von scroll-reveal.js
+   gesetzt, sofern IntersectionObserver verfügbar ist und keine
+   reduzierte Bewegung gewünscht wird) bleiben ".js-reveal"-Elemente
+   normal sichtbar — kein JS/kein Observer bedeutet daher nie
+   dauerhaft verstecktes Inhalt. */
+.reveal-ready .js-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity var(--dur-slow, 0.4s) var(--ease-out, ease),
+              transform var(--dur-slow, 0.4s) var(--ease-out, ease);
+  will-change: opacity, transform;
+}
+
+.reveal-ready .js-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ── Navigation ─────────────────────────────────────────────── */
+/* Glassmorphism accent: --nav-bg is already a near-solid rgba value, so
+   browsers without backdrop-filter support render a perfectly readable
+   solid bar (progressive enhancement, no separate fallback rule needed). */
 .site-nav {
   background: var(--nav-bg);
   border-bottom: 1px solid var(--border);
@@ -61,26 +167,61 @@ body {
   z-index: 100;
 }
 
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .site-nav {
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+  }
+}
+
 .site-nav .brand {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--text);
   text-decoration: none;
   margin-right: 1rem;
+  transition: transform var(--dur-fast, 0.15s) var(--ease-standard, ease);
+  display: inline-block;
 }
+.site-nav .brand:hover { transform: translateY(-1px) scale(1.03); }
 
 .site-nav a {
+  position: relative;
   color: var(--text-muted);
   text-decoration: none;
   padding: 0.3rem 0.6rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm, 4px);
   font-size: 0.85rem;
-  transition: color 0.2s;
+  transition: color var(--dur-fast, 0.2s) var(--ease-standard, ease),
+              background var(--dur-fast, 0.2s) var(--ease-standard, ease);
+}
+
+/* Animated underline/pill: a scaled pseudo-element grows in from the
+   center on hover/focus and stays fully grown for the active page. */
+.site-nav a::after {
+  content: '';
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.05rem;
+  height: 2px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform var(--dur-base, 0.25s) var(--ease-standard, ease);
 }
 
 .site-nav a:hover,
+.site-nav a:focus-visible,
 .site-nav a.active {
   color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.site-nav a:hover::after,
+.site-nav a:focus-visible::after,
+.site-nav a.active::after {
+  transform: scaleX(1);
 }
 
 /* Theme toggle button in nav */
@@ -93,14 +234,17 @@ body {
   font-size: 1rem;
   cursor: pointer;
   color: var(--text-muted);
-  transition: border-color 0.2s, color 0.2s;
-  flex-shrink: 0;
+  transition: border-color var(--dur-fast, 0.2s) var(--ease-standard, ease),
+              color var(--dur-fast, 0.2s) var(--ease-standard, ease),
+              transform var(--dur-fast, 0.2s) var(--ease-spring, ease);
 }
 
 .theme-toggle:hover {
   border-color: var(--accent);
   color: var(--accent);
+  transform: scale(1.1) rotate(8deg);
 }
+.theme-toggle:active { transform: scale(0.95); }
 
 /* ── Layout Wrappers ─────────────────────────────────────────── */
 .page-wrap {
@@ -140,7 +284,7 @@ body {
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 1rem;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -148,11 +292,19 @@ body {
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s;
+  transition: background var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-fast, 0.15s) var(--ease-standard, ease),
+              box-shadow var(--dur-base, 0.25s) var(--ease-standard, ease);
 }
 
 .btn:hover {
-  background: var(--accent-hover);
+  background: linear-gradient(135deg, var(--accent-hover), var(--accent));
+  box-shadow: var(--shadow-glow, none);
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .btn-outline {
@@ -164,5 +316,9 @@ body {
 .btn-outline:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: transparent;
+  background: var(--accent-dim);
+  box-shadow: none;
+  transform: translateY(-2px);
 }
+
+.btn-outline:active { transform: translateY(0) scale(0.97); }

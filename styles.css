@@ -204,8 +204,10 @@ footer {
   border: 1px solid var(--border);
   color: var(--text);
   padding: 18px 20px;
-  border-radius: 14px;
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  border-radius: var(--radius-lg, 14px);
+  transition: border-color var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-base, 0.25s) var(--ease-standard, ease),
+              box-shadow var(--dur-base, 0.25s) var(--ease-standard, ease);
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -214,11 +216,28 @@ footer {
   animation: cardFadeUp 0.35s ease backwards;
 }
 
-.fact-card:hover {
+.fact-card:hover,
+.fact-card:focus-within {
   border-color: var(--border-hover);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow);
+  transform: translateY(-6px) scale(1.012);
+  box-shadow: var(--shadow-lg, var(--shadow));
 }
+
+.fact-card:active { transform: translateY(-3px) scale(1.005); }
+
+/* Quickstats + hint reveal a little more elegantly on hover */
+.fact-card .card-quickstats,
+.fact-card .card-hint {
+  transition: opacity var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.fact-card:hover .card-hint {
+  transform: translateY(-1px);
+}
+.fact-card:hover .card-quickstats .qstat {
+  transform: translateY(-1px);
+}
+.qstat { transition: transform var(--dur-fast, 0.15s) var(--ease-standard, ease), border-color var(--dur-fast, 0.15s) var(--ease-standard, ease); }
 
 .fact-card h3 {
   font-size: 1.15em;
@@ -486,6 +505,21 @@ footer {
 .gallery-slide-active { opacity: 1; visibility: visible; animation: slideFadeIn 0.35s ease; }
 @keyframes slideFadeIn { from { opacity: 0; transform: scale(1.03); } to { opacity: 1; transform: scale(1); } }
 
+/* Consistent aspect ratio, rounded corners, gentle fade-in on load and a
+   subtle zoom on hover for every gallery image (self-authored SVG or
+   local asset — no external image requests). */
+.gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-md, 10px);
+  opacity: 0;
+  animation: imgFadeIn var(--dur-slow, 0.4s) var(--ease-out, ease) forwards;
+  transition: transform var(--dur-slow, 0.4s) var(--ease-standard, ease);
+}
+.gallery:hover .gallery-img { transform: scale(1.05); }
+@keyframes imgFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 .gallery-emoji { font-size: 3.5em; }
 .gallery-caption { font-size: 0.9em; background: rgba(0,0,0,0.4); padding: 3px 12px; border-radius: 20px; }
 
@@ -741,17 +775,24 @@ footer {
 .advice-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md, 12px);
   padding: 16px;
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition: border-color var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-base, 0.25s) var(--ease-standard, ease),
+              box-shadow var(--dur-base, 0.25s) var(--ease-standard, ease);
 }
-.advice-card:hover, .advice-card:focus {
+.advice-card:hover, .advice-card:focus-visible {
   border-color: var(--border-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--shadow-lg, var(--shadow));
   outline: none;
 }
+.advice-card:active { transform: translateY(-1px) scale(1.0); }
+.advice-card .advice-emoji {
+  transition: transform var(--dur-base, 0.25s) var(--ease-spring, ease);
+}
+.advice-card:hover .advice-emoji { transform: scale(1.15) rotate(-4deg); }
 .advice-emoji { font-size: 2em; margin-bottom: 5px; display: block; }
 .advice-card-title { font-size: 1em; margin-bottom: 3px; color: var(--text); font-weight: 700; }
 .advice-bike-name { font-size: 0.9em; color: var(--text-muted); margin-bottom: 5px; }
@@ -832,6 +873,19 @@ footer {
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--border);
   background: var(--bg-secondary);
+}
+
+/* Glassmorphism accent (sparingly used, see design.css .site-nav for the
+   other occurrence): solid --bg-secondary above is the fallback for
+   browsers without backdrop-filter support; where supported, a
+   translucent glass panel replaces it. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .settings-panel-header {
+    background: var(--glass-bg, var(--bg-secondary));
+    border-bottom: 1px solid var(--glass-border, var(--border));
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    backdrop-filter: blur(12px) saturate(150%);
+  }
 }
 .settings-panel-title { font-weight: 700; font-size: 1rem; color: var(--text); }
 .settings-close {
@@ -942,6 +996,61 @@ footer {
   transition: background 0.2s;
 }
 .settings-reset-btn:hover { background: var(--accent-hover); }
+.settings-reset-btn:active { transform: scale(0.97); }
+
+/* ── Button micro-interactions (hover + active + focus-visible) ──────
+   Zentrale Regel für alle bestehenden Klick-Buttons: dezentes Scale-down
+   beim Klicken sowie ein sichtbarer Fokusring für Tastaturnutzung, ohne
+   die individuellen Hover-Farben/-Effekte jeder Komponente zu verändern. */
+.btn-clear-filter,
+.btn-compare:not(:disabled),
+.btn-clear-compare,
+.fav-btn,
+.modal-close,
+.btn-youtube,
+.btn-modal-fav,
+.gallery-btn,
+.gallery-autoplay,
+.star-btn,
+.btn-save-review,
+.settings-reset-btn,
+.extended-specs-toggle,
+.theme-option {
+  transition-property: background, color, border-color, transform, box-shadow, opacity;
+  transition-duration: var(--dur-fast, 0.18s);
+  transition-timing-function: var(--ease-standard, ease);
+}
+
+.btn-clear-filter:active,
+.btn-compare:not(:disabled):active,
+.btn-clear-compare:active,
+.modal-close:active,
+.btn-youtube:active,
+.btn-modal-fav:active,
+.gallery-btn:active,
+.gallery-autoplay:active,
+.star-btn:active,
+.btn-save-review:active {
+  transform: scale(0.94);
+}
+
+.btn-clear-filter:focus-visible,
+.btn-compare:focus-visible,
+.btn-clear-compare:focus-visible,
+.fav-btn:focus-visible,
+.modal-close:focus-visible,
+.btn-youtube:focus-visible,
+.btn-modal-fav:focus-visible,
+.gallery-btn:focus-visible,
+.gallery-autoplay:focus-visible,
+.star-btn:focus-visible,
+.btn-save-review:focus-visible,
+.settings-reset-btn:focus-visible,
+.filter-select:focus-visible,
+.search-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 /* ── Accessibility helpers ──────────────────────────────────── */
 .a11y-large-text { font-size: 1.18em !important; }
