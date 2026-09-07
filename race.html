@@ -391,7 +391,96 @@
         .racing-bg.moving {
             animation: grid-scroll 0.3s linear infinite;
         }
-    
+
+        /* ==========================================
+           LIGHT MODE OVERRIDES
+           race.html verwendet fast durchgängig hart kodierte dunkle
+           Hex-Farben statt der design.css-Variablen und hatte dadurch
+           bisher als einzige App-Seite keine [data-theme="light"]-
+           Anpassungen (Mängelliste 5.1) — im Light-Mode blieb der
+           Inhalt größtenteils dunkel/unlesbar. Diese Overrides ändern
+           NICHTS an der Dark-Mode-Darstellung (Standardregeln oben
+           bleiben unverändert) und rühren keine Physik-/Renn-Logik an.
+           ========================================== */
+        [data-theme="light"] body { color: var(--text); }
+        [data-theme="light"] .page-title p { color: var(--text-muted); }
+
+        [data-theme="light"] .bike-selector-section,
+        [data-theme="light"] .gauges-panel,
+        [data-theme="light"] .live-stats,
+        [data-theme="light"] .controls-section,
+        [data-theme="light"] .compare-bike-panel,
+        [data-theme="light"] .records-section,
+        [data-theme="light"] .splits-section,
+        [data-theme="light"] .graph-section {
+            border-color: var(--border);
+        }
+        [data-theme="light"] .bike-selector-section h2,
+        [data-theme="light"] .gauges-panel h2,
+        [data-theme="light"] .live-stats h2,
+        [data-theme="light"] .controls-section h2,
+        [data-theme="light"] .compare-bike-panel h3,
+        [data-theme="light"] .records-section h2,
+        [data-theme="light"] .splits-section h2,
+        [data-theme="light"] .graph-section h2 {
+            color: var(--text-muted);
+        }
+
+        [data-theme="light"] .selector-group label,
+        [data-theme="light"] .toggle-label,
+        [data-theme="light"] .throttle-label,
+        [data-theme="light"] .mode-chip,
+        [data-theme="light"] .toggle-btn,
+        [data-theme="light"] .rpm-zone-labels,
+        [data-theme="light"] .gauge-label,
+        [data-theme="light"] .shift-indicator.normal {
+            color: var(--text-muted);
+        }
+
+        [data-theme="light"] .selector-group select {
+            background: var(--card-bg);
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        [data-theme="light"] .stat-box,
+        [data-theme="light"] .gear-display,
+        [data-theme="light"] .record-item,
+        [data-theme="light"] .endless-result-item {
+            background: var(--bg-secondary);
+            border-color: var(--border);
+        }
+        [data-theme="light"] .stat-box .stat-lbl,
+        [data-theme="light"] .gear-label,
+        [data-theme="light"] .record-item .rec-bike,
+        [data-theme="light"] .record-item .rec-lbl,
+        [data-theme="light"] .endless-result-item .er-lbl {
+            color: var(--text-muted);
+        }
+
+        [data-theme="light"] .rpm-bar-bg,
+        [data-theme="light"] .throttle-slider {
+            background: var(--border);
+        }
+
+        [data-theme="light"] .gauge-value { color: var(--text); }
+
+        [data-theme="light"] .splits-table th {
+            color: var(--text-muted);
+            border-bottom-color: var(--border);
+        }
+        [data-theme="light"] .splits-table td {
+            color: var(--text-muted);
+            border-bottom-color: var(--border);
+        }
+
+        [data-theme="light"] .compare-stat {
+            border-bottom-color: var(--border);
+        }
+
+        [data-theme="light"] .endless-result-banner {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--accent-dim));
+        }
 
     </style>
 </head>
