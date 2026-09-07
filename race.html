@@ -1595,21 +1595,8 @@ document.addEventListener('keydown', e => {
 // Initial draw
 drawTrack();
 
-// Theme toggle
-(function() {
-    var btn = document.getElementById('themeToggle');
-    if (!btn) return;
-    var t = localStorage.getItem('theme') || 'dark';
-    btn.textContent = t === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
-    btn.addEventListener('click', function() {
-        var current = document.documentElement.getAttribute('data-theme');
-        var next = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        btn.textContent = next === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
-    });
-})();
 </script>
+    <script src="theme-toggle.js"></script>
     <script src="settings.js"></script>
 </body>
 </html>

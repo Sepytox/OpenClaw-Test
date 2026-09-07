@@ -946,21 +946,8 @@ function restartQuiz() {
     document.getElementById('introSection').style.display = 'block';
 }
 
-// Theme toggle
-(function() {
-    var btn = document.getElementById('themeToggle');
-    if (!btn) return;
-    var t = localStorage.getItem('theme') || 'dark';
-    btn.textContent = t === 'dark' ? '☀️' : '🌙';
-    btn.addEventListener('click', function() {
-        var current = document.documentElement.getAttribute('data-theme');
-        var next = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        btn.textContent = next === 'dark' ? '☀️' : '🌙';
-    });
-})();
 </script>
+    <script src="theme-toggle.js"></script>
     <script src="settings.js"></script>
 </body>
 </html>
