@@ -224,7 +224,7 @@ summary:focus-visible,
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem 1rem;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -232,11 +232,19 @@ summary:focus-visible,
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s;
+  transition: background var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-fast, 0.15s) var(--ease-standard, ease),
+              box-shadow var(--dur-base, 0.25s) var(--ease-standard, ease);
 }
 
 .btn:hover {
-  background: var(--accent-hover);
+  background: linear-gradient(135deg, var(--accent-hover), var(--accent));
+  box-shadow: var(--shadow-glow, none);
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .btn-outline {
@@ -248,5 +256,9 @@ summary:focus-visible,
 .btn-outline:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: transparent;
+  background: var(--accent-dim);
+  box-shadow: none;
+  transform: translateY(-2px);
 }
+
+.btn-outline:active { transform: translateY(0) scale(0.97); }

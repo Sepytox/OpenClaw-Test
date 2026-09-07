@@ -968,6 +968,61 @@ footer {
   transition: background 0.2s;
 }
 .settings-reset-btn:hover { background: var(--accent-hover); }
+.settings-reset-btn:active { transform: scale(0.97); }
+
+/* ── Button micro-interactions (hover + active + focus-visible) ──────
+   Zentrale Regel für alle bestehenden Klick-Buttons: dezentes Scale-down
+   beim Klicken sowie ein sichtbarer Fokusring für Tastaturnutzung, ohne
+   die individuellen Hover-Farben/-Effekte jeder Komponente zu verändern. */
+.btn-clear-filter,
+.btn-compare:not(:disabled),
+.btn-clear-compare,
+.fav-btn,
+.modal-close,
+.btn-youtube,
+.btn-modal-fav,
+.gallery-btn,
+.gallery-autoplay,
+.star-btn,
+.btn-save-review,
+.settings-reset-btn,
+.extended-specs-toggle,
+.theme-option {
+  transition-property: background, color, border-color, transform, box-shadow, opacity;
+  transition-duration: var(--dur-fast, 0.18s);
+  transition-timing-function: var(--ease-standard, ease);
+}
+
+.btn-clear-filter:active,
+.btn-compare:not(:disabled):active,
+.btn-clear-compare:active,
+.modal-close:active,
+.btn-youtube:active,
+.btn-modal-fav:active,
+.gallery-btn:active,
+.gallery-autoplay:active,
+.star-btn:active,
+.btn-save-review:active {
+  transform: scale(0.94);
+}
+
+.btn-clear-filter:focus-visible,
+.btn-compare:focus-visible,
+.btn-clear-compare:focus-visible,
+.fav-btn:focus-visible,
+.modal-close:focus-visible,
+.btn-youtube:focus-visible,
+.btn-modal-fav:focus-visible,
+.gallery-btn:focus-visible,
+.gallery-autoplay:focus-visible,
+.star-btn:focus-visible,
+.btn-save-review:focus-visible,
+.settings-reset-btn:focus-visible,
+.filter-select:focus-visible,
+.search-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 /* ── Accessibility helpers ──────────────────────────────────── */
 .a11y-large-text { font-size: 1.18em !important; }
