@@ -1977,7 +1977,7 @@
         var year = parseInt(document.getElementById('maintYear').value, 10);
         var km = parseInt(document.getElementById('maintCurrentKm').value, 10);
 
-        if (!bikeKey || isNaN(year) || isNaN(km) || km < 0) {
+        if (!bikeKey || isNaN(year) || isNaN(km) || km < 0 || km > 999999) {
             var tbody = document.getElementById('maintTableBody');
             tbody.innerHTML = '<tr><td colspan="6" class="maint-placeholder">⚠️ Bitte Modell, Baujahr und Kilometerstand auswählen.</td></tr>';
             document.getElementById('maintInfoBar').style.display = 'none';
