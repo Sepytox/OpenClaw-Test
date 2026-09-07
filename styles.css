@@ -874,6 +874,19 @@ footer {
   border-bottom: 1px solid var(--border);
   background: var(--bg-secondary);
 }
+
+/* Glassmorphism accent (sparingly used, see design.css .site-nav for the
+   other occurrence): solid --bg-secondary above is the fallback for
+   browsers without backdrop-filter support; where supported, a
+   translucent glass panel replaces it. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .settings-panel-header {
+    background: var(--glass-bg, var(--bg-secondary));
+    border-bottom: 1px solid var(--glass-border, var(--border));
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    backdrop-filter: blur(12px) saturate(150%);
+  }
+}
 .settings-panel-title { font-weight: 700; font-size: 1rem; color: var(--text); }
 .settings-close {
   background: none;

@@ -151,6 +151,9 @@ summary:focus-visible,
 }
 
 /* ── Navigation ─────────────────────────────────────────────── */
+/* Glassmorphism accent: --nav-bg is already a near-solid rgba value, so
+   browsers without backdrop-filter support render a perfectly readable
+   solid bar (progressive enhancement, no separate fallback rule needed). */
 .site-nav {
   background: var(--nav-bg);
   border-bottom: 1px solid var(--border);
@@ -162,6 +165,13 @@ summary:focus-visible,
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .site-nav {
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+  }
 }
 
 .site-nav .brand {
