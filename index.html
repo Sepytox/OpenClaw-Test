@@ -243,6 +243,87 @@
     /* Wrap service chips better */
     .maint-service-chip { font-size: 0.68rem; padding: 0.1rem 0.35rem; }
 }
+
+/* ====================================================
+   HERO — reine CSS-Grafik (Gradient + Muster), kein
+   externes Bild. Rein präsentational, ändert kein
+   Verhalten der übrigen Seite.
+   ==================================================== */
+.hero {
+    position: relative;
+    overflow: hidden;
+    padding: 4.5rem 1.5rem 4rem;
+    text-align: center;
+    isolation: isolate;
+}
+
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(circle at 15% 20%, var(--accent-dim), transparent 55%),
+        radial-gradient(circle at 85% 15%, rgba(255,102,0,0.14), transparent 50%),
+        repeating-linear-gradient(135deg, var(--accent-dim) 0 2px, transparent 2px 42px),
+        var(--bg);
+}
+
+.hero-inner {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.hero-eyebrow {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full, 999px);
+    padding: 0.35rem 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.hero-title {
+    font-size: var(--font-hero, clamp(2.1rem, 5vw, 3.4rem));
+    font-weight: 800;
+    line-height: var(--line-height-tight, 1.15);
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+.hero-accent {
+    color: var(--accent);
+}
+
+.hero-tagline {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 620px;
+    margin: 0 auto 1.75rem;
+}
+
+.hero-cta-row {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.hero-cta,
+.hero-cta-secondary {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.5rem;
+}
+
+@media (max-width: 600px) {
+    .hero { padding: 3rem 1rem 2.5rem; }
+    .hero-cta-row { flex-direction: column; align-items: stretch; }
+}
     </style>
 </head>
 <body>
@@ -256,6 +337,23 @@
         <a href="wheel.html">Wheel</a>
         <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">☀️</button>
     </nav>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero js-reveal">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-inner">
+            <p class="hero-eyebrow">🏍️ Der Kawasaki Guide</p>
+            <h1 class="hero-title">Finde dein perfektes <span class="hero-accent">Kawasaki</span></h1>
+            <p class="hero-tagline">19 Modelle im direkten Vergleich — vom günstigen Einsteiger-Bike bis zum
+                300&nbsp;km/h-Hypersportler. Specs, Kaufberatung, Wartungsrechner und Community-Bewertungen an
+                einem Ort.</p>
+            <div class="hero-cta-row">
+                <a href="#bikesGrid" class="btn hero-cta">🔍 Modelle entdecken</a>
+                <a href="quiz.html" class="btn btn-outline hero-cta-secondary">🎯 Welches Kawasaki bin ich?</a>
+            </div>
+        </div>
+    </header>
+
     <div class="container">
         <main>
             <!-- ===== SEARCH & FILTER ===== -->
