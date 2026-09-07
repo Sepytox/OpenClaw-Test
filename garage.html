@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Garage — Vrooooom</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23080808'/%3E%3Ctext x='50' y='68' font-size='58' font-family='sans-serif' font-weight='800' text-anchor='middle' fill='%23ff6600'%3EK%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="design.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="bikes-data.js"></script>
+    <style>
+/* ====================================================
+   GARAGE — Meine Garage Styles
+   ==================================================== */
+.garage-hero {
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem;
+}
+.garage-hero h1 { font-size: var(--font-h1); margin-bottom: 0.5rem; }
+.garage-hero p { color: var(--text-muted); max-width: 640px; margin: 0 auto; }
+
+.garage-section {
+    margin: 1.75rem 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 16px);
+    padding: 1.5rem 1.5rem 1.75rem;
+}
+.garage-section-title {
+    font-size: 1.15em;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.garage-empty {
+    text-align: center;
+    padding: 1.75rem 1rem;
+    color: var(--text-muted);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md, 10px);
+}
+.garage-empty .garage-empty-cta { margin-top: 0.75rem; }
+
+.garage-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.garage-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 10px);
+    padding: 1rem;
+    transition: transform var(--dur-fast, 0.15s) var(--ease-standard, ease),
+                border-color var(--dur-fast, 0.15s) var(--ease-standard, ease);
+}
+.garage-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+.garage-card h3 { font-size: 1em; margin-bottom: 0.35rem; }
+.garage-card p { color: var(--text-muted); font-size: 0.88em; margin: 0.15rem 0; }
+.garage-card-meta { font-size: 0.78em !important; color: var(--text-subtle) !important; }
+.garage-card-link { margin-top: 0.6rem; font-size: 0.8em; padding: 0.4rem 0.75rem; }
+
+.garage-review-item {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 10px);
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.75rem;
+    background: var(--bg-secondary);
+}
+.garage-review-item:last-child { margin-bottom: 0; }
+.garage-review-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem; }
+.garage-review-stars { color: var(--accent); letter-spacing: 1px; }
+.garage-review-text { color: var(--text); font-size: 0.92em; margin: 0.25rem 0; }
+
+.garage-dream-select-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.garage-dream-select-row label { color: var(--text-muted); font-size: 0.9em; }
+#garageDreamSelect {
+    background: var(--bg-secondary);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 6px);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9em;
+    min-width: 240px;
+}
+.garage-dream-hero {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: linear-gradient(135deg, var(--accent-dim), transparent);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 16px);
+    padding: 1.5rem;
+}
+.garage-dream-icon { font-size: 3.2em; flex-shrink: 0; }
+.garage-dream-info h3 { font-size: 1.25em; margin-bottom: 0.2rem; }
+.garage-dream-info p { color: var(--text-muted); margin-bottom: 0.6rem; }
+.garage-dream-specs { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.garage-dream-specs span {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full, 999px);
+    padding: 0.25rem 0.7rem;
+    font-size: 0.82em;
+    color: var(--text);
+}
+
+.garage-progress-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 1rem; }
+.garage-progress-row span { color: var(--text-muted); font-size: 0.88em; white-space: nowrap; }
+.garage-progress-track {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full, 999px);
+    overflow: hidden;
+}
+.garage-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+    transition: width var(--dur-slow, 0.4s) var(--ease-out, ease);
+}
+
+.garage-ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.9rem; }
+.garage-ach-card {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 10px);
+    padding: 0.9rem;
+    background: var(--bg-secondary);
+}
+.garage-ach-unlocked { border-color: var(--accent); }
+.garage-ach-locked { opacity: 0.55; }
+.garage-ach-icon { font-size: 1.6em; flex-shrink: 0; }
+.garage-ach-body h4 { font-size: 0.95em; margin-bottom: 0.2rem; }
+.garage-ach-body p { color: var(--text-muted); font-size: 0.82em; margin: 0.1rem 0; }
+
+.garage-stat-row { margin-bottom: 0.85rem; }
+.garage-stat-row:last-child { margin-bottom: 0; }
+.garage-stat-label { display: flex; justify-content: space-between; font-size: 0.86em; color: var(--text-muted); margin-bottom: 0.3rem; }
+.garage-stat-track {
+    height: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full, 999px);
+    overflow: hidden;
+}
+.garage-stat-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+    transition: width var(--dur-slow, 0.4s) var(--ease-out, ease);
+}
+.garage-most-viewed { margin-top: 1.1rem; color: var(--text-muted); font-size: 0.9em; }
+
+@media (max-width: 600px) {
+    .garage-dream-hero { flex-direction: column; text-align: center; }
+    .garage-progress-row { flex-direction: column; align-items: stretch; }
+}
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <a class="brand" href="index.html">🏍️ Vrooooom</a>
+        <a href="index.html">Übersicht</a>
+        <a href="soundcheck.html">SoundCheck</a>
+        <a href="race.html">Racing Sim</a>
+        <a href="shop.html">Aftermarket</a>
+        <a href="quiz.html">Quiz</a>
+        <a href="wheel.html">Wheel</a>
+        <a href="garage.html" class="active">🏠 Garage</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
+    </nav>
+
+    <header class="garage-hero js-reveal">
+        <h1>🏠 Meine Garage</h1>
+        <p>Deine Favoriten, zuletzt angesehenen Bikes, Bewertungen, dein Traum-Bike, Achievements und Statistiken — alles an einem Ort.</p>
+    </header>
+
+    <div class="container">
+        <main>
+
+            <!-- ===== TRAUM-BIKE ===== -->
+            <section class="garage-section js-reveal" aria-label="Mein Traum-Bike">
+                <div class="garage-section-title">✨ Mein Traum-Bike</div>
+                <div class="garage-dream-select-row">
+                    <label for="garageDreamSelect">Traum-Bike wählen:</label>
+                    <select id="garageDreamSelect" aria-label="Traum-Bike auswählen"></select>
+                </div>
+                <div class="garage-dream-hero" id="garageDreamHero" hidden></div>
+                <div class="garage-empty" id="garageDreamEmpty">
+                    Du hast noch kein Traum-Bike gewählt. Wähle oben eines aus der Liste — es wird hier groß mit allen Specs präsentiert.
+                </div>
+            </section>
+
+            <!-- ===== MEINE BIKES (FAVORITEN) ===== -->
+            <section class="garage-section js-reveal" aria-label="Meine Bikes">
+                <div class="garage-section-title">❤️ Meine Bikes</div>
+                <div class="garage-grid" id="garageFavoritesGrid" hidden></div>
+                <div class="garage-empty" id="garageFavoritesEmpty">
+                    Noch keine Favoriten markiert. Öffne die
+                    <a href="index.html">Übersicht</a> und klicke bei einem Motorrad auf 🤍, um es hier zu sammeln.
+                </div>
+            </section>
+
+            <!-- ===== ZULETZT ANGESEHEN ===== -->
+            <section class="garage-section js-reveal" aria-label="Zuletzt angesehen">
+                <div class="garage-section-title">🔍 Zuletzt angesehen</div>
+                <div class="garage-grid" id="garageRecentGrid" hidden></div>
+                <div class="garage-empty" id="garageRecentEmpty">
+                    Du hast noch kein Motorrad im Detail angesehen. Öffne ein Modell in der
+                    <a href="index.html">Übersicht</a>, um es hier wiederzufinden.
+                </div>
+            </section>
+
+            <!-- ===== MEINE REVIEWS ===== -->
+            <section class="garage-section js-reveal" aria-label="Meine Reviews">
+                <div class="garage-section-title">📝 Meine Reviews</div>
+                <div id="garageReviewsList" hidden></div>
+                <div class="garage-empty" id="garageReviewsEmpty">
+                    Du hast noch keine Bewertung geschrieben. Öffne ein Motorrad in der
+                    <a href="index.html">Übersicht</a> und teile deine Meinung.
+                </div>
+            </section>
+
+            <!-- ===== ACHIEVEMENTS ===== -->
+            <section class="garage-section js-reveal" aria-label="Achievements">
+                <div class="garage-section-title">🏅 Achievements</div>
+                <div class="garage-progress-row">
+                    <div class="garage-progress-track"><div class="garage-progress-fill" id="garageAchievementsProgressBar" style="width:0%"></div></div>
+                    <span id="garageAchievementsProgress">0 / 0 freigeschaltet</span>
+                </div>
+                <div class="garage-ach-grid" id="garageAchievementsGrid"></div>
+            </section>
+
+            <!-- ===== STATISTIKEN ===== -->
+            <section class="garage-section js-reveal" aria-label="Statistiken">
+                <div class="garage-section-title">📊 Statistiken</div>
+                <div id="garageStatsBars"></div>
+                <p class="garage-most-viewed" id="garageMostViewed" hidden></p>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="stats.js"></script>
+    <script src="achievements.js"></script>
+    <script src="theme-toggle.js"></script>
+    <script src="settings.js"></script>
+    <script src="scroll-reveal.js"></script>
+    <script src="garage.js"></script>
+</body>
+</html>
