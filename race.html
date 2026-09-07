@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kawasaki Racing Simulator — Realistic Physics</title>
+    <title>Kawasaki Rennsimulator — Realistische Physik | Vrooooom</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23080808'/%3E%3Ctext x='50' y='68' font-size='58' font-family='sans-serif' font-weight='800' text-anchor='middle' fill='%23ff6600'%3EK%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
@@ -391,7 +392,96 @@
         .racing-bg.moving {
             animation: grid-scroll 0.3s linear infinite;
         }
-    
+
+        /* ==========================================
+           LIGHT MODE OVERRIDES
+           race.html verwendet fast durchgängig hart kodierte dunkle
+           Hex-Farben statt der design.css-Variablen und hatte dadurch
+           bisher als einzige App-Seite keine [data-theme="light"]-
+           Anpassungen (Mängelliste 5.1) — im Light-Mode blieb der
+           Inhalt größtenteils dunkel/unlesbar. Diese Overrides ändern
+           NICHTS an der Dark-Mode-Darstellung (Standardregeln oben
+           bleiben unverändert) und rühren keine Physik-/Renn-Logik an.
+           ========================================== */
+        [data-theme="light"] body { color: var(--text); }
+        [data-theme="light"] .page-title p { color: var(--text-muted); }
+
+        [data-theme="light"] .bike-selector-section,
+        [data-theme="light"] .gauges-panel,
+        [data-theme="light"] .live-stats,
+        [data-theme="light"] .controls-section,
+        [data-theme="light"] .compare-bike-panel,
+        [data-theme="light"] .records-section,
+        [data-theme="light"] .splits-section,
+        [data-theme="light"] .graph-section {
+            border-color: var(--border);
+        }
+        [data-theme="light"] .bike-selector-section h2,
+        [data-theme="light"] .gauges-panel h2,
+        [data-theme="light"] .live-stats h2,
+        [data-theme="light"] .controls-section h2,
+        [data-theme="light"] .compare-bike-panel h3,
+        [data-theme="light"] .records-section h2,
+        [data-theme="light"] .splits-section h2,
+        [data-theme="light"] .graph-section h2 {
+            color: var(--text-muted);
+        }
+
+        [data-theme="light"] .selector-group label,
+        [data-theme="light"] .toggle-label,
+        [data-theme="light"] .throttle-label,
+        [data-theme="light"] .mode-chip,
+        [data-theme="light"] .toggle-btn,
+        [data-theme="light"] .rpm-zone-labels,
+        [data-theme="light"] .gauge-label,
+        [data-theme="light"] .shift-indicator.normal {
+            color: var(--text-muted);
+        }
+
+        [data-theme="light"] .selector-group select {
+            background: var(--card-bg);
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        [data-theme="light"] .stat-box,
+        [data-theme="light"] .gear-display,
+        [data-theme="light"] .record-item,
+        [data-theme="light"] .endless-result-item {
+            background: var(--bg-secondary);
+            border-color: var(--border);
+        }
+        [data-theme="light"] .stat-box .stat-lbl,
+        [data-theme="light"] .gear-label,
+        [data-theme="light"] .record-item .rec-bike,
+        [data-theme="light"] .record-item .rec-lbl,
+        [data-theme="light"] .endless-result-item .er-lbl {
+            color: var(--text-muted);
+        }
+
+        [data-theme="light"] .rpm-bar-bg,
+        [data-theme="light"] .throttle-slider {
+            background: var(--border);
+        }
+
+        [data-theme="light"] .gauge-value { color: var(--text); }
+
+        [data-theme="light"] .splits-table th {
+            color: var(--text-muted);
+            border-bottom-color: var(--border);
+        }
+        [data-theme="light"] .splits-table td {
+            color: var(--text-muted);
+            border-bottom-color: var(--border);
+        }
+
+        [data-theme="light"] .compare-stat {
+            border-bottom-color: var(--border);
+        }
+
+        [data-theme="light"] .endless-result-banner {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--accent-dim));
+        }
 
     </style>
 </head>
@@ -413,8 +503,8 @@
 
 <div class="race-page">
     <div class="page-title">
-        <h1>🏁 RACING SIMULATOR</h1>
-        <p>Realistic Physics — RPM · Gears · Torque · Variable Track Length</p>
+        <h1>🏁 RENNSIMULATOR</h1>
+        <p>Realistische Physik — Drehzahl · Gänge · Drehmoment · variable Streckenlänge</p>
     </div>
 
     <!-- BIKE SELECTOR -->
@@ -1595,21 +1685,8 @@ document.addEventListener('keydown', e => {
 // Initial draw
 drawTrack();
 
-// Theme toggle
-(function() {
-    var btn = document.getElementById('themeToggle');
-    if (!btn) return;
-    var t = localStorage.getItem('theme') || 'dark';
-    btn.textContent = t === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
-    btn.addEventListener('click', function() {
-        var current = document.documentElement.getAttribute('data-theme');
-        var next = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        btn.textContent = next === 'dark' ? '\u2600\ufe0f' : '\ud83c\udf19';
-    });
-})();
 </script>
+    <script src="theme-toggle.js"></script>
     <script src="settings.js"></script>
 </body>
 </html>
