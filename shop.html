@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="bikes-data.js"></script>
     <style>
 /* PAGE */
         .shop-page { max-width:1200px;margin:0 auto;padding:1.5rem 1rem 4rem; }
@@ -881,25 +882,40 @@
 
 <script>
 // ==========================================
-// BIKE DATA
+// BIKE DATA — aus der geteilten Quelle bikes-data.js abgeleitet
 // ==========================================
-const SHOP_BIKES = {
-    zx10r:      { name:'Kawasaki Ninja ZX-10R', icon:'🏆', sub:'203 PS • 299 km/h • 186 kg • ab €20.400', ps:203, weight:186, accel:2.9, torque:115, price:20400 },
-    h2:         { name:'Kawasaki Ninja H2',      icon:'⚡', sub:'231 PS • 300 km/h • 216 kg • ab €33.000', ps:231, weight:216, accel:3.0, torque:141, price:33000 },
-    zh2:        { name:'Kawasaki Z H2',           icon:'👹', sub:'200 PS • 290 km/h • 239 kg • ab €22.900', ps:200, weight:239, accel:3.2, torque:137, price:22900 },
-    h2sx:       { name:'Kawasaki H2 SX',          icon:'🚀', sub:'200 PS • 299 km/h • 240 kg • ab €25.500', ps:200, weight:240, accel:3.1, torque:137, price:25500 },
-    zx6r:       { name:'Kawasaki ZX-6R',          icon:'🔥', sub:'130 PS • 260 km/h • 193 kg • ab €12.900', ps:130, weight:193, accel:3.5, torque:71,  price:12900 },
-    z900:       { name:'Kawasaki Z900',            icon:'💪', sub:'125 PS • 248 km/h • 193 kg • ab €10.200', ps:125, weight:193, accel:3.4, torque:99,  price:10200 },
-    versys1000: { name:'Kawasaki Versys 1000',     icon:'🌍', sub:'120 PS • 220 km/h • 235 kg • ab €13.500', ps:120, weight:235, accel:3.9, torque:102, price:13500 },
-    ninja650:   { name:'Kawasaki Ninja 650',       icon:'🎯', sub:'68 PS • 200 km/h • 172 kg • ab €8.200',  ps:68,  weight:172, accel:4.5, torque:64,  price:8200  },
-    z650:       { name:'Kawasaki Z650',            icon:'🟢', sub:'68 PS • 190 km/h • 168 kg • ab €7.700',  ps:68,  weight:168, accel:4.2, torque:64,  price:7700  },
-    ninja400:   { name:'Kawasaki Ninja 400',       icon:'🏍️', sub:'45 PS • 190 km/h • 168 kg • ab €6.500',  ps:45,  weight:168, accel:4.8, torque:38,  price:6500  },
-    zx25r:      { name:'Kawasaki ZX-25R',          icon:'🎆', sub:'51 PS • 215 km/h • 182 kg • ab €9.800',  ps:51,  weight:182, accel:5.0, torque:23,  price:9800  },
-    eliminator400:{name:'Kawasaki Eliminator 400', icon:'😎', sub:'45 PS • 165 km/h • 176 kg • ab €6.700',  ps:45,  weight:176, accel:5.5, torque:43,  price:6700  },
-    w800:       { name:'Kawasaki W800',            icon:'🕰️', sub:'48 PS • 170 km/h • 202 kg • ab €10.500', ps:48,  weight:202, accel:6.0, torque:63,  price:10500 },
-    klx300:     { name:'Kawasaki KLX 300',         icon:'⛰️', sub:'27 PS • 137 km/h • 137 kg • ab €6.200',  ps:27,  weight:137, accel:7.5, torque:26,  price:6200  },
-    kx450:      { name:'Kawasaki KX 450',          icon:'🏟️', sub:'62 PS • 150 km/h • 110 kg • ab €9.500',  ps:62,  weight:110, accel:3.8, torque:54,  price:9500  }
-};
+// Reihenfolge/Auswahl entspricht dem bisherigen Shop-Sortiment (Tuning-relevante Modelle).
+const SHOP_BIKE_KEYS = [
+    'zx10r', 'h2', 'zh2', 'h2sx', 'zx6r', 'z900', 'versys1000', 'ninja650',
+    'z650', 'ninja400', 'zx25r', 'eliminator400', 'w800', 'klx300', 'kx450'
+];
+
+/**
+ * Baut die Shop-Bike-Map aus SHARED_BIKES (bikes-data.js) — keine eigene,
+ * doppelte Bike-Liste mehr im Shop-Code.
+ * @param {string[]} keys - Bike-IDs, die im Shop angeboten werden.
+ * @returns {Object} Map bikeId -> { name, icon, sub, ps, weight, accel, torque, price }.
+ */
+function buildShopBikes(keys) {
+    const result = {};
+    keys.forEach(function(key) {
+        const b = SHARED_BIKES[key];
+        if (!b) return;
+        result[key] = {
+            name: b.name,
+            icon: b.icon,
+            sub: b.ps + ' PS • ' + b.vmax + ' km/h • ' + b.weight + ' kg • ab €' + b.price.toLocaleString('de-DE'),
+            ps: b.ps,
+            weight: b.weight,
+            accel: b.accel,
+            torque: b.torque,
+            price: b.price
+        };
+    });
+    return result;
+}
+
+const SHOP_BIKES = buildShopBikes(SHOP_BIKE_KEYS);
 
 // ==========================================
 // PARTS DATA

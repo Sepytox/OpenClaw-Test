@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="bikes-data.js"></script>
     <style>
             color: var(--accent);
             background: var(--accent-dim);
@@ -325,6 +326,62 @@
             margin-top: 0.1rem;
         }
 
+        /* RECOMMENDATION BLOCK */
+        .recommendation-block { position: relative; z-index: 1; margin-top: 1.5rem; }
+        .recommendation-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: #0d0d0d;
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            text-align: left;
+        }
+        .recommendation-icon-wrap {
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            background: var(--accent-dim);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .recommendation-icon-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .recommendation-info { flex: 1; min-width: 0; }
+        .recommendation-title {
+            font-size: 0.75rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.2rem;
+        }
+        .recommendation-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.2rem;
+        }
+        .recommendation-meta { font-size: 0.85rem; color: #aaa; margin-bottom: 0.6rem; }
+        .recommendation-link {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+            background: var(--accent);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        .recommendation-link:hover { transform: translateY(-1px); }
+
         /* RESULT ACTIONS */
         .result-actions {
             display: flex;
@@ -514,6 +571,8 @@
             </div>
 
             <div class="result-specs" id="resultSpecs"></div>
+
+            <div class="recommendation-block" id="recommendationBlock"></div>
 
             <div class="result-actions">
                 <a href="index.html" class="btn-goto" id="bikeLink">🏍️ Zum Bike</a>
@@ -803,9 +862,60 @@ function showResults(topCat, sorted, pcts) {
         `<div class="spec-chip"><div class="spec-val">${v}</div><div class="spec-lbl">${k}</div></div>`
     ).join('');
 
+    // Konkrete Modell-Empfehlung aus der geteilten Bike-Datenquelle
+    renderRecommendation(topCat);
+
     // Update progress to 100%
     document.getElementById('progressFill').style.width = '100%';
     document.getElementById('progressPct').textContent = '100%';
+}
+
+/**
+ * Ermittelt das empfohlene Kawasaki-Modell für eine Quiz-Kategorie.
+ * Nutzt BIKE_RESULTS[categoryKey].key als Bike-ID und schlägt sie in
+ * SHARED_BIKES (bikes-data.js) nach, um konkrete Specs zu erhalten.
+ * @param {string} categoryKey - Quiz-Kategorie (z. B. "naked", "tourer").
+ * @returns {Object|null} Bike-Datensatz aus SHARED_BIKES oder null, falls nicht gefunden.
+ */
+function getRecommendedBike(categoryKey) {
+    const result = BIKE_RESULTS[categoryKey];
+    if (!result || typeof SHARED_BIKES === 'undefined') return null;
+    return SHARED_BIKES[result.key] || null;
+}
+
+/**
+ * Rendert die Empfehlungs-Karte (#recommendationBlock) für die Top-Kategorie
+ * des Quiz-Ergebnisses. Zeigt Modellname, Bild mit Icon-Fallback, PS,
+ * Preis (€, de-DE) sowie einen Link zur Hauptseite.
+ * @param {string} categoryKey - Top-Kategorie des Quiz-Ergebnisses.
+ * @returns {void}
+ */
+function renderRecommendation(categoryKey) {
+    const block = document.getElementById('recommendationBlock');
+    if (!block) return;
+
+    const rec = getRecommendedBike(categoryKey);
+    if (!rec) {
+        block.innerHTML = '';
+        return;
+    }
+
+    const priceFormatted = rec.price.toLocaleString('de-DE') + ' €';
+    const imgSrc = 'images/bikes/' + rec.id + '.jpg';
+
+    block.innerHTML = `
+        <div class="recommendation-card">
+            <div class="recommendation-icon-wrap">
+                <img src="${imgSrc}" alt="${rec.name}" onerror="this.onerror=null;this.replaceWith(Object.assign(document.createElement('span'),{textContent:'${rec.icon}'}));">
+            </div>
+            <div class="recommendation-info">
+                <div class="recommendation-title">Konkrete Modell-Empfehlung</div>
+                <div class="recommendation-name">${rec.icon} ${rec.name}</div>
+                <div class="recommendation-meta">${rec.ps} PS &middot; ${priceFormatted}</div>
+                <a class="recommendation-link" href="index.html?bike=${rec.id}#bikesGrid">Zum Modell auf der Hauptseite →</a>
+            </div>
+        </div>
+    `;
 }
 
 function shareResult() {
