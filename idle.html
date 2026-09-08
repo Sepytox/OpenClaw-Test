@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kawasaki Idle Racer — Fahre &amp; sammle km | Vrooooom</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23080808'/%3E%3Ctext x='50' y='68' font-size='58' font-family='sans-serif' font-weight='800' text-anchor='middle' fill='%23ff6600'%3EK%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="design.css">
+    <link rel="stylesheet" href="idle.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="idle-core.js"></script>
+</head>
+<body>
+    <!-- Gemeinsame Navbar (Single Source of Truth) — siehe navbar.js.
+         data-theme-toggle="external": theme-toggle.js verdrahtet den
+         Button weiter unten, navbar.js darf hier NICHT selbst
+         verdrahten. -->
+    <nav id="siteNavRoot" class="site-nav" data-theme-toggle="external"></nav>
+    <script src="navbar.js"></script>
+
+    <header class="idle-hero js-reveal">
+        <h1>🏁 Kawasaki Idle Racer</h1>
+        <p>Fahre, sammle Kilometer und kaufe dir Bike für Bike den kompletten Kawasaki-Fuhrpark — auch während du wegschaust.</p>
+    </header>
+
+    <div class="container">
+        <main>
+
+            <div class="idle-layout">
+                <!-- ===== FAHR-BEREICH ===== -->
+                <section class="idle-drive js-reveal" aria-label="Fahrt">
+                    <!-- Platzhalter: Strecken-Canvas kommt in Phase B -->
+                    <div class="idle-track-placeholder" id="idleTrackPlaceholder">
+                        🛣️ Streckenanzeige (Canvas) folgt in Phase B
+                    </div>
+                    <!-- Platzhalter: Tacho kommt in Phase B -->
+                    <div class="idle-tacho-placeholder" id="idleTachoPlaceholder">
+                        🏎️ Tacho folgt in Phase B
+                    </div>
+
+                    <div class="idle-km-display">
+                        <span class="idle-km-label">Gesamtstrecke</span>
+                        <span class="idle-km-value" id="idleKmValue">0</span>
+                        <span class="idle-km-unit">km</span>
+                    </div>
+
+                    <button type="button" class="idle-gas-btn" id="idleGasBtn" aria-label="Gas geben — aktiv Kilometer sammeln">
+                        🏁 Gas geben!
+                    </button>
+                </section>
+
+                <!-- ===== AKTUELLES BIKE (Statistik-Balken) ===== -->
+                <section class="idle-bike-card js-reveal" aria-label="Aktuelles Bike">
+                    <div class="idle-bike-card-header">
+                        <h2 id="idleBikeName">—</h2>
+                        <p id="idleBikeMeta">—</p>
+                    </div>
+
+                    <div class="idle-stat-row">
+                        <div class="idle-stat-label"><span>Geschwindigkeit</span><span id="idleStatSpeedVal">0%</span></div>
+                        <div class="idle-stat-track"><div class="idle-stat-fill" id="idleStatSpeedFill"></div></div>
+                    </div>
+                    <div class="idle-stat-row">
+                        <div class="idle-stat-label"><span>Beschleunigung</span><span id="idleStatAccelVal">0%</span></div>
+                        <div class="idle-stat-track"><div class="idle-stat-fill" id="idleStatAccelFill"></div></div>
+                    </div>
+                    <div class="idle-stat-row">
+                        <div class="idle-stat-label"><span>Ertrag-Bonus</span><span id="idleStatErtragVal">0%</span></div>
+                        <div class="idle-stat-track"><div class="idle-stat-fill" id="idleStatErtragFill"></div></div>
+                    </div>
+
+                    <div class="idle-bike-level">
+                        <span>Tuning-Level <strong id="idleBikeLevel">0</strong> / <span id="idleBikeLevelCap">25</span></span>
+                    </div>
+                    <button type="button" class="btn idle-upgrade-btn" id="idleUpgradeBtn">
+                        🔧 Tuning verbessern — <span id="idleUpgradeCost">–</span> km
+                    </button>
+                </section>
+            </div>
+
+            <!-- ===== BIKE-SHOP (nächste Bikes kaufen) ===== -->
+            <section class="idle-shop js-reveal" aria-label="Bike-Shop">
+                <h2>🏍️ Bike-Shop</h2>
+                <div class="idle-shop-list" id="idleShopList"></div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="theme-toggle.js"></script>
+    <script src="settings.js"></script>
+    <script src="scroll-reveal.js"></script>
+    <script src="idle.js"></script>
+</body>
+</html>

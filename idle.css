@@ -1,0 +1,226 @@
+/* ============================================================
+   idle.css — Kawasaki Idle Racer (idle.html)
+   Nutzt ausschliesslich Design-Tokens aus design.css (--bg, --text,
+   --accent, Spacing-/Radius-/Motion-Skalen) — kein eigenes Farbsystem.
+   Layout-Shell für Phase A: Platzhalter für Strecke/Tacho (Phase B
+   füllt sie), km-Anzeige, "Gas geben"-Button, Bike-Shop-Liste und eine
+   Bike-Detailkarte mit gefüllten Statistik-Balken.
+   ============================================================ */
+
+.idle-hero {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+}
+.idle-hero h1 {
+  font-size: var(--font-h1);
+  margin-bottom: 0.5rem;
+}
+.idle-hero p {
+  color: var(--text-muted);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* ── Zwei-Spalten-Layout: Fahr-Bereich links, Bike-Detailkarte rechts ── */
+.idle-layout {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 1.75rem;
+}
+@media (max-width: 900px) {
+  .idle-layout { grid-template-columns: 1fr; }
+}
+
+.idle-drive,
+.idle-bike-card,
+.idle-shop {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.5rem;
+}
+
+/* ── Strecke/Tacho-Platzhalter (Phase B füllt sie mit Canvas/Tacho) ── */
+.idle-track-placeholder,
+.idle-tacho-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-subtle);
+  font-size: 0.85em;
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 1rem;
+}
+.idle-track-placeholder {
+  aspect-ratio: 16 / 6;
+  margin-bottom: 1rem;
+}
+.idle-tacho-placeholder {
+  aspect-ratio: 16 / 5;
+  margin-bottom: 1.25rem;
+}
+
+/* ── km/Währungs-Anzeige ────────────────────────────────────────── */
+.idle-km-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.idle-km-label {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  width: 100%;
+  text-align: center;
+}
+.idle-km-value {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  color: var(--accent);
+  letter-spacing: var(--ls-tight);
+}
+.idle-km-unit {
+  color: var(--text-muted);
+  font-size: 1.1em;
+}
+
+/* ── "Gas geben"-Pill-Button — gross, thumb-friendly ────────────── */
+.idle-gas-btn {
+  display: block;
+  width: 100%;
+  padding: 1.1rem 1.5rem;
+  font-size: 1.15rem;
+  font-weight: var(--fw-bold);
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border: none;
+  border-radius: var(--radius-full, 999px);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--dur-fast, 0.15s) var(--ease-spring, ease),
+              box-shadow var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.idle-gas-btn:hover {
+  box-shadow: var(--shadow-glow, var(--shadow-md));
+  transform: translateY(-2px);
+}
+.idle-gas-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+.idle-gas-btn.is-pulsing {
+  animation: idle-gas-pulse var(--dur-fast, 0.15s) var(--ease-spring, ease);
+}
+@keyframes idle-gas-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+/* ── Bike-Detailkarte (aktuelles Bike + Statistik-Balken) ──────── */
+.idle-bike-card-header h2 {
+  font-size: 1.3em;
+  margin-bottom: 0.15rem;
+}
+.idle-bike-card-header p {
+  color: var(--text-muted);
+  font-size: 0.88em;
+  margin-bottom: 1.1rem;
+}
+
+.idle-stat-row { margin-bottom: 0.9rem; }
+.idle-stat-row:last-of-type { margin-bottom: 1.1rem; }
+.idle-stat-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.86em;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+}
+.idle-stat-track {
+  height: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full, 999px);
+  overflow: hidden;
+}
+.idle-stat-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  transition: width var(--dur-slow, 0.4s) var(--ease-out, ease);
+}
+
+.idle-bike-level {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.92em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+.idle-bike-level strong { color: var(--text); }
+
+.idle-upgrade-btn {
+  width: 100%;
+  justify-content: center;
+}
+.idle-upgrade-btn:disabled,
+.idle-buy-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Bike-Shop-Liste (nächste Bikes kaufen) ─────────────────────── */
+.idle-shop h2 {
+  font-size: 1.15em;
+  margin-bottom: 1rem;
+}
+.idle-shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.idle-shop-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.85rem 1rem;
+  transition: border-color var(--dur-fast, 0.15s) var(--ease-standard, ease);
+}
+.idle-shop-item.is-current { border-color: var(--accent); }
+.idle-shop-item.is-locked { opacity: 0.55; }
+.idle-shop-item-icon { font-size: 1.6em; flex-shrink: 0; }
+.idle-shop-item-info { flex: 1; min-width: 160px; }
+.idle-shop-item-info h4 { font-size: 0.98em; margin-bottom: 0.15rem; }
+.idle-shop-item-info p { color: var(--text-muted); font-size: 0.8em; margin: 0; }
+.idle-shop-item-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.idle-shop-item-badge {
+  font-size: 0.78em;
+  color: var(--text-subtle);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .idle-shop-item { flex-direction: column; align-items: stretch; text-align: center; }
+  .idle-shop-item-action { justify-content: center; }
+}
