@@ -41,6 +41,12 @@
   /** Anzeigedauer (ms) des Übergabe-Banners nach einem Bike-Kauf. */
   var HANDOVER_BANNER_MS = 2200;
 
+  /* ── Phase B: Schaltpunkt-Combo (MECHANIK A) — UI-Konstanten ────── */
+  /** Fixe Mitte der perfekten Zone (% der Leistenbreite) — "in der Mitte". */
+  var SHIFT_ZONE_CENTER_PCT = 50;
+  /** Anzeigedauer (ms) des Treffer-/Fehlklick-Flashs, bevor die Leiste ausblendet. */
+  var SHIFT_RESULT_FLASH_MS = 550;
+
   /* ── Phase B: Web Audio Motorsound (synthetisiert, standardmässig AUS) ── */
   /** Motor-Grundfrequenz (Hz) bei Geschwindigkeit 0%. */
   var ENGINE_BASE_HZ = 52;
@@ -103,6 +109,16 @@
   var engineOsc = null;
   var subOsc = null;
   var noiseGain = null;
+
+  /* ── Schaltpunkt-Combo (MECHANIK A): Laufzeit-Zustand einer Leiste ── */
+  var shiftState = {
+    active: false,
+    elapsedSeconds: 0,
+    zoneWidthPct: IdleCore.IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT,
+    resultShown: false,
+  };
+  /** Sekunden bis zur nächsten Schaltpunkt-Leiste (zufällig 15–30s, siehe idle-core.js). */
+  var shiftTimerSeconds = IdleCore.nextShiftIntervalSeconds();
 
   /**
    * Formatiert eine km-Zahl für die Anzeige (deutsches Zahlenformat,
@@ -289,7 +305,7 @@
     var btn = document.getElementById('idleGasBtn');
     if (!btn) return;
     btn.addEventListener('click', function () {
-      var earned = IdleCore.activeEarn(state);
+      var earned = IdleCore.activeEarn(state) * IdleCore.activeComboMultiplier(state, Date.now());
       IdleCore.creditKm(state, earned);
       btn.classList.remove('is-pulsing');
       // Reflow erzwingen, damit die Animation bei schnellem Mehrfach-Klick erneut startet.
@@ -689,6 +705,166 @@
     });
   }
 
+  /* ============================================================
+     SCHALTPUNKT-COMBO (MECHANIK A) — feat(idle-combo) UI-Wiring
+     ============================================================ */
+
+  /**
+   * Aktualisiert die dauerhafte Combo-/Multiplikator-Anzeige unterhalb der
+   * Renn-Strecke (ausgeblendet, solange Combo 0 ist).
+   * @returns {void}
+   */
+  function updateComboBadge() {
+    var badge = document.getElementById('idleComboBadge');
+    var countEl = document.getElementById('idleComboCount');
+    var multEl = document.getElementById('idleComboMultiplier');
+    if (!badge || !countEl || !multEl) return;
+
+    if (!state.combo || state.combo.count <= 0) {
+      badge.hidden = true;
+      return;
+    }
+    badge.hidden = false;
+    countEl.textContent = '🔥 Combo ×' + state.combo.count;
+    var activeMultiplier = IdleCore.activeComboMultiplier(state, Date.now());
+    multEl.textContent = activeMultiplier > 1 ? ('· Multiplikator ×' + formatMultiplier(activeMultiplier)) : '';
+  }
+
+  /**
+   * Formatiert einen Multiplikator ohne unnötige Nachkommastelle (z. B.
+   * 2 statt "2.0", aber 2.5 bleibt "2.5").
+   * @param {number} value - Roh-Multiplikator.
+   * @returns {string} Formatierte Zeichenkette.
+   */
+  function formatMultiplier(value) {
+    return (Math.round(value * 10) / 10).toString().replace(/\.0$/, '');
+  }
+
+  /**
+   * Startet eine neue Schaltpunkt-Leiste: berechnet die (mit steigender
+   * Combo schrumpfende) perfekte Zone per IdleCore.perfectZoneWidth() und
+   * macht die Leiste sichtbar/interaktiv.
+   * @returns {void}
+   */
+  function startShift() {
+    shiftState.active = true;
+    shiftState.elapsedSeconds = 0;
+    shiftState.resultShown = false;
+    shiftState.zoneWidthPct = IdleCore.perfectZoneWidth(state.combo ? state.combo.count : 0, IdleCore.IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT);
+
+    var zoneEl = document.getElementById('idleShiftZone');
+    var trackEl = document.getElementById('idleShiftTrack');
+    var wrapEl = document.getElementById('idleShift');
+    var halfWidth = shiftState.zoneWidthPct / 2;
+    if (zoneEl) {
+      zoneEl.style.left = (SHIFT_ZONE_CENTER_PCT - halfWidth) + '%';
+      zoneEl.style.width = shiftState.zoneWidthPct + '%';
+    }
+    if (trackEl) trackEl.classList.remove('is-hit', 'is-miss');
+    if (wrapEl) {
+      wrapEl.classList.add('is-active');
+      wrapEl.setAttribute('aria-hidden', 'false');
+    }
+    renderShiftMarker(0);
+  }
+
+  /**
+   * Positioniert den Schaltpunkt-Marker gemäss dem Sweep-Fortschritt.
+   * @param {number} progressPct - Fortschritt des Marker-Durchlaufs (0–100).
+   * @returns {void}
+   */
+  function renderShiftMarker(progressPct) {
+    var markerEl = document.getElementById('idleShiftMarker');
+    if (markerEl) markerEl.style.left = progressPct + '%';
+  }
+
+  /**
+   * Beendet die aktuell aktive Schaltpunkt-Leiste. Bei einem tatsächlichen
+   * Klick (isIgnore=false) wird IdleCore.applyShiftResult() aufgerufen und
+   * ein kurzer Treffer-/Fehlklick-Flash gezeigt; läuft die Leiste
+   * unbeklickt ab (isIgnore=true), wird NICHTS an der Combo verändert
+   * (keine Strafe fürs Ignorieren) und die Leiste blendet sofort aus.
+   * @param {boolean} hit - true, falls im grünen Bereich geklickt wurde.
+   * @param {boolean} isIgnore - true, falls die Leiste unbeklickt abgelaufen ist.
+   * @returns {void}
+   */
+  function endShift(hit, isIgnore) {
+    if (shiftState.resultShown) return;
+    shiftState.resultShown = true;
+
+    var trackEl = document.getElementById('idleShiftTrack');
+    if (!isIgnore) {
+      IdleCore.applyShiftResult(state, hit, Date.now());
+      IdleCore.saveState(state);
+      if (trackEl) trackEl.classList.add(hit ? 'is-hit' : 'is-miss');
+      renderAll();
+      updateComboBadge();
+    }
+
+    var wrapEl = document.getElementById('idleShift');
+    setTimeout(function () {
+      if (wrapEl) {
+        wrapEl.classList.remove('is-active');
+        wrapEl.setAttribute('aria-hidden', 'true');
+      }
+      shiftState.active = false;
+      shiftTimerSeconds = IdleCore.nextShiftIntervalSeconds();
+    }, isIgnore ? 0 : SHIFT_RESULT_FLASH_MS);
+  }
+
+  /**
+   * Wertet einen Klick/Tastendruck auf die aktuell aktive Schaltpunkt-
+   * Leiste aus: prüft, ob sich der Marker gerade innerhalb der perfekten
+   * Zone befindet, und beendet die Leiste entsprechend als Treffer/Fehlklick.
+   * @returns {void}
+   */
+  function evaluateShiftClick() {
+    if (!shiftState.active || shiftState.resultShown) return;
+    var progressPct = Math.min(100, (shiftState.elapsedSeconds / IdleCore.IDLE_BALANCE.SHIFT_SWEEP_DURATION_SECONDS) * 100);
+    var half = shiftState.zoneWidthPct / 2;
+    var hit = progressPct >= (SHIFT_ZONE_CENTER_PCT - half) && progressPct <= (SHIFT_ZONE_CENTER_PCT + half);
+    endShift(hit, false);
+  }
+
+  /**
+   * Verdrahtet die Klick-/Tastatur-Interaktion (Enter/Leertaste) der
+   * Schaltpunkt-Leiste.
+   * @returns {void}
+   */
+  function wireShiftInteraction() {
+    var trackEl = document.getElementById('idleShiftTrack');
+    if (!trackEl) return;
+    trackEl.addEventListener('click', evaluateShiftClick);
+    trackEl.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        evaluateShiftClick();
+      }
+    });
+  }
+
+  /**
+   * EIN Game-Loop-Tick der Schaltpunkt-Leiste: zählt entweder bis zur
+   * nächsten zufälligen Leiste herunter, oder lässt den Marker der
+   * aktiven Leiste weiterwandern und wertet ein unbeklicktes Ablaufen
+   * (Ignorieren, keine Strafe) als solches aus.
+   * @param {number} dtSeconds - Verstrichene Zeit seit dem letzten Frame (Sekunden, gedeckelt).
+   * @returns {void}
+   */
+  function tickShift(dtSeconds) {
+    if (!shiftState.active) {
+      shiftTimerSeconds -= dtSeconds;
+      if (shiftTimerSeconds <= 0) startShift();
+      return;
+    }
+    shiftState.elapsedSeconds += dtSeconds;
+    var progressPct = Math.min(100, (shiftState.elapsedSeconds / IdleCore.IDLE_BALANCE.SHIFT_SWEEP_DURATION_SECONDS) * 100);
+    renderShiftMarker(progressPct);
+    if (progressPct >= 100 && !shiftState.resultShown) {
+      endShift(false, true);
+    }
+  }
+
   /**
    * Verdrahtet regelmässiges Auto-Speichern sowie ein finales Speichern,
    * bevor die Seite verlassen/versteckt wird (Tab-Wechsel, Schliessen).
@@ -727,7 +903,7 @@
     // einen riesigen Sprung, wenn ein hintergründiger Tab zurückkehrt).
     var clampedDt = Math.min(Math.max(dtSeconds, 0), IdleCore.IDLE_BALANCE.MAX_TICK_DELTA_SECONDS);
 
-    var earned = IdleCore.passiveEarn(state, clampedDt);
+    var earned = IdleCore.passiveEarn(state, clampedDt) * IdleCore.activeComboMultiplier(state, Date.now());
     IdleCore.creditKm(state, earned);
 
     updateKmDisplay();
@@ -738,6 +914,8 @@
     renderTrack(clampedDt, info.stats.geschwindigkeitPct);
     renderTacho(info.stats.geschwindigkeitPct, kmh);
     updateEngineSound(info.stats.geschwindigkeitPct);
+    tickShift(clampedDt);
+    updateComboBadge();
 
     window.requestAnimationFrame(tick);
   }
@@ -753,8 +931,10 @@
     updateKmDisplay();
     initCanvases();
     tachoDisplayPct = getCurrentBikeInfo().stats.geschwindigkeitPct;
+    updateComboBadge();
     wireGasButton();
     wireUpgradeButton();
+    wireShiftInteraction();
     wireSoundControls();
     wireLifecycleSave();
     window.requestAnimationFrame(tick);

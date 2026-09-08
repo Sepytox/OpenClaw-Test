@@ -48,6 +48,21 @@
                         <span class="idle-km-unit">km</span>
                     </div>
 
+                    <!-- Schaltpunkt-Leiste (MECHANIK A): erscheint alle 15–30s, Klick im
+                         grünen Bereich = Treffer (Combo + Multiplikator). -->
+                    <div class="idle-shift" id="idleShift" aria-hidden="true">
+                        <div class="idle-shift-track" id="idleShiftTrack" role="button" tabindex="0" aria-label="Schaltpunkt — im grünen Bereich klicken">
+                            <div class="idle-shift-zone" id="idleShiftZone"></div>
+                            <div class="idle-shift-marker" id="idleShiftMarker"></div>
+                        </div>
+                        <span class="idle-shift-hint">🎯 Jetzt schalten!</span>
+                    </div>
+
+                    <div class="idle-combo-badge" id="idleComboBadge" hidden>
+                        <span id="idleComboCount">🔥 Combo ×0</span>
+                        <span id="idleComboMultiplier"></span>
+                    </div>
+
                     <button type="button" class="idle-gas-btn" id="idleGasBtn" aria-label="Gas geben — aktiv Kilometer sammeln">
                         🏁 Gas geben!
                     </button>

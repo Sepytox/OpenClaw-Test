@@ -263,6 +263,74 @@
   .idle-shop-item-action { justify-content: center; }
 }
 
+/* ── Schaltpunkt-Combo (MECHANIK A) ─────────────────────────────── */
+.idle-shift {
+  margin-bottom: 0.9rem;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity var(--dur-base, 0.25s) var(--ease-standard, ease),
+              max-height var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.idle-shift.is-active {
+  opacity: 1;
+  max-height: 6rem;
+  margin-bottom: 1.1rem;
+}
+.idle-shift-hint {
+  display: block;
+  text-align: center;
+  font-size: 0.82em;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+.idle-shift-track {
+  position: relative;
+  height: 30px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full, 999px);
+  overflow: hidden;
+  cursor: pointer;
+}
+.idle-shift-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 33%;
+  width: 34%;
+  background: rgba(47, 160, 107, 0.35);
+  border-left: 2px solid var(--accent-hover);
+  border-right: 2px solid var(--accent-hover);
+}
+.idle-shift-marker {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0%;
+  width: 4px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--text);
+  box-shadow: 0 0 8px var(--text);
+}
+.idle-shift-track.is-hit .idle-shift-zone { background: rgba(47, 160, 107, 0.75); }
+.idle-shift-track.is-miss .idle-shift-zone { background: rgba(200, 60, 60, 0.55); border-color: rgba(200, 60, 60, 0.8); }
+
+.idle-combo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-size: 0.9em;
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-bottom: 0.9rem;
+}
+.idle-combo-badge #idleComboMultiplier {
+  color: var(--accent);
+  font-weight: var(--fw-bold);
+}
+
 /* ── Motorsound-Steuerung (Web Audio, synthetisiert, standardmässig AUS) ── */
 .idle-sound-controls {
   display: flex;
@@ -304,4 +372,5 @@
   .idle-track-wrap.is-pulsing { animation: none; }
   .idle-gas-btn.is-pulsing { animation: none; }
   .idle-handover { transition: none; }
+  .idle-shift { transition: none; }
 }
