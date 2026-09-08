@@ -412,6 +412,33 @@ main#soundcheckMain {
   flex: 1;
 }
 
+/* "Sound folgt" — Kennzeichnung für Bike/Exhaust-Kombinationen ohne echte
+   Original-Aufnahme (soundcheck.js hasRealAudio()). Wird stattdessen live
+   per Web Audio synthetisiert, statt einen falsch zugeordneten Sound
+   abzuspielen (siehe AUDIO_FILES-Kommentar in soundcheck.js). */
+.sc-badge-synth {
+  display: inline-block;
+  margin-left: 0.4em;
+  padding: 0.08em 0.5em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  background: var(--accent-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full, 999px);
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .sc-badge-synth {
+    display: block;
+    margin: 0.2em 0 0;
+    width: fit-content;
+  }
+}
+
 .sc-exhaust-db {
   font-family: inherit;
   font-size: 0.7em;

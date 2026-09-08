@@ -50,10 +50,16 @@
       ]
     },
     {
-      id: 'z650rs',
-      name: 'Kawasaki Z650RS',
-      icon: '🎸',
-      ps: 68,
+      // War früher 'z650rs' — dieses Modell existiert im echten Katalog
+      // (bikes-data.js) nicht. Ersetzt durch 'w230', ein echtes,
+      // ebenfalls klassisch-retro gestimmtes Katalog-Modell (Regel 6-
+      // konform, keine Änderung an soundcheck.html nötig, siehe D.3/D.5
+      // im Recon). Die "Retro"-Klangcharakteristik der Exhausts passt
+      // inhaltlich mindestens so gut zum W230 wie zum vormaligen Z650RS.
+      id: 'w230',
+      name: 'Kawasaki W230',
+      icon: '🛞',
+      ps: 19,
       category: 'classic',
       exhausts: [
         { type: 'stock',  label: 'Stock (OEM)',         brand: 'Kawasaki Standard', db: 88,  character: 'Retro Burble',    freq: 110, harmonics: 2 },
@@ -62,10 +68,13 @@
       ]
     },
     {
+      // Existierte vorher schon als Karten-Eintrag, war aber nicht mit dem
+      // echten Katalog verknüpft. Mit Teil 3 ist 'versys650' ein echtes
+      // SHARED_BIKES-Modell — ps an den echten Katalogwert angeglichen.
       id: 'versys650',
       name: 'Kawasaki Versys 650',
       icon: '🗺️',
-      ps: 69,
+      ps: 67,
       category: 'naked',
       exhausts: [
         { type: 'stock',  label: 'Stock (OEM)',         brand: 'Kawasaki Standard', db: 86,  character: 'Touring Rumble',  freq: 120, harmonics: 2 },
@@ -74,10 +83,14 @@
       ]
     },
     {
-      id: 'h2r',
-      name: 'Kawasaki Ninja H2R',
-      icon: '💥',
-      ps: 310,
+      // War früher 'h2r' — dieses Modell existiert im echten Katalog nicht
+      // (nur 'h2'). Ersetzt durch das echte 'h2' (Ninja H2, ebenfalls
+      // supercharged) — die "Supercharged"-Klangcharakteristik der
+      // Exhausts passt unverändert zum echten Modell.
+      id: 'h2',
+      name: 'Kawasaki Ninja H2',
+      icon: '⚡',
+      ps: 231,
       category: 'sport',
       exhausts: [
         { type: 'stock',  label: 'Stock (OEM)',         brand: 'Kawasaki Standard', db: 101, character: 'Supercharged Howl', freq: 240, harmonics: 4 },
@@ -134,14 +147,29 @@
      Falls back to Web Audio synthesis if file not available
      ============================================================ */
 
-  // Audio file definitions per bike
+  // Audio-Datei-Zuordnung je Bike/Exhaust-Kombination.
+  //
+  // WICHTIG (Sound-Fix, siehe Recon §D): `audio/` enthält 21 mp3-Dateien,
+  // die sich auf nur 4 tatsächlich unterschiedliche Aufnahmen reduzieren
+  // (per md5sum verifiziert) — u. a. war 'audio/versys650-stock.mp3'
+  // byte-identisch mit 'audio/harley-engine.mp3' (V2-Bike-Rumpeln als
+  // "Stock"-Sound eines japanischen Paralleltwin-Adventure-Bikes,
+  // Kategorie-Fehlzuordnung). Diese Zuordnung hier referenziert deshalb
+  // NUR Dateien, deren Dateiname tatsächlich zum jeweiligen Bike passt.
+  // Für 'versys650' fehlt bewusst der 'stock'-Eintrag: es gibt dafür
+  // keine ehrliche Aufnahme (nur die falsch zugeordnete Harley-Datei) —
+  // ohne AUDIO_FILES-Eintrag greift automatisch die vorhandene
+  // Web-Audio-Synthese (fallbackToSynthesis(), s. u.), parametrisiert mit
+  // den freq/harmonics/character-Werten des jeweiligen Exhausts, statt
+  // einen falschen Motor-Sound abzuspielen ("Sound folgt"-Verhalten ohne
+  // Silent-/Broken-Playback).
   var AUDIO_FILES = {
     zx6r:      { stock: 'audio/zx6r-stock.mp3',      racing: 'audio/zx6r-racing.mp3',      custom: 'audio/zx6r-custom.mp3'      },
     z900:      { stock: 'audio/z900-stock.mp3',       racing: 'audio/z900-racing.mp3',       custom: 'audio/z900-custom.mp3'       },
     zx10r:     { stock: 'audio/zx10r-stock.mp3',      racing: 'audio/zx10r-racing.mp3',      custom: 'audio/zx10r-custom.mp3'      },
-    z650rs:    { stock: 'audio/z650rs-stock.mp3',     racing: 'audio/z650rs-racing.mp3',     custom: 'audio/z650rs-custom.mp3'     },
-    versys650: { stock: 'audio/versys650-stock.mp3',  racing: 'audio/versys650-racing.mp3',  custom: 'audio/versys650-custom.mp3'  },
-    h2r:       { stock: 'audio/h2r-stock.mp3',        racing: 'audio/h2r-racing.mp3',        custom: 'audio/h2r-custom.mp3'        },
+    w230:      { stock: 'audio/z650rs-stock.mp3',     racing: 'audio/z650rs-racing.mp3',     custom: 'audio/z650rs-custom.mp3'     },
+    versys650: {                                      racing: 'audio/versys650-racing.mp3',  custom: 'audio/versys650-custom.mp3'  },
+    h2:        { stock: 'audio/h2r-stock.mp3',        racing: 'audio/h2r-racing.mp3',        custom: 'audio/h2r-custom.mp3'        },
   };
 
   // Audio buffer cache
@@ -448,6 +476,21 @@
     setPlayerLoadingState(false);
   }
 
+  /**
+   * Prüft, ob für eine Bike/Exhaust-Kombination eine echte, korrekt
+   * zugeordnete Audio-Datei existiert (siehe AUDIO_FILES-Kommentar oben).
+   * Fehlt sie, greift beim Abspielen automatisch die Web-Audio-Synthese
+   * und die UI zeigt ein "Sound folgt"-Badge (siehe updateExhaustTabs()/
+   * renderBikesGrid()) statt einen falsch zugeordneten Sound zu behaupten.
+   * @param {string} bikeId - Bike-ID (z. B. "versys650").
+   * @param {string} exhaustType - "stock" | "racing" | "custom".
+   * @returns {boolean} true, wenn eine echte Aufnahme hinterlegt ist.
+   */
+  function hasRealAudio(bikeId, exhaustType) {
+    var files = AUDIO_FILES[bikeId];
+    return !!(files && files[exhaustType]);
+  }
+
   function playExhaust(bike, exhaustIdx) {
     stopCurrentPlayback();
     currentBike = bike;
@@ -731,11 +774,13 @@
       tab.className = 'sc-exhaust-tab tab-' + ex.type + (idx === activeIdx ? ' active' : '');
       tab.setAttribute('role', 'button');
       tab.setAttribute('tabindex', '0');
-      tab.setAttribute('aria-label', ex.label + ', ' + ex.db + ' dB');
+      var isSynth = !hasRealAudio(bike.id, ex.type);
+      tab.setAttribute('aria-label', ex.label + ', ' + ex.db + ' dB' + (isSynth ? ', Sound folgt (synthetisiert)' : ''));
       tab.innerHTML =
         '<span class="tab-type-label">' + ex.type.toUpperCase() + '</span>' +
         '<span class="tab-brand">' + ex.brand + '</span>' +
-        '<span class="tab-db">' + ex.db + ' dB</span>';
+        '<span class="tab-db">' + ex.db + ' dB</span>' +
+        (isSynth ? '<span class="sc-badge-synth" title="Noch keine Original-Aufnahme — Motor-Sound wird live synthetisiert">🎛️ Sound folgt</span>' : '');
 
       tab.addEventListener('click', function() {
         currentExhaustIdx = idx;
@@ -1007,9 +1052,11 @@
 
       var exhaustsHTML = bike.exhausts.map(function(ex, eIdx) {
         var dbPercent = ((ex.db - 80) / 40 * 100).toFixed(0);
-        return '<div class="sc-exhaust-row" role="button" tabindex="0" aria-label="' + ex.label + ', ' + ex.db + ' dB" data-bike="' + bike.id + '" data-ex-idx="' + eIdx + '">' +
+        var isSynth = !hasRealAudio(bike.id, ex.type);
+        var synthBadge = isSynth ? '<span class="sc-badge-synth" title="Noch keine Original-Aufnahme — Motor-Sound wird live synthetisiert">🎛️ Sound folgt</span>' : '';
+        return '<div class="sc-exhaust-row" role="button" tabindex="0" aria-label="' + ex.label + ', ' + ex.db + ' dB' + (isSynth ? ', Sound folgt (synthetisiert)' : '') + '" data-bike="' + bike.id + '" data-ex-idx="' + eIdx + '">' +
           '<div class="sc-exhaust-type"><span class="sc-exhaust-label label-' + ex.type + '">' + ex.type.toUpperCase() + '</span></div>' +
-          '<span class="sc-exhaust-name">' + ex.brand + '</span>' +
+          '<span class="sc-exhaust-name">' + ex.brand + synthBadge + '</span>' +
           '<div class="sc-db-bar"><div class="sc-db-bar-fill" style="width:' + dbPercent + '%"></div></div>' +
           '<span class="sc-exhaust-db">' + ex.db + 'dB</span>' +
           '<div class="sc-mini-wave">' + generateMiniWave(8) + '</div>' +
