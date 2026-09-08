@@ -255,6 +255,103 @@ section('8 · Kauf-/Tuning-/Wechsel-Mutationen (buyNextBike/upgradeBike/selectBi
   assert(state.bikeLevels[secondBike.id] === 1, 'upgradeBike() erhöht das Level um 1');
 })();
 
+section('9 · MECHANIK A — Schaltpunkt-Combo (comboMultiplier/perfectZoneWidth/applyShiftResult)');
+(function () {
+  // comboMultiplier(): 1x ohne Combo, rampt x2→x5, deckelt bei x5.
+  assert(IdleCore.comboMultiplier(0) === 1, 'comboMultiplier(0) === 1 (kein Multiplikator)');
+  assert(IdleCore.comboMultiplier(-3) === 1, 'comboMultiplier(negativ) === 1 (kein Absturz)');
+  assert(IdleCore.comboMultiplier(1) === IdleCore.IDLE_BALANCE.COMBO_MULTIPLIER_BASE, 'comboMultiplier(1) === COMBO_MULTIPLIER_BASE (x2)');
+
+  let prevMultiplier = IdleCore.comboMultiplier(1);
+  for (let combo = 2; combo <= 20; combo++) {
+    const m = IdleCore.comboMultiplier(combo);
+    assert(m >= prevMultiplier, `comboMultiplier(${combo}) >= comboMultiplier(${combo - 1}) (rampt monoton)`);
+    assert(m <= IdleCore.IDLE_BALANCE.COMBO_MULTIPLIER_MAX, `comboMultiplier(${combo}) <= COMBO_MULTIPLIER_MAX (x5-Deckel)`);
+    prevMultiplier = m;
+  }
+  assert(IdleCore.comboMultiplier(100) === IdleCore.IDLE_BALANCE.COMBO_MULTIPLIER_MAX, 'comboMultiplier(100) deckelt exakt bei COMBO_MULTIPLIER_MAX (x5)');
+
+  // perfectZoneWidth(): schrumpft monoton mit der Combo, nie unter das Minimum.
+  const baseWidth = IdleCore.IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT;
+  assert(IdleCore.perfectZoneWidth(0, baseWidth) === baseWidth, 'perfectZoneWidth(0, baseWidth) === baseWidth (volle Breite bei Combo 0)');
+  let prevWidth = IdleCore.perfectZoneWidth(0, baseWidth);
+  for (let combo = 1; combo <= 30; combo++) {
+    const w = IdleCore.perfectZoneWidth(combo, baseWidth);
+    assert(w <= prevWidth, `perfectZoneWidth(${combo}) <= perfectZoneWidth(${combo - 1}) (schrumpft monoton)`);
+    assert(w >= IdleCore.IDLE_BALANCE.COMBO_ZONE_MIN_WIDTH_PCT, `perfectZoneWidth(${combo}) >= COMBO_ZONE_MIN_WIDTH_PCT (Untergrenze respektiert)`);
+    prevWidth = w;
+  }
+  assert(IdleCore.perfectZoneWidth(999, baseWidth) === IdleCore.IDLE_BALANCE.COMBO_ZONE_MIN_WIDTH_PCT, 'perfectZoneWidth(999) erreicht exakt die Untergrenze');
+  assert(IdleCore.perfectZoneWidth(0) === IdleCore.IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT, 'perfectZoneWidth(0) ohne baseWidth nutzt IDLE_BALANCE-Standard');
+
+  // applyShiftResult(): Treffer erhöht Combo + gewährt Multiplikator für die Dauer.
+  const state = IdleCore.createInitialState();
+  const t0 = 1000000;
+  const afterHit1 = IdleCore.applyShiftResult(state, true, t0);
+  assert(afterHit1.count === 1, 'applyShiftResult(hit) erhöht Combo auf 1');
+  assert(state.combo.count === 1, 'applyShiftResult(hit) mutiert state.combo.count');
+  assert(afterHit1.multiplier === IdleCore.comboMultiplier(1), 'applyShiftResult(hit) setzt den zu Combo 1 passenden Multiplikator');
+  assert(afterHit1.multiplierExpiresAt === t0 + IdleCore.IDLE_BALANCE.COMBO_MULTIPLIER_DURATION_MS, 'applyShiftResult(hit) setzt multiplierExpiresAt auf now + COMBO_MULTIPLIER_DURATION_MS');
+
+  const afterHit2 = IdleCore.applyShiftResult(state, true, t0 + 500);
+  assert(afterHit2.count === 2, 'applyShiftResult(hit) erhöht Combo weiter auf 2');
+  assert(afterHit2.multiplier === IdleCore.comboMultiplier(2), 'applyShiftResult(hit) aktualisiert den Multiplikator passend zur neuen Combo');
+
+  const afterMiss = IdleCore.applyShiftResult(state, false, t0 + 800);
+  assert(afterMiss.count === 0, 'applyShiftResult(miss) setzt Combo zurück auf 0');
+  assert(afterMiss.multiplier === 1, 'applyShiftResult(miss) setzt den Multiplikator zurück auf 1x');
+  assert(afterMiss.multiplierExpiresAt === null, 'applyShiftResult(miss) löscht multiplierExpiresAt');
+
+  // Ignorieren (kein Klick) ⇒ keine Funktion aufgerufen ⇒ keine Strafe, Combo bleibt unverändert.
+  const ignoreState = IdleCore.createInitialState();
+  IdleCore.applyShiftResult(ignoreState, true, t0);
+  const comboBeforeIgnore = ignoreState.combo.count;
+  // (Simuliert: Leiste läuft unbeklickt ab — idle.js ruft applyShiftResult() dann NICHT auf.)
+  assert(ignoreState.combo.count === comboBeforeIgnore, 'Ignorieren einer Schaltpunkt-Leiste ändert die Combo nicht (keine Strafe)');
+
+  // activeComboMultiplier(): Multiplikator ist genau innerhalb des Dauer-Fensters aktiv.
+  const durState = IdleCore.createInitialState();
+  IdleCore.applyShiftResult(durState, true, t0);
+  const grantedMultiplier = durState.combo.multiplier;
+  assert(IdleCore.activeComboMultiplier(durState, t0) === grantedMultiplier, 'activeComboMultiplier() ist direkt nach dem Treffer aktiv');
+  assert(
+    IdleCore.activeComboMultiplier(durState, t0 + IdleCore.IDLE_BALANCE.COMBO_MULTIPLIER_DURATION_MS - 1) === grantedMultiplier,
+    'activeComboMultiplier() bleibt bis knapp vor Ablauf der Dauer aktiv'
+  );
+  assert(
+    IdleCore.activeComboMultiplier(durState, t0 + IdleCore.IDLE_BALANCE.COMBO_MULTIPLIER_DURATION_MS) === 1,
+    'activeComboMultiplier() fällt exakt beim Ablauf der Dauer auf 1x zurück'
+  );
+  assert(
+    IdleCore.activeComboMultiplier(durState, t0 + IdleCore.IDLE_BALANCE.COMBO_MULTIPLIER_DURATION_MS + 5000) === 1,
+    'activeComboMultiplier() bleibt nach Ablauf dauerhaft auf 1x'
+  );
+  assert(IdleCore.activeComboMultiplier(IdleCore.createInitialState(), t0) === 1, 'activeComboMultiplier() liefert 1x für einen frischen Zustand ohne Combo');
+
+  // nextShiftIntervalSeconds(): liegt im konfigurierten Intervall, Zufälligkeit wird übergeben.
+  const min = IdleCore.IDLE_BALANCE.SHIFT_INTERVAL_MIN_SECONDS;
+  const max = IdleCore.IDLE_BALANCE.SHIFT_INTERVAL_MAX_SECONDS;
+  assert(IdleCore.nextShiftIntervalSeconds(function () { return 0; }) === min, 'nextShiftIntervalSeconds(random=0) === Untergrenze');
+  assert(IdleCore.nextShiftIntervalSeconds(function () { return 1; }) === max, 'nextShiftIntervalSeconds(random=1) === Obergrenze');
+  const mid = IdleCore.nextShiftIntervalSeconds(function () { return 0.5; });
+  assert(mid > min && mid < max, 'nextShiftIntervalSeconds(random=0.5) liegt strikt zwischen den Grenzen');
+
+  // Migration/Persistenz: combo/sound-Felder überstehen saveState()/loadState() und werden defensiv migriert.
+  const persistState = IdleCore.createInitialState();
+  IdleCore.applyShiftResult(persistState, true, t0);
+  persistState.sound.enabled = true;
+  persistState.sound.volume = 0.3;
+  IdleCore.saveState(persistState);
+  const reloaded = IdleCore.loadState();
+  assert(reloaded.combo.count === 1, 'combo.count übersteht saveState()/loadState()');
+  assert(reloaded.sound.enabled === true, 'sound.enabled übersteht saveState()/loadState()');
+  assert(Math.abs(reloaded.sound.volume - 0.3) < 1e-9, 'sound.volume übersteht saveState()/loadState()');
+
+  const migratedNoCombo = IdleCore.migrateState({ version: 1, km: 5 });
+  assert(migratedNoCombo.combo && migratedNoCombo.combo.count === 0, 'migrateState() füllt fehlendes combo-Feld defensiv auf');
+  assert(migratedNoCombo.sound && migratedNoCombo.sound.enabled === false, 'migrateState() füllt fehlendes sound-Feld defensiv auf (Sound-Standard AUS)');
+})();
+
 // ============================================================
 // Results
 // ============================================================
