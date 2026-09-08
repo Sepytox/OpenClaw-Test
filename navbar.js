@@ -45,6 +45,7 @@
         { href: 'shop.html', label: 'Aftermarket' },
         { href: 'quiz.html', label: 'Quiz' },
         { href: 'wheel.html', label: 'Wheel' },
+        { href: 'idle.html', label: 'Idle Racer' },
     ];
 
     /**
