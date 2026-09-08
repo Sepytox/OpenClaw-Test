@@ -20,11 +20,13 @@
  *     deriveBikeStats) sowie Zustands-Mutationen fürs Kaufen/Tunen/
  *     Wechseln von Bikes (buyNextBike, upgradeBike, selectBike).
  *
- * Erweiterungspunkte für Phase B (Canvas-Strecke, Tacho, Motorsound,
- * Schaltpunkt-Combo) und Phase C (Prestige, Teile-Sammlung, Offline-
- * Erträge, Statistiken) sind im State-Objekt UND in IDLE_BALANCE als
- * klar markierte, aber bewusst leere/inaktive Platzhalter angelegt — sie
- * werden in dieser Phase NICHT implementiert.
+ * Phase B ergänzte Canvas-Strecke/Tacho/Motorsound sowie die
+ * Schaltpunkt-Combo (MECHANIK A). Phase C ergänzt MECHANIK B — Saison/
+ * Prestige: ab der ZX-10R kann eine Saison abgeschlossen werden
+ * (trophiesForSeason/canFinishSeason/finishSeason); die dabei verdienten
+ * TROPHÄEN sind PERMANENT und kaufen dauerhafte WERKSVERTRÄGE
+ * (IDLE_CONTRACTS/contractEffects), die Reset-Saisons überleben. Teile-
+ * Sammlung/Offline-Ertrag/Statistiken folgen in weiteren Phase-C-Commits.
  */
 'use strict';
 
@@ -92,15 +94,18 @@ var IDLE_BALANCE = {
    *  definiert, damit idle.js keine eigene "magische Zahl" pflegt. */
   MAX_TICK_DELTA_SECONDS: 0.25,
 
-  /* ── Erweiterungspunkte (Phase B/C) ─────────────────────────────
-   * Bewusst als benannte, aber inaktive Platzhalter angelegt (Wert 0/1
-   * = "kein Effekt"), damit Phase B/C sie befüllen kann, ohne die
-   * IDLE_BALANCE-Struktur zu brechen oder bestehende Felder zu verschieben. */
-  /** @todo Phase C — Prestige-Multiplikator pro Prestige-Level (aktuell ungenutzt). */
-  PRESTIGE_BONUS_PER_LEVEL: 0,
-  /** @todo Phase C — Ertrag-Multiplikator aus gesammelten Teilen (aktuell ungenutzt). */
+  /* ── Phase C: MECHANIK B — Saison/Prestige/Werksverträge ─────────
+   * Ab der ZX-10R (siehe canFinishSeason) kann eine Saison abgeschlossen
+   * werden (finishSeason): km + besessene Bikes werden zurückgesetzt,
+   * TROPHÄEN (siehe trophiesForSeason) bleiben PERMANENT und kaufen
+   * Werksverträge (IDLE_CONTRACTS), die selbst einen Reset überleben. */
+  /** Permanenter Ertrags-Bonus pro abgeschlossener Saison (prestige.level), stackt multiplikativ mit Werksverträgen. */
+  PRESTIGE_BONUS_PER_LEVEL: 0.05,
+  /** Je 5 kumulierte Tuning-Level (über alle Bikes) gibt es +1 Bonus-Trophäe beim Saisonabschluss. */
+  TROPHY_LEVEL_BONUS_DIVISOR: 5,
+  /** @todo Phase C (feat(idle-parts)) — Ertrag-Multiplikator aus gesammelten Teilen (aktuell ungenutzt). */
   PARTS_BONUS_MULTIPLIER: 1,
-  /** @todo Phase C — Anteil des Passivertrags, der offline gutgeschrieben wird (0=kein Offline-Ertrag). */
+  /** @todo Phase C (feat(idle-offline)) — Anteil des Passivertrags, der offline gutgeschrieben wird (0=kein Offline-Ertrag). */
   OFFLINE_EARN_FRACTION: 0,
 
   /* ── Phase B: Schaltpunkt-Combo (MECHANIK A) ────────────────────
@@ -177,6 +182,22 @@ var IDLE_BIKES = [
   makeIdleBike(13, 'zx10rr', 'Kawasaki Ninja ZX-10RR', 295, 204, 'Supersportler'),
   makeIdleBike(14, 'ninjah2', 'Kawasaki Ninja H2', 300, 231, 'Hypersportler'),
   makeIdleBike(15, 'ninjah2r', 'Kawasaki Ninja H2R', 400, 310, 'Hypersportler (Track)'),
+];
+
+/**
+ * IDLE_CONTRACTS — MECHANIK B: die käuflichen Werksverträge. Jeder Vertrag
+ * kostet eine feste Anzahl TROPHÄEN (permanente Saison-Währung, siehe
+ * trophiesForSeason/finishSeason) und gewährt einen dauerhaften, Saison-
+ * Reset überlebenden Effekt. `effect` benennt den Schlüssel in dem von
+ * contractEffects() aggregierten Ergebnisobjekt, `value` den anzuwendenden
+ * Rohwert (Multiplikator, Prozentpunkte oder Bike-id, je nach `effect`).
+ */
+var IDLE_CONTRACTS = [
+  { id: 'ertrag25', name: '+25% passiver Ertrag', beschreibung: 'Erhöht sämtlichen Ertrag (aktiv & passiv) dauerhaft um 25%.', kostenTrophaeen: 3, effect: 'earnMultiplier', value: 1.25 },
+  { id: 'startNinja400', name: 'Start mit Ninja 400', beschreibung: 'Jede neue Saison beginnt direkt mit der Ninja 400 statt der Z125 PRO.', kostenTrophaeen: 5, effect: 'startBikeId', value: 'ninja400' },
+  { id: 'zoneBreiter10', name: 'Perfekt-Zone 10% breiter', beschreibung: 'Die Schaltpunkt-Zone ist dauerhaft 10 Prozentpunkte breiter.', kostenTrophaeen: 4, effect: 'zoneWidthBonusPct', value: 10 },
+  { id: 'offlineVerdoppelt', name: 'Offline-Ertrag verdoppelt', beschreibung: 'Verdoppelt die Offline-Ertragsdeckelung von 4 auf 8 Stunden.', kostenTrophaeen: 6, effect: 'offlineCapMultiplier', value: 2 },
+  { id: 'tuningGuenstiger15', name: 'Tuning 15% günstiger', beschreibung: 'Alle Tuning-Kosten sinken dauerhaft um 15%.', kostenTrophaeen: 4, effect: 'tuningCostMultiplier', value: 0.85 },
 ];
 
 /**
@@ -333,10 +354,11 @@ function activeEarn(state) {
 
 /**
  * Erzeugt einen frischen, initialen Idle-Zustand (Startbike besessen und
- * ausgewählt, 0 km, Level 0). Enthält bereits alle Erweiterungspunkte für
- * Phase B/C (prestige/parts/offline) als klar markierte, inaktive
- * Platzhalter, damit spätere Phasen den State NICHT umstrukturieren
- * müssen.
+ * ausgewählt, 0 km, Level 0). Enthält bereits alle Erweiterungsfelder aus
+ * Phase B (combo/sound) sowie Phase C MECHANIK B (prestige inkl.
+ * Trophäen/Verträge), damit die Zustandsform von Anfang an stabil ist.
+ * parts/offline sind weiterhin die inaktiven Phase-A/B-Platzhalter (siehe
+ * feat(idle-parts)/feat(idle-offline)).
  * @returns {Object} Neuer, gültiger Idle-Zustand mit version=IDLE_STATE_VERSION.
  */
 function createInitialState() {
@@ -352,15 +374,16 @@ function createInitialState() {
     bikeLevels: bikeLevels,
     lastSavedAt: null,
 
-    /* ── Erweiterungspunkte (Phase B/C) ───────────────────────────
-     * Bewusst bereits im initialen Zustand angelegt (statt später per
-     * Migration nachgerüstet), damit die Zustandsform von Anfang an
-     * stabil ist. In Phase A/B unverändert/ungenutzt. */
-    /** @todo Phase C — Prestige-Fortschritt (Reset-Mechanik mit Dauerbonus). */
-    prestige: { level: 0, points: 0 },
-    /** @todo Phase C — gesammelte Tuning-/Kosmetik-Teile. */
+    /* ── Phase C: MECHANIK B — Saison/Prestige/Werksverträge ──────
+     * level = Anzahl abgeschlossener Saisons (0 = erste, laufende
+     * Saison). points = Lebenszeit-Summe aller je verdienten Trophäen
+     * (Statistik, sinkt nie). trophies = aktuell verfügbare/ausgebbare
+     * Trophäen (siehe buyContract). contracts = ids der dauerhaft
+     * gekauften Werksverträge (überleben jeden Saison-Reset). */
+    prestige: { level: 0, points: 0, trophies: 0, contracts: [] },
+    /** @todo Phase C (feat(idle-parts)) — gesammelte Teile-ids. */
     parts: { collected: [] },
-    /** @todo Phase C — Zeitstempel für Offline-Ertragsberechnung beim nächsten Laden. */
+    /** @todo Phase C (feat(idle-offline)) — Zeitstempel für Offline-Ertragsberechnung beim nächsten Laden. */
     offline: { lastSeenAt: null },
 
     /* ── Phase B ────────────────────────────────────────────────── */
@@ -368,6 +391,22 @@ function createInitialState() {
     combo: { count: 0, multiplier: 1, multiplierExpiresAt: null },
     /** Motorsound-Einstellungen (Web Audio, standardmässig AUS). */
     sound: { enabled: false, volume: 0.5 },
+  };
+}
+
+/**
+ * Migriert das prestige-Feld (level/points/trophies/contracts) defensiv.
+ * @param {*} raw - Rohes Zustandsobjekt (evtl. null/korrupt).
+ * @param {Object} fresh - Frischer Referenzzustand für Standardwerte.
+ * @returns {Object} Gültiges prestige-Objekt.
+ */
+function migratePrestige(raw, fresh) {
+  var rp = raw && raw.prestige && typeof raw.prestige === 'object' ? raw.prestige : {};
+  return {
+    level: typeof rp.level === 'number' && rp.level >= 0 ? rp.level : fresh.prestige.level,
+    points: typeof rp.points === 'number' && rp.points >= 0 ? rp.points : fresh.prestige.points,
+    trophies: typeof rp.trophies === 'number' && rp.trophies >= 0 ? rp.trophies : fresh.prestige.trophies,
+    contracts: Array.isArray(rp.contracts) ? rp.contracts.filter(function (id) { return !!getContractById(id); }) : fresh.prestige.contracts.slice(),
   };
 }
 
@@ -392,7 +431,7 @@ function migrateState(raw) {
     currentBikeId: typeof raw.currentBikeId === 'string' && findBikeIndex(raw.currentBikeId) !== -1 ? raw.currentBikeId : fresh.currentBikeId,
     bikeLevels: raw.bikeLevels && typeof raw.bikeLevels === 'object' ? raw.bikeLevels : fresh.bikeLevels,
     lastSavedAt: typeof raw.lastSavedAt === 'number' ? raw.lastSavedAt : fresh.lastSavedAt,
-    prestige: raw.prestige && typeof raw.prestige === 'object' ? raw.prestige : fresh.prestige,
+    prestige: migratePrestige(raw, fresh),
     parts: raw.parts && typeof raw.parts === 'object' ? raw.parts : fresh.parts,
     offline: raw.offline && typeof raw.offline === 'object' ? raw.offline : fresh.offline,
     combo: raw.combo && typeof raw.combo === 'object' ? {
@@ -480,8 +519,10 @@ function buyNextBike(state) {
 
 /**
  * Erhöht das Tuning-Level eines besessenen Bikes um 1, falls genug km
- * vorhanden sind UND das Level-Cap noch nicht erreicht ist. Mutiert state
- * bei Erfolg.
+ * vorhanden sind UND das Level-Cap noch nicht erreicht ist. Nutzt
+ * effectiveTuningCost() statt der rohen tuningCost(), damit der
+ * "Tuning 15% günstiger"-Werksvertrag (siehe contractEffects) automatisch
+ * greift. Mutiert state bei Erfolg.
  * @param {Object} state - Zentraler Idle-Zustand (wird bei Erfolg mutiert).
  * @param {string} bikeId - id des zu tunenden, besessenen Bikes.
  * @returns {{success: boolean, cost: (number|null), newLevel: number}} Ergebnis.
@@ -489,7 +530,7 @@ function buyNextBike(state) {
 function upgradeBike(state, bikeId) {
   if (state.ownedBikeIds.indexOf(bikeId) === -1) return { success: false, cost: null, newLevel: getBikeLevel(state, bikeId) };
   var currentLevel = getBikeLevel(state, bikeId);
-  var cost = tuningCost(bikeId, currentLevel);
+  var cost = effectiveTuningCost(state, bikeId, currentLevel);
   if (cost === null || state.km < cost) return { success: false, cost: cost, newLevel: currentLevel };
   state.km -= cost;
   state.bikeLevels[bikeId] = currentLevel + 1;
@@ -629,6 +670,215 @@ function nextShiftIntervalSeconds(randomFn) {
   return min + rnd() * (max - min);
 }
 
+/* ============================================================
+   MECHANIK B — SAISON/PRESTIGE/WERKSVERTRÄGE — feat(idle-prestige)
+   ============================================================ */
+
+/**
+ * Findet einen Werksvertrag anhand seiner id.
+ * @param {string} contractId - id des Werksvertrags.
+ * @returns {Object|null} Eintrag aus IDLE_CONTRACTS, oder null.
+ */
+function getContractById(contractId) {
+  for (var i = 0; i < IDLE_CONTRACTS.length; i++) {
+    if (IDLE_CONTRACTS[i].id === contractId) return IDLE_CONTRACTS[i];
+  }
+  return null;
+}
+
+/**
+ * Aggregiert ALLE aktiven Werksvertrag-Effekte (siehe IDLE_CONTRACTS)
+ * UND den permanenten Pro-Saison-Bonus (IDLE_BALANCE.PRESTIGE_BONUS_PER_
+ * LEVEL) zu einem einzigen Ergebnisobjekt. Reine, deterministische
+ * Funktion — mutiert state NICHT. Zentrale Stelle, die von earn-/tuning-/
+ * offline-/combo-zone-Berechnungen konsumiert wird (siehe passiveEarn/
+ * activeEarn-Aufrufstellen in idle.js, effectiveTuningCost, offlineEarn,
+ * perfectZoneWidthForState).
+ * @param {Object} state - Zentraler Idle-Zustand.
+ * @returns {{earnMultiplier:number, startBikeId:(string|null), zoneWidthBonusPct:number, offlineCapMultiplier:number, tuningCostMultiplier:number}} Aggregierte Effekte.
+ */
+function contractEffects(state) {
+  var effects = {
+    earnMultiplier: 1,
+    startBikeId: null,
+    zoneWidthBonusPct: 0,
+    offlineCapMultiplier: 1,
+    tuningCostMultiplier: 1,
+  };
+  if (!state) return effects;
+
+  var level = state.prestige && typeof state.prestige.level === 'number' ? state.prestige.level : 0;
+  effects.earnMultiplier *= 1 + level * IDLE_BALANCE.PRESTIGE_BONUS_PER_LEVEL;
+
+  var contracts = state.prestige && Array.isArray(state.prestige.contracts) ? state.prestige.contracts : [];
+  contracts.forEach(function (contractId) {
+    var contract = getContractById(contractId);
+    if (!contract) return;
+    switch (contract.effect) {
+      case 'earnMultiplier': effects.earnMultiplier *= contract.value; break;
+      case 'startBikeId': effects.startBikeId = contract.value; break;
+      case 'zoneWidthBonusPct': effects.zoneWidthBonusPct += contract.value; break;
+      case 'offlineCapMultiplier': effects.offlineCapMultiplier *= contract.value; break;
+      case 'tuningCostMultiplier': effects.tuningCostMultiplier *= contract.value; break;
+      default: break;
+    }
+  });
+  return effects;
+}
+
+/**
+ * Prüft, ob ein Werksvertrag aktuell kaufbar ist (existiert, noch nicht
+ * besessen, genug Trophäen vorhanden).
+ * @param {Object} state - Zentraler Idle-Zustand.
+ * @param {string} contractId - id des Werksvertrags.
+ * @returns {boolean} true, falls kaufbar.
+ */
+function canBuyContract(state, contractId) {
+  var contract = getContractById(contractId);
+  if (!contract || !state || !state.prestige) return false;
+  if (Array.isArray(state.prestige.contracts) && state.prestige.contracts.indexOf(contractId) !== -1) return false;
+  return (state.prestige.trophies || 0) >= contract.kostenTrophaeen;
+}
+
+/**
+ * Kauft einen Werksvertrag, falls canBuyContract() zustimmt. Zieht die
+ * Trophäenkosten ab und fügt die id dauerhaft zu state.prestige.contracts
+ * hinzu (überlebt jeden Saison-Reset). Mutiert state bei Erfolg.
+ * @param {Object} state - Zentraler Idle-Zustand (wird bei Erfolg mutiert).
+ * @param {string} contractId - id des zu kaufenden Werksvertrags.
+ * @returns {{success: boolean, cost: (number|null)}} Ergebnis.
+ */
+function buyContract(state, contractId) {
+  var contract = getContractById(contractId);
+  if (!canBuyContract(state, contractId)) return { success: false, cost: contract ? contract.kostenTrophaeen : null };
+  state.prestige.trophies -= contract.kostenTrophaeen;
+  state.prestige.contracts.push(contractId);
+  return { success: true, cost: contract.kostenTrophaeen };
+}
+
+/**
+ * Berechnet die Anzahl Trophäen, die ein Saisonabschluss JETZT gewähren
+ * würde: 1 Trophäe pro über das Startbike hinaus gekauftem Bike, plus 1
+ * Bonus-Trophäe je IDLE_BALANCE.TROPHY_LEVEL_BONUS_DIVISOR kumulierten
+ * Tuning-Leveln (über alle Bikes). Reine, deterministische Funktion.
+ * @param {Object} state - Zentraler Idle-Zustand.
+ * @returns {number} Anzahl Trophäen (>= 0).
+ */
+function trophiesForSeason(state) {
+  if (!state || !Array.isArray(state.ownedBikeIds)) return 0;
+  var bikesBeyondStarter = Math.max(0, state.ownedBikeIds.length - 1);
+  var totalLevels = 0;
+  if (state.bikeLevels && typeof state.bikeLevels === 'object') {
+    Object.keys(state.bikeLevels).forEach(function (id) {
+      var lvl = state.bikeLevels[id];
+      if (typeof lvl === 'number' && lvl > 0) totalLevels += lvl;
+    });
+  }
+  var levelBonus = Math.floor(totalLevels / IDLE_BALANCE.TROPHY_LEVEL_BONUS_DIVISOR);
+  return bikesBeyondStarter + levelBonus;
+}
+
+/**
+ * Prüft, ob eine Saison aktuell abgeschlossen werden kann: frühestens ab
+ * Besitz der Ninja ZX-10R (Bikes werden strikt in IDLE_BIKES-Reihenfolge
+ * gekauft, ein Besitz der ZX-10R impliziert also den Besitz aller
+ * günstigeren Bikes davor).
+ * @param {Object} state - Zentraler Idle-Zustand.
+ * @returns {boolean} true, falls finishSeason() jetzt einen echten Reset ausführen würde.
+ */
+function canFinishSeason(state) {
+  if (!state || !Array.isArray(state.ownedBikeIds)) return false;
+  var zxIndex = findBikeIndex('zx10r');
+  if (zxIndex === -1) return false;
+  return state.ownedBikeIds.length >= zxIndex + 1;
+}
+
+/**
+ * MECHANIK B — Saison-Abschluss: setzt km, ownedBikeIds, bikeLevels UND
+ * die Schaltpunkt-Combo auf einen frischen Saison-Start zurück, während
+ * Trophäen, Werksverträge, Teile-Sammlung, die Lebenszeit-km-Statistik
+ * (totalKmEarned), Sound-Einstellungen und der Offline-Zeitstempel
+ * PERMANENT erhalten bleiben. Verdient dabei trophiesForSeason(state)
+ * neue Trophäen. Reine Funktion — mutiert das übergebene state NICHT,
+ * sondern gibt einen komplett neuen Zustand zurück (Aufrufer in idle.js
+ * muss die lokale state-Referenz ersetzen + saveState() aufrufen). Ist
+ * canFinishSeason(state) false, wird state UNVERÄNDERT zurückgegeben
+ * (kein Reset, kein Effekt).
+ * @param {Object} state - Zentraler Idle-Zustand vor dem Saisonabschluss.
+ * @returns {Object} Neuer, nach dem Saisonabschluss gültiger Idle-Zustand
+ *   (oder das unveränderte state, falls (noch) nicht abschliessbar).
+ */
+function finishSeason(state) {
+  if (!canFinishSeason(state)) return state;
+
+  var earnedTrophies = trophiesForSeason(state);
+  var fresh = createInitialState();
+  var prevPrestige = state.prestige || fresh.prestige;
+  var prevParts = state.parts || fresh.parts;
+
+  fresh.totalKmEarned = typeof state.totalKmEarned === 'number' ? state.totalKmEarned : fresh.totalKmEarned;
+
+  fresh.prestige = {
+    level: (typeof prevPrestige.level === 'number' ? prevPrestige.level : 0) + 1,
+    points: (typeof prevPrestige.points === 'number' ? prevPrestige.points : 0) + earnedTrophies,
+    trophies: (typeof prevPrestige.trophies === 'number' ? prevPrestige.trophies : 0) + earnedTrophies,
+    contracts: Array.isArray(prevPrestige.contracts) ? prevPrestige.contracts.slice() : [],
+  };
+  fresh.parts = { collected: Array.isArray(prevParts.collected) ? prevParts.collected.slice() : [] };
+  fresh.offline = state.offline && typeof state.offline === 'object' ? { lastSeenAt: state.offline.lastSeenAt } : fresh.offline;
+  fresh.sound = state.sound && typeof state.sound === 'object' ? { enabled: state.sound.enabled, volume: state.sound.volume } : fresh.sound;
+
+  // "Start mit Ninja 400"-Werksvertrag: die neue Saison beginnt weiter
+  // oben in der Bike-Reihe statt beim Z125 PRO.
+  var effects = contractEffects(fresh);
+  if (effects.startBikeId) {
+    var idx = findBikeIndex(effects.startBikeId);
+    if (idx > 0) {
+      var ownedIds = [];
+      var levels = {};
+      for (var i = 0; i <= idx; i++) {
+        ownedIds.push(IDLE_BIKES[i].id);
+        levels[IDLE_BIKES[i].id] = 0;
+      }
+      fresh.ownedBikeIds = ownedIds;
+      fresh.bikeLevels = levels;
+      fresh.currentBikeId = effects.startBikeId;
+    }
+  }
+
+  return fresh;
+}
+
+/**
+ * Berechnet die tatsächlich zu zahlenden Tuning-Kosten UNTER Berücksichtigung
+ * des "Tuning 15% günstiger"-Werksvertrags (siehe contractEffects). Reine
+ * Funktion — mutiert state NICHT.
+ * @param {Object} state - Zentraler Idle-Zustand (nur lesend, für contractEffects).
+ * @param {string} bikeId - id des zu tunenden Bikes.
+ * @param {number} currentLevel - Aktuelles Level des Bikes.
+ * @returns {number|null} Effektive Kosten in km, oder null (siehe tuningCost()).
+ */
+function effectiveTuningCost(state, bikeId, currentLevel) {
+  var base = tuningCost(bikeId, currentLevel);
+  if (base === null) return null;
+  var multiplier = contractEffects(state).tuningCostMultiplier;
+  var step = IDLE_BALANCE.TUNING_COST_ROUND_TO;
+  return Math.max(step, Math.round((base * multiplier) / step) * step);
+}
+
+/**
+ * Berechnet die Breite der perfekten Schaltpunkt-Zone UNTER
+ * Berücksichtigung des "Perfekt-Zone 10% breiter"-Werksvertrags (siehe
+ * contractEffects). Reine Funktion — wraps perfectZoneWidth().
+ * @param {Object} state - Zentraler Idle-Zustand (nur lesend, für contractEffects).
+ * @param {number} combo - Aktuelle Combo-Anzahl (>= 0).
+ * @returns {number} Zonenbreite in % (siehe perfectZoneWidth()).
+ */
+function perfectZoneWidthForState(state, combo) {
+  var bonus = contractEffects(state).zoneWidthBonusPct;
+  return perfectZoneWidth(combo, IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT + bonus);
+}
+
 var IdleCore = {
   IDLE_STATE_KEY: IDLE_STATE_KEY,
   IDLE_STATE_VERSION: IDLE_STATE_VERSION,
@@ -657,6 +907,18 @@ var IdleCore = {
   applyShiftResult: applyShiftResult,
   activeComboMultiplier: activeComboMultiplier,
   nextShiftIntervalSeconds: nextShiftIntervalSeconds,
+
+  /* ── Phase C: MECHANIK B — Saison/Prestige/Werksverträge ────────── */
+  IDLE_CONTRACTS: IDLE_CONTRACTS,
+  getContractById: getContractById,
+  contractEffects: contractEffects,
+  canBuyContract: canBuyContract,
+  buyContract: buyContract,
+  trophiesForSeason: trophiesForSeason,
+  canFinishSeason: canFinishSeason,
+  finishSeason: finishSeason,
+  effectiveTuningCost: effectiveTuningCost,
+  perfectZoneWidthForState: perfectZoneWidthForState,
 };
 
 if (typeof window !== 'undefined') {
