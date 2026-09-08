@@ -263,6 +263,42 @@
   .idle-shop-item-action { justify-content: center; }
 }
 
+/* ── Motorsound-Steuerung (Web Audio, synthetisiert, standardmässig AUS) ── */
+.idle-sound-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.idle-sound-toggle {
+  padding: 0.5rem 1rem;
+  font-size: 0.85em;
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full, 999px);
+  cursor: pointer;
+  transition: border-color var(--dur-fast, 0.15s) var(--ease-standard, ease);
+}
+.idle-sound-toggle[aria-pressed="true"] {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-color: transparent;
+}
+.idle-sound-volume-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+.idle-sound-volume {
+  width: 120px;
+}
+
 /* ── prefers-reduced-motion: Zusatzbewegung reduzieren, Spiel bleibt nutzbar ── */
 @media (prefers-reduced-motion: reduce) {
   .idle-track-wrap.is-pulsing { animation: none; }

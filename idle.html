@@ -51,6 +51,17 @@
                     <button type="button" class="idle-gas-btn" id="idleGasBtn" aria-label="Gas geben — aktiv Kilometer sammeln">
                         🏁 Gas geben!
                     </button>
+
+                    <!-- Motorsound (Web Audio, synthetisiert, standardmässig AUS) -->
+                    <div class="idle-sound-controls">
+                        <button type="button" class="idle-sound-toggle" id="idleSoundToggle" aria-pressed="false">
+                            🔈 Motorsound: AUS
+                        </button>
+                        <label class="idle-sound-volume-label" for="idleSoundVolume">
+                            🔊
+                            <input type="range" id="idleSoundVolume" class="idle-sound-volume" min="0" max="100" value="50" aria-label="Motorsound-Lautstärke">
+                        </label>
+                    </div>
                 </section>
 
                 <!-- ===== AKTUELLES BIKE (Statistik-Balken) ===== -->

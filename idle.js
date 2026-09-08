@@ -41,6 +41,20 @@
   /** Anzeigedauer (ms) des Übergabe-Banners nach einem Bike-Kauf. */
   var HANDOVER_BANNER_MS = 2200;
 
+  /* ── Phase B: Web Audio Motorsound (synthetisiert, standardmässig AUS) ── */
+  /** Motor-Grundfrequenz (Hz) bei Geschwindigkeit 0%. */
+  var ENGINE_BASE_HZ = 52;
+  /** Zusätzliche Frequenz (Hz) bei Geschwindigkeit 100%, addiert auf ENGINE_BASE_HZ. */
+  var ENGINE_RANGE_HZ = 190;
+  /** Zeitkonstante (s) für sanfte Frequenz-/Lautstärke-Übergänge (Web Audio setTargetAtTime). */
+  var ENGINE_SMOOTH_TIME_CONSTANT = 0.12;
+  /** Zusätzlicher Frequenz-Boost (Hz) des kurzen "Rev-up"-Effekts bei "Gas geben". */
+  var ENGINE_REV_UP_BOOST_HZ = 55;
+  /** Dauer (s) des "Rev-up"-Effekts, bevor er zur Grundfrequenz zurückklingt. */
+  var ENGINE_REV_UP_DECAY_SECONDS = 0.35;
+  /** Maximale Master-Lautstärke (0..1) bei Lautstärke-Regler = 100%. */
+  var ENGINE_MAX_GAIN = 0.22;
+
   /** Emoji-Zuordnung je Bike-Kategorie, rein dekorativ (kein externes Bildmaterial). */
   var CATEGORY_ICONS = {
     'Einsteiger-Naked': '🔰',
@@ -82,6 +96,13 @@
   /* ── "Neues Bike in der Garage"-Übergabe ────────────────────────── */
   /** Timeout-Handle des aktuell angezeigten Übergabe-Banners (für Re-Trigger). */
   var handoverTimeoutId = null;
+
+  /* ── Web Audio Motorsound: Laufzeit-Zustand (lazy, erst nach Nutzer-Geste) ── */
+  var audioCtx = null;
+  var masterGain = null;
+  var engineOsc = null;
+  var subOsc = null;
+  var noiseGain = null;
 
   /**
    * Formatiert eine km-Zahl für die Anzeige (deutsches Zahlenformat,
@@ -275,6 +296,7 @@
       void btn.offsetWidth;
       btn.classList.add('is-pulsing');
       renderAll();
+      revUpEngineSound();
     });
   }
 
@@ -506,6 +528,167 @@
     }
   }
 
+  /* ============================================================
+     WEB AUDIO MOTORSOUND (synthetisiert) — feat(idle-sound)
+     ============================================================ */
+
+  /**
+   * Prüft, ob die Web Audio API im aktuellen Browser verfügbar ist.
+   * @returns {boolean} true, falls AudioContext (ggf. mit webkit-Präfix) existiert.
+   */
+  function hasWebAudio() {
+    return !!(window.AudioContext || window.webkitAudioContext);
+  }
+
+  /**
+   * Erzeugt einen kurzen, in sich geschlossenen Loop aus gefiltertem
+   * weissem Rauschen (Textur für den Motorsound-Untergrund).
+   * @param {AudioContext} ctx - Aktiver AudioContext.
+   * @returns {AudioBufferSourceNode} Startbare, loopende Rauschquelle.
+   */
+  function createNoiseLoop(ctx) {
+    var bufferSeconds = 2;
+    var buffer = ctx.createBuffer(1, ctx.sampleRate * bufferSeconds, ctx.sampleRate);
+    var data = buffer.getChannelData(0);
+    for (var i = 0; i < data.length; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    var source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    return source;
+  }
+
+  /**
+   * Erzeugt (einmalig, lazy) den synthetisierten Motorsound-Signalgraph:
+   * zwei Oszillatoren (Grund-/Sub-Frequenz) + gefiltertes Rauschen für
+   * Textur, zusammengeführt in einem Master-Gain (initial stumm). MUSS
+   * erst nach einer Nutzer-Geste aufgerufen werden (Autoplay-Policy).
+   * @returns {AudioContext|null} Der aktive AudioContext, oder null falls Web Audio fehlt.
+   */
+  function ensureAudioEngine() {
+    if (!hasWebAudio()) return null;
+    if (!audioCtx) {
+      try {
+        var AudioCtxCtor = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioCtxCtor();
+
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0;
+        masterGain.connect(audioCtx.destination);
+
+        engineOsc = audioCtx.createOscillator();
+        engineOsc.type = 'sawtooth';
+        engineOsc.frequency.value = ENGINE_BASE_HZ;
+        engineOsc.connect(masterGain);
+        engineOsc.start();
+
+        subOsc = audioCtx.createOscillator();
+        subOsc.type = 'sine';
+        subOsc.frequency.value = ENGINE_BASE_HZ / 2;
+        var subGain = audioCtx.createGain();
+        subGain.gain.value = 0.5;
+        subOsc.connect(subGain);
+        subGain.connect(masterGain);
+        subOsc.start();
+
+        var noiseSource = createNoiseLoop(audioCtx);
+        var noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.value = 400;
+        noiseGain = audioCtx.createGain();
+        noiseGain.gain.value = 0.06;
+        noiseSource.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(masterGain);
+        noiseSource.start();
+      } catch (e) {
+        audioCtx = null;
+        return null;
+      }
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  /**
+   * Aktualisiert Frequenz + Lautstärke des Motorsounds gemäss der
+   * aktuellen Geschwindigkeit UND dem Sound-EIN/AUS-/Lautstärke-Zustand.
+   * Sanfte Übergänge per setTargetAtTime (kein hörbares Klicken). No-op,
+   * falls der Motor noch nie gestartet wurde (Sound war nie aktiviert).
+   * @param {number} speedPct - Aktuelle Geschwindigkeit des Bikes (0–100%).
+   * @returns {void}
+   */
+  function updateEngineSound(speedPct) {
+    if (!audioCtx || !engineOsc || !subOsc || !masterGain) return;
+    var now = audioCtx.currentTime;
+    var targetHz = ENGINE_BASE_HZ + (speedPct / 100) * ENGINE_RANGE_HZ;
+    engineOsc.frequency.setTargetAtTime(targetHz, now, ENGINE_SMOOTH_TIME_CONSTANT);
+    subOsc.frequency.setTargetAtTime(targetHz / 2, now, ENGINE_SMOOTH_TIME_CONSTANT);
+
+    var targetGain = state.sound.enabled ? state.sound.volume * ENGINE_MAX_GAIN : 0;
+    masterGain.gain.setTargetAtTime(targetGain, now, ENGINE_SMOOTH_TIME_CONSTANT);
+  }
+
+  /**
+   * Löst einen kurzen "Rev-up"-Effekt aus (Frequenz-Spitze, die wieder
+   * zur aktuellen Geschwindigkeit zurückklingt), beim Klick auf
+   * "Gas geben". No-op, falls Sound nicht aktiviert/erzeugt ist.
+   * @returns {void}
+   */
+  function revUpEngineSound() {
+    if (!audioCtx || !engineOsc || !state.sound.enabled) return;
+    var now = audioCtx.currentTime;
+    var info = getCurrentBikeInfo();
+    var baseHz = ENGINE_BASE_HZ + (info.stats.geschwindigkeitPct / 100) * ENGINE_RANGE_HZ;
+    engineOsc.frequency.cancelScheduledValues(now);
+    engineOsc.frequency.setValueAtTime(baseHz + ENGINE_REV_UP_BOOST_HZ, now);
+    engineOsc.frequency.setTargetAtTime(baseHz, now + 0.02, ENGINE_REV_UP_DECAY_SECONDS);
+  }
+
+  /**
+   * Verdrahtet den Motorsound-Toggle-Button + Lautstärke-Regler. Erzeugt
+   * den AudioContext erst beim ersten Einschalten (Nutzer-Geste, siehe
+   * Autoplay-Policy). Persistiert EIN/AUS + Lautstärke in state.sound.
+   * @returns {void}
+   */
+  function wireSoundControls() {
+    var toggleBtn = document.getElementById('idleSoundToggle');
+    var volumeInput = document.getElementById('idleSoundVolume');
+    if (!toggleBtn || !volumeInput) return;
+
+    if (!hasWebAudio()) {
+      toggleBtn.disabled = true;
+      toggleBtn.textContent = '🔇 Motorsound nicht verfügbar';
+      volumeInput.disabled = true;
+      return;
+    }
+
+    volumeInput.value = String(Math.round((state.sound.volume || 0) * 100));
+
+    function refreshToggleLabel() {
+      toggleBtn.setAttribute('aria-pressed', state.sound.enabled ? 'true' : 'false');
+      toggleBtn.textContent = state.sound.enabled ? '🔊 Motorsound: AN' : '🔈 Motorsound: AUS';
+    }
+    refreshToggleLabel();
+
+    toggleBtn.addEventListener('click', function () {
+      ensureAudioEngine();
+      state.sound.enabled = !state.sound.enabled;
+      IdleCore.saveState(state);
+      refreshToggleLabel();
+      updateEngineSound(getCurrentBikeInfo().stats.geschwindigkeitPct);
+    });
+
+    volumeInput.addEventListener('input', function () {
+      state.sound.volume = Math.max(0, Math.min(100, Number(volumeInput.value) || 0)) / 100;
+      updateEngineSound(getCurrentBikeInfo().stats.geschwindigkeitPct);
+    });
+    volumeInput.addEventListener('change', function () {
+      IdleCore.saveState(state);
+    });
+  }
+
   /**
    * Verdrahtet regelmässiges Auto-Speichern sowie ein finales Speichern,
    * bevor die Seite verlassen/versteckt wird (Tab-Wechsel, Schliessen).
@@ -554,6 +737,7 @@
     var kmh = (info.bike.topspeed * info.stats.geschwindigkeitPct) / 100;
     renderTrack(clampedDt, info.stats.geschwindigkeitPct);
     renderTacho(info.stats.geschwindigkeitPct, kmh);
+    updateEngineSound(info.stats.geschwindigkeitPct);
 
     window.requestAnimationFrame(tick);
   }
@@ -571,6 +755,7 @@
     tachoDisplayPct = getCurrentBikeInfo().stats.geschwindigkeitPct;
     wireGasButton();
     wireUpgradeButton();
+    wireSoundControls();
     wireLifecycleSave();
     window.requestAnimationFrame(tick);
   }
