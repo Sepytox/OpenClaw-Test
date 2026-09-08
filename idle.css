@@ -586,6 +586,64 @@
   .idle-toast-container { left: 1rem; right: 1rem; }
 }
 
+/* ── Statistiken — feat(idle-stats) ─────────────────────────────── */
+.idle-stats-section h2 { font-size: 1.15em; margin-bottom: 1rem; }
+.idle-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.idle-stat-tile {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.85rem 1rem;
+  text-align: center;
+}
+.idle-stat-tile-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78em;
+  margin-bottom: 0.25rem;
+}
+.idle-stat-tile-value {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: 1.25em;
+  color: var(--accent);
+}
+.idle-season-history-heading {
+  font-size: 1em;
+  margin-bottom: 0.6rem;
+}
+.idle-season-history {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+}
+.idle-season-history li {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.idle-season-history li strong { color: var(--text); }
+.idle-season-history-empty {
+  color: var(--text-subtle);
+  font-size: 0.85em;
+}
+
 /* ── prefers-reduced-motion: Zusatzbewegung reduzieren, Spiel bleibt nutzbar ── */
 @media (prefers-reduced-motion: reduce) {
   .idle-track-wrap.is-pulsing { animation: none; }

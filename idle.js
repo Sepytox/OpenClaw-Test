@@ -157,6 +157,18 @@
   }
 
   /**
+   * Formatiert eine Spielzeit (Sekunden) als "Xh Ym" bzw. "Ym" (feat(idle-stats)).
+   * @param {number} totalSeconds - Spielzeit in Sekunden.
+   * @returns {string} Formatierte Zeichenkette.
+   */
+  function formatPlayTime(totalSeconds) {
+    var minutes = Math.floor(Math.max(0, totalSeconds) / 60);
+    var hours = Math.floor(minutes / 60);
+    var remMinutes = minutes % 60;
+    return hours > 0 ? (hours + 'h ' + remMinutes + 'm') : (remMinutes + 'm');
+  }
+
+  /**
    * Liefert das aktuell gefahrene Bike-Objekt inkl. Level und
    * abgeleiteten Statistiken.
    * @returns {{bike: Object, level: number, stats: Object}} Aktuelles Bike + Stats.
@@ -311,8 +323,9 @@
 
   /**
    * Rendert alle Teile der Seite neu (Bike-Karte, Shop-Liste, Saison-/
-   * Werksvertrags-Übersicht, Teile-Sammlung). Die km-Anzeige wird
-   * separat im Game-Loop weich nachgezogen, siehe updateKmDisplay().
+   * Werksvertrags-Übersicht, Teile-Sammlung, Statistik-Panel). Die
+   * km-Anzeige wird separat im Game-Loop weich nachgezogen, siehe
+   * updateKmDisplay().
    * @returns {void}
    */
   function renderAll() {
@@ -320,6 +333,7 @@
     renderShopList();
     renderSeasonPanel();
     renderPartsPanel();
+    renderStatsPanel();
   }
 
   /**
@@ -844,6 +858,7 @@
     var trackEl = document.getElementById('idleShiftTrack');
     if (!isIgnore) {
       IdleCore.applyShiftResult(state, hit, Date.now());
+      IdleCore.recordComboPeak(state, state.combo.count);
       IdleCore.saveState(state);
       if (trackEl) trackEl.classList.add(hit ? 'is-hit' : 'is-miss');
       renderAll();
@@ -1128,6 +1143,7 @@
    */
   function onLapCompleted() {
     IdleCore.recordLap(state);
+    renderStatsPanel();
     var partId = IdleCore.rollPartDrop(Math.random);
     if (partId) {
       var result = IdleCore.addPart(state, partId);
@@ -1135,6 +1151,64 @@
       renderPartsPanel();
       renderBikeCard();
       showPartToast(result);
+    }
+  }
+
+  /* ============================================================
+     STATISTIKEN — feat(idle-stats)
+     ============================================================ */
+
+  /**
+   * Rendert das Statistik-Panel (Gesamt-km, Runden, beste Combo,
+   * Spielzeit) sowie die Saison-Historie-Liste.
+   * @returns {void}
+   */
+  function renderStatsPanel() {
+    var grid = document.getElementById('idleStatsGrid');
+    if (grid) {
+      grid.innerHTML = '';
+      var tiles = [
+        { label: 'Gesamt-km', value: formatKm(state.totalKmEarned) + ' km' },
+        { label: 'Runden', value: String(state.stats.laps) },
+        { label: 'Beste Combo', value: '×' + state.stats.bestCombo },
+        { label: 'Spielzeit', value: formatPlayTime(state.stats.playTimeSeconds) },
+      ];
+      tiles.forEach(function (tile) {
+        var tileEl = document.createElement('div');
+        tileEl.className = 'idle-stat-tile';
+        var labelEl = document.createElement('span');
+        labelEl.className = 'idle-stat-tile-label';
+        labelEl.textContent = tile.label;
+        var valueEl = document.createElement('span');
+        valueEl.className = 'idle-stat-tile-value';
+        valueEl.textContent = tile.value;
+        tileEl.appendChild(labelEl);
+        tileEl.appendChild(valueEl);
+        grid.appendChild(tileEl);
+      });
+    }
+
+    var historyList = document.getElementById('idleSeasonHistory');
+    if (historyList) {
+      historyList.innerHTML = '';
+      var history = state.stats.seasonHistory;
+      if (!history || history.length === 0) {
+        var emptyEl = document.createElement('li');
+        emptyEl.className = 'idle-season-history-empty';
+        emptyEl.textContent = 'Noch keine Saison abgeschlossen.';
+        historyList.appendChild(emptyEl);
+      } else {
+        history.slice().reverse().forEach(function (entry) {
+          var li = document.createElement('li');
+          var strong = document.createElement('strong');
+          strong.textContent = 'Saison ' + entry.season;
+          var trophies = document.createElement('span');
+          trophies.textContent = '+' + entry.trophiesEarned + ' 🏆';
+          li.appendChild(strong);
+          li.appendChild(trophies);
+          historyList.appendChild(li);
+        });
+      }
     }
   }
 
@@ -1178,6 +1252,7 @@
 
     var earned = IdleCore.passiveEarn(state, clampedDt) * totalEarnMultiplier(Date.now());
     IdleCore.creditKm(state, earned);
+    IdleCore.addPlayTime(state, clampedDt);
 
     updateKmDisplay();
 
