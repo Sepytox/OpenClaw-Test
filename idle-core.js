@@ -427,10 +427,8 @@ function activeEarn(state) {
 /**
  * Erzeugt einen frischen, initialen Idle-Zustand (Startbike besessen und
  * ausgewählt, 0 km, Level 0). Enthält bereits alle Erweiterungsfelder aus
- * Phase B (combo/sound) sowie Phase C MECHANIK B (prestige inkl.
- * Trophäen/Verträge), damit die Zustandsform von Anfang an stabil ist.
- * parts/offline sind weiterhin die inaktiven Phase-A/B-Platzhalter (siehe
- * feat(idle-parts)/feat(idle-offline)).
+ * Phase B (combo/sound) sowie Phase C (prestige inkl. Trophäen/Verträge,
+ * parts, offline, stats), damit die Zustandsform von Anfang an stabil ist.
  * @returns {Object} Neuer, gültiger Idle-Zustand mit version=IDLE_STATE_VERSION.
  */
 function createInitialState() {
@@ -453,10 +451,12 @@ function createInitialState() {
      * Trophäen (siehe buyContract). contracts = ids der dauerhaft
      * gekauften Werksverträge (überleben jeden Saison-Reset). */
     prestige: { level: 0, points: 0, trophies: 0, contracts: [] },
-    /** @todo Phase C (feat(idle-parts)) — gesammelte Teile-ids. */
+    /** Gesammelte Teile-ids (siehe IDLE_PARTS/addPart) — permanent, überlebt Saison-Resets. */
     parts: { collected: [] },
-    /** @todo Phase C (feat(idle-offline)) — Zeitstempel für Offline-Ertragsberechnung beim nächsten Laden. */
+    /** Zeitstempel (ms) der letzten Sichtung, für die Offline-Ertragsberechnung beim nächsten Laden. */
     offline: { lastSeenAt: null },
+    /** Zentrale Statistiken (siehe recordLap/recordComboPeak/addPlayTime/finishSeason). */
+    stats: { laps: 0, bestCombo: 0, seasonHistory: [], playTimeSeconds: 0 },
 
     /* ── Phase B ────────────────────────────────────────────────── */
     /** Schaltpunkt-Combo-Fortschritt (siehe applyShiftResult/comboMultiplier). */
@@ -510,6 +510,23 @@ function migrateOffline(raw, fresh) {
 }
 
 /**
+ * Migriert das stats-Feld (Laps/beste Combo/Saison-Historie/Spielzeit)
+ * defensiv.
+ * @param {*} raw - Rohes Zustandsobjekt (evtl. null/korrupt).
+ * @param {Object} fresh - Frischer Referenzzustand für Standardwerte.
+ * @returns {Object} Gültiges stats-Objekt.
+ */
+function migrateStats(raw, fresh) {
+  var rs = raw && raw.stats && typeof raw.stats === 'object' ? raw.stats : {};
+  return {
+    laps: typeof rs.laps === 'number' && rs.laps >= 0 ? rs.laps : fresh.stats.laps,
+    bestCombo: typeof rs.bestCombo === 'number' && rs.bestCombo >= 0 ? rs.bestCombo : fresh.stats.bestCombo,
+    seasonHistory: Array.isArray(rs.seasonHistory) ? rs.seasonHistory.slice() : fresh.stats.seasonHistory.slice(),
+    playTimeSeconds: typeof rs.playTimeSeconds === 'number' && rs.playTimeSeconds >= 0 ? rs.playTimeSeconds : fresh.stats.playTimeSeconds,
+  };
+}
+
+/**
  * Migriert/validiert ein aus localStorage geparstes Rohobjekt zu einem
  * garantiert gültigen, aktuellen Idle-Zustand. Fehlt das Objekt komplett,
  * ist es kein Objekt, fehlt/veraltet die version, oder fehlen/haben
@@ -533,6 +550,7 @@ function migrateState(raw) {
     prestige: migratePrestige(raw, fresh),
     parts: migrateParts(raw, fresh),
     offline: migrateOffline(raw, fresh),
+    stats: migrateStats(raw, fresh),
     combo: raw.combo && typeof raw.combo === 'object' ? {
       count: typeof raw.combo.count === 'number' && raw.combo.count >= 0 ? raw.combo.count : 0,
       multiplier: typeof raw.combo.multiplier === 'number' && raw.combo.multiplier >= 1 ? raw.combo.multiplier : 1,
@@ -900,14 +918,15 @@ function canFinishSeason(state) {
 /**
  * MECHANIK B — Saison-Abschluss: setzt km, ownedBikeIds, bikeLevels UND
  * die Schaltpunkt-Combo auf einen frischen Saison-Start zurück, während
- * Trophäen, Werksverträge, Teile-Sammlung, die Lebenszeit-km-Statistik
- * (totalKmEarned), Sound-Einstellungen und der Offline-Zeitstempel
- * PERMANENT erhalten bleiben. Verdient dabei trophiesForSeason(state)
- * neue Trophäen. Reine Funktion — mutiert das übergebene state NICHT,
- * sondern gibt einen komplett neuen Zustand zurück (Aufrufer in idle.js
- * muss die lokale state-Referenz ersetzen + saveState() aufrufen). Ist
- * canFinishSeason(state) false, wird state UNVERÄNDERT zurückgegeben
- * (kein Reset, kein Effekt).
+ * Trophäen, Werksverträge, Teile-Sammlung, Lebenszeit-Statistiken
+ * (totalKmEarned/laps/bestCombo/playTimeSeconds), Sound-Einstellungen und
+ * der Offline-Zeitstempel PERMANENT erhalten bleiben. Verdient dabei
+ * trophiesForSeason(state) neue Trophäen und hängt einen Eintrag an
+ * state.stats.seasonHistory an. Reine Funktion — mutiert das übergebene
+ * state NICHT, sondern gibt einen komplett neuen Zustand zurück (Aufrufer
+ * in idle.js muss die lokale state-Referenz ersetzen + saveState()
+ * aufrufen). Ist canFinishSeason(state) false, wird state UNVERÄNDERT
+ * zurückgegeben (kein Reset, kein Effekt).
  * @param {Object} state - Zentraler Idle-Zustand vor dem Saisonabschluss.
  * @returns {Object} Neuer, nach dem Saisonabschluss gültiger Idle-Zustand
  *   (oder das unveränderte state, falls (noch) nicht abschliessbar).
@@ -919,6 +938,7 @@ function finishSeason(state) {
   var fresh = createInitialState();
   var prevPrestige = state.prestige || fresh.prestige;
   var prevParts = state.parts || fresh.parts;
+  var prevStats = state.stats || fresh.stats;
 
   fresh.totalKmEarned = typeof state.totalKmEarned === 'number' ? state.totalKmEarned : fresh.totalKmEarned;
 
@@ -931,6 +951,14 @@ function finishSeason(state) {
   fresh.parts = { collected: Array.isArray(prevParts.collected) ? prevParts.collected.slice() : [] };
   fresh.offline = state.offline && typeof state.offline === 'object' ? { lastSeenAt: state.offline.lastSeenAt } : fresh.offline;
   fresh.sound = state.sound && typeof state.sound === 'object' ? { enabled: state.sound.enabled, volume: state.sound.volume } : fresh.sound;
+
+  var historyEntry = { season: fresh.prestige.level, trophiesEarned: earnedTrophies, finishedAt: Date.now() };
+  fresh.stats = {
+    laps: typeof prevStats.laps === 'number' ? prevStats.laps : 0,
+    bestCombo: typeof prevStats.bestCombo === 'number' ? prevStats.bestCombo : 0,
+    playTimeSeconds: typeof prevStats.playTimeSeconds === 'number' ? prevStats.playTimeSeconds : 0,
+    seasonHistory: (Array.isArray(prevStats.seasonHistory) ? prevStats.seasonHistory.slice() : []).concat([historyEntry]),
+  };
 
   // "Start mit Ninja 400"-Werksvertrag: die neue Saison beginnt weiter
   // oben in der Bike-Reihe statt beim Z125 PRO.
@@ -1128,6 +1156,62 @@ function offlineEarn(state, awaySeconds) {
   return passiveEarn(state, cappedSeconds) * IDLE_BALANCE.OFFLINE_EARN_FRACTION * effects.earnMultiplier * bonus;
 }
 
+/* ============================================================
+   STATISTIKEN — feat(idle-stats)
+   ============================================================ */
+
+/**
+ * Stellt sicher, dass state.stats ein gültiges Objekt ist (defensiv, für
+ * Zustände, die nicht über createInitialState()/migrateState() gelaufen
+ * sind).
+ * @param {Object} state - Zentraler Idle-Zustand (wird ggf. mutiert).
+ * @returns {void}
+ */
+function ensureStatsState(state) {
+  if (!state.stats || typeof state.stats !== 'object') {
+    state.stats = { laps: 0, bestCombo: 0, seasonHistory: [], playTimeSeconds: 0 };
+  }
+}
+
+/**
+ * Zählt eine abgeschlossene Runde auf der Renn-Strecke (siehe idle.js
+ * renderTrack()'s Rundenerkennung). Mutiert state.stats.laps.
+ * @param {Object} state - Zentraler Idle-Zustand (wird mutiert).
+ * @returns {void}
+ */
+function recordLap(state) {
+  ensureStatsState(state);
+  state.stats.laps += 1;
+}
+
+/**
+ * Aktualisiert die höchste je erreichte Combo-Anzahl (Statistik), falls
+ * comboCount grösser als der bisherige Bestwert ist. Mutiert state.stats.bestCombo.
+ * @param {Object} state - Zentraler Idle-Zustand (wird mutiert).
+ * @param {number} comboCount - Aktuell erreichte Combo-Anzahl.
+ * @returns {void}
+ */
+function recordComboPeak(state, comboCount) {
+  ensureStatsState(state);
+  if (typeof comboCount === 'number' && comboCount > state.stats.bestCombo) {
+    state.stats.bestCombo = comboCount;
+  }
+}
+
+/**
+ * Zählt verstrichene Spielzeit (Sekunden) zur Statistik hinzu. Mutiert
+ * state.stats.playTimeSeconds.
+ * @param {Object} state - Zentraler Idle-Zustand (wird mutiert).
+ * @param {number} dtSeconds - Verstrichene Zeit in Sekunden (>= 0).
+ * @returns {void}
+ */
+function addPlayTime(state, dtSeconds) {
+  ensureStatsState(state);
+  if (typeof dtSeconds === 'number' && dtSeconds > 0) {
+    state.stats.playTimeSeconds += dtSeconds;
+  }
+}
+
 var IdleCore = {
   IDLE_STATE_KEY: IDLE_STATE_KEY,
   IDLE_STATE_VERSION: IDLE_STATE_VERSION,
@@ -1179,6 +1263,11 @@ var IdleCore = {
 
   /* ── Phase C: Offline-Ertrag ──────────────────────────────────────── */
   offlineEarn: offlineEarn,
+
+  /* ── Phase C: Statistiken ──────────────────────────────────────────── */
+  recordLap: recordLap,
+  recordComboPeak: recordComboPeak,
+  addPlayTime: addPlayTime,
 };
 
 if (typeof window !== 'undefined') {
