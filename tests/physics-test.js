@@ -32,6 +32,12 @@ const RACE_BIKES = {
   klx300:     { name:'Kawasaki KLX 300',           ps:27,  torque:26,  weight:137, vmax:137, redline:9500,  idleRpm:1400, gears:6 },
   kx450:      { name:'Kawasaki KX 450',            ps:62,  torque:54,  weight:110, vmax:150, redline:11000, idleRpm:1800, gears:5 },
   samurai:    { name:'Kawasaki Samurai',            ps:31,  torque:25,  weight:145, vmax:160, redline:8000,  idleRpm:1200, gears:5 },
+  ninja7hybrid:{name:'Kawasaki Ninja 7 Hybrid',    ps:80,  torque:61,  weight:240, vmax:180, redline:10500, idleRpm:1000, gears:6 },
+  z900se:     { name:'Kawasaki Z900SE',             ps:125, torque:99,  weight:196, vmax:248, redline:11500, idleRpm:1100, gears:6 },
+  versys650:  { name:'Kawasaki Versys 650',         ps:67,  torque:61,  weight:216, vmax:200, redline:9000,  idleRpm:900,  gears:6 },
+  w230:       { name:'Kawasaki W230',               ps:19,  torque:18,  weight:144, vmax:120, redline:9000,  idleRpm:1300, gears:5 },
+  klr650:     { name:'Kawasaki KLR650',             ps:40,  torque:52,  weight:198, vmax:145, redline:7500,  idleRpm:1300, gears:5 },
+  vulcans:    { name:'Kawasaki Vulcan S',           ps:61,  torque:63,  weight:229, vmax:180, redline:8500,  idleRpm:900,  gears:6 },
 };
 
 const GEAR_RATIOS  = [0, 3.2, 2.1, 1.6, 1.28, 1.05, 0.88];

@@ -275,6 +275,12 @@ footer {
 .fact-card:nth-child(17) { animation-delay: 0.34s; }
 .fact-card:nth-child(18) { animation-delay: 0.36s; }
 .fact-card:nth-child(19) { animation-delay: 0.38s; }
+.fact-card:nth-child(20) { animation-delay: 0.40s; }
+.fact-card:nth-child(21) { animation-delay: 0.42s; }
+.fact-card:nth-child(22) { animation-delay: 0.44s; }
+.fact-card:nth-child(23) { animation-delay: 0.46s; }
+.fact-card:nth-child(24) { animation-delay: 0.48s; }
+.fact-card:nth-child(25) { animation-delay: 0.50s; }
 
 /* Card top row (compare + fav) */
 .card-top-row {

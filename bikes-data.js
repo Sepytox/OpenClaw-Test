@@ -1,7 +1,7 @@
 /**
  * bikes-data.js — Geteilte Kawasaki-Motorrad-Datenquelle (Single Source of Truth).
  *
- * Spiegelt exakt die 19 Motorräder aus dem `BIKES`-Objekt in index.html (siehe
+ * Spiegelt exakt die 25 Motorräder aus dem `BIKES`-Objekt in index.html (siehe
  * dortiges `makeBike(...)`-Inline-Script). Wird sowohl im Browser (window/globalThis)
  * als auch in Node (module.exports) bereitgestellt, damit shop.html, quiz.html,
  * wheel.html sowie die Tests unter tests/ dieselben Werte verwenden.
@@ -22,7 +22,7 @@ function makeSharedBike(id, data) {
 }
 
 /**
- * SHARED_BIKES — kanonische Liste aller 19 Kawasaki-Motorräder.
+ * SHARED_BIKES — kanonische Liste aller 25 Kawasaki-Motorräder.
  * Quelle: index.html, var BIKES (Inline-Script, ~Zeile 579).
  */
 var SHARED_BIKES = {
@@ -120,6 +120,36 @@ var SHARED_BIKES = {
     name: 'Kawasaki KX 450', sub: 'MX-Rennmaschine pur', icon: '🏟️',
     category: 'Off-Road', license: 'A',
     ps: 62, kw: 45.6, torque: 54, weight: 110, vmax: 150, accel: 3.8, price: 9500
+  }),
+  ninja7hybrid: makeSharedBike('ninja7hybrid', {
+    name: 'Kawasaki Ninja 7 Hybrid', sub: 'Supercharged Hybrid-Sporttourer', icon: '🔋',
+    category: 'Sport Tourer', license: 'A',
+    ps: 80, kw: 59, torque: 61, weight: 240, vmax: 180, accel: 4.9, price: 13500
+  }),
+  z900se: makeSharedBike('z900se', {
+    name: 'Kawasaki Z900SE', sub: 'Premium Naked mit Öhlins-Fahrwerk', icon: '🥇',
+    category: 'Naked', license: 'A',
+    ps: 125, kw: 91.9, torque: 98.6, weight: 196, vmax: 248, accel: 3.4, price: 12200
+  }),
+  versys650: makeSharedBike('versys650', {
+    name: 'Kawasaki Versys 650', sub: 'Vielseitiger Adventure-Tourer', icon: '🧭',
+    category: 'Adventure', license: 'A2',
+    ps: 67, kw: 49, torque: 61, weight: 216, vmax: 200, accel: 4.5, price: 9700
+  }),
+  w230: makeSharedBike('w230', {
+    name: 'Kawasaki W230', sub: 'Klassischer Einzylinder-Roadster', icon: '🛞',
+    category: 'Klassiker', license: 'A2',
+    ps: 19, kw: 14, torque: 18, weight: 144, vmax: 120, accel: 0, price: 5700
+  }),
+  klr650: makeSharedBike('klr650', {
+    name: 'Kawasaki KLR650', sub: 'Legendärer Langstrecken-Dual-Sport', icon: '🏔️',
+    category: 'Off-Road', license: 'A2',
+    ps: 40, kw: 29, torque: 52, weight: 198, vmax: 145, accel: 7.0, price: 7300
+  }),
+  vulcans: makeSharedBike('vulcans', {
+    name: 'Kawasaki Vulcan S', sub: 'Sportlicher Einsteiger-Cruiser', icon: '🌋',
+    category: 'Cruiser', license: 'A2',
+    ps: 61, kw: 45, torque: 63, weight: 229, vmax: 180, accel: 5.0, price: 8600
   })
 };
 

@@ -18,7 +18,8 @@ const SHARED_BIKES = require('../bikes-data.js');
 const WHEEL_BIKE_KEYS = [
   'h2', 'zx10r', 'zh2', 'h2sx', 'hybrid1200', 'zx6r', 'z900', 'versys1000',
   'ninja650', 'z650', 'ninja400', 'zx25r', 'eliminator400', 'w800',
-  'klx300', 'kx450', 'samurai'
+  'klx300', 'kx450', 'samurai',
+  'ninja7hybrid', 'z900se', 'versys650', 'w230', 'klr650', 'vulcans'
 ];
 
 /**
@@ -80,7 +81,7 @@ const WHEEL_BIKES = buildWheelBikes(WHEEL_BIKE_KEYS);
 
 section('1 · Erwartete Anzahl an Segmenten');
 (function() {
-  assert(WHEEL_BIKES.length === 17, `WHEEL_BIKES hat 17 Segmente (gefunden: ${WHEEL_BIKES.length})`);
+  assert(WHEEL_BIKES.length === 23, `WHEEL_BIKES hat 23 Segmente (gefunden: ${WHEEL_BIKES.length})`);
   assert(WHEEL_BIKES.length === WHEEL_BIKE_KEYS.length, 'Segmentanzahl entspricht Anzahl der Bike-Keys');
 })();
 
