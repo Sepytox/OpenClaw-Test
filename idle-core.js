@@ -102,6 +102,34 @@ var IDLE_BALANCE = {
   PARTS_BONUS_MULTIPLIER: 1,
   /** @todo Phase C — Anteil des Passivertrags, der offline gutgeschrieben wird (0=kein Offline-Ertrag). */
   OFFLINE_EARN_FRACTION: 0,
+
+  /* ── Phase B: Schaltpunkt-Combo (MECHANIK A) ────────────────────
+   * Alle ca. 15–30s erscheint eine Schaltpunkt-Leiste mit wandernder
+   * Markierung und einer grünen "perfekten Zone" in der Mitte. Ein
+   * Treffer (Klick innerhalb der Zone) erhöht die Combo und gewährt für
+   * COMBO_MULTIPLIER_DURATION_MS einen steigenden Ertrags-Multiplikator
+   * (x2 bis maximal x5); ein Fehlklick (ausserhalb der Zone) setzt die
+   * Combo zurück auf 0; Ignorieren (Leiste läuft ab) hat KEINE Strafe. */
+  /** Basis-Breite der perfekten Zone in % der Leistenbreite (Combo 0). */
+  COMBO_ZONE_BASE_WIDTH_PCT: 34,
+  /** Untere Grenze, unter die die Zone niemals schrumpft (% Leistenbreite). */
+  COMBO_ZONE_MIN_WIDTH_PCT: 8,
+  /** Schrumpfung der Zonenbreite je Combo-Punkt (Prozentpunkte). */
+  COMBO_ZONE_SHRINK_PER_COMBO_PCT: 2,
+  /** Ertrags-Multiplikator, der bei Combo 1 gewährt wird. */
+  COMBO_MULTIPLIER_BASE: 2,
+  /** Höchster erreichbarer Ertrags-Multiplikator (Deckel). */
+  COMBO_MULTIPLIER_MAX: 5,
+  /** Zusätzlicher Multiplikator je weiterem Combo-Punkt über 1 hinaus. */
+  COMBO_MULTIPLIER_STEP: 0.5,
+  /** Dauer (ms), die ein frisch gewährter Multiplikator aktiv bleibt. */
+  COMBO_MULTIPLIER_DURATION_MS: 10000,
+  /** Zufälliges Intervall (Sekunden) zwischen zwei Schaltpunkt-Leisten — untere Grenze. */
+  SHIFT_INTERVAL_MIN_SECONDS: 15,
+  /** Zufälliges Intervall (Sekunden) zwischen zwei Schaltpunkt-Leisten — obere Grenze. */
+  SHIFT_INTERVAL_MAX_SECONDS: 30,
+  /** Dauer (Sekunden) des Marker-Durchlaufs einer einzelnen Schaltpunkt-Leiste. */
+  SHIFT_SWEEP_DURATION_SECONDS: 2.2,
 };
 
 /**
@@ -334,6 +362,12 @@ function createInitialState() {
     parts: { collected: [] },
     /** @todo Phase C — Zeitstempel für Offline-Ertragsberechnung beim nächsten Laden. */
     offline: { lastSeenAt: null },
+
+    /* ── Phase B ────────────────────────────────────────────────── */
+    /** Schaltpunkt-Combo-Fortschritt (siehe applyShiftResult/comboMultiplier). */
+    combo: { count: 0, multiplier: 1, multiplierExpiresAt: null },
+    /** Motorsound-Einstellungen (Web Audio, standardmässig AUS). */
+    sound: { enabled: false, volume: 0.5 },
   };
 }
 
@@ -361,6 +395,15 @@ function migrateState(raw) {
     prestige: raw.prestige && typeof raw.prestige === 'object' ? raw.prestige : fresh.prestige,
     parts: raw.parts && typeof raw.parts === 'object' ? raw.parts : fresh.parts,
     offline: raw.offline && typeof raw.offline === 'object' ? raw.offline : fresh.offline,
+    combo: raw.combo && typeof raw.combo === 'object' ? {
+      count: typeof raw.combo.count === 'number' && raw.combo.count >= 0 ? raw.combo.count : 0,
+      multiplier: typeof raw.combo.multiplier === 'number' && raw.combo.multiplier >= 1 ? raw.combo.multiplier : 1,
+      multiplierExpiresAt: typeof raw.combo.multiplierExpiresAt === 'number' ? raw.combo.multiplierExpiresAt : null,
+    } : fresh.combo,
+    sound: raw.sound && typeof raw.sound === 'object' ? {
+      enabled: typeof raw.sound.enabled === 'boolean' ? raw.sound.enabled : false,
+      volume: typeof raw.sound.volume === 'number' && raw.sound.volume >= 0 && raw.sound.volume <= 1 ? raw.sound.volume : 0.5,
+    } : fresh.sound,
   };
 
   if (state.ownedBikeIds.length === 0) state.ownedBikeIds = fresh.ownedBikeIds.slice();
@@ -478,6 +521,114 @@ function creditKm(state, amount) {
   state.totalKmEarned += amount;
 }
 
+/**
+ * MECHANIK A — Schaltpunkt-Combo: berechnet den Ertrags-Multiplikator für
+ * eine gegebene Combo-Anzahl. Combo 0 (oder kleiner) bedeutet "kein
+ * Multiplikator" (1x). Ab Combo 1 startet der Multiplikator bei
+ * COMBO_MULTIPLIER_BASE und wächst je weiterem Combo-Punkt um
+ * COMBO_MULTIPLIER_STEP, gedeckelt auf COMBO_MULTIPLIER_MAX. Reine,
+ * deterministische Funktion.
+ * @param {number} combo - Aktuelle Combo-Anzahl (>= 0).
+ * @returns {number} Ertrags-Multiplikator (1 bis COMBO_MULTIPLIER_MAX).
+ */
+function comboMultiplier(combo) {
+  if (!combo || combo <= 0) return 1;
+  var raw = IDLE_BALANCE.COMBO_MULTIPLIER_BASE + (combo - 1) * IDLE_BALANCE.COMBO_MULTIPLIER_STEP;
+  return Math.min(IDLE_BALANCE.COMBO_MULTIPLIER_MAX, raw);
+}
+
+/**
+ * MECHANIK A — Schaltpunkt-Combo: berechnet die Breite der "perfekten
+ * Zone" (in % der Leistenbreite) für eine gegebene Combo-Anzahl. Die Zone
+ * schrumpft monoton mit steigender Combo (schwerer zu treffen bei hoher
+ * Combo), fällt aber nie unter COMBO_ZONE_MIN_WIDTH_PCT. Reine,
+ * deterministische Funktion.
+ * @param {number} combo - Aktuelle Combo-Anzahl (>= 0).
+ * @param {number} [baseWidth] - Basis-Breite in % (Combo 0); Standard
+ *   IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT, falls ausgelassen/ungültig.
+ * @returns {number} Zonenbreite in % (>= COMBO_ZONE_MIN_WIDTH_PCT).
+ */
+function perfectZoneWidth(combo, baseWidth) {
+  var base = typeof baseWidth === 'number' && baseWidth > 0 ? baseWidth : IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT;
+  var c = combo > 0 ? combo : 0;
+  var shrunk = base - c * IDLE_BALANCE.COMBO_ZONE_SHRINK_PER_COMBO_PCT;
+  return Math.max(IDLE_BALANCE.COMBO_ZONE_MIN_WIDTH_PCT, shrunk);
+}
+
+/**
+ * Stellt sicher, dass state.combo ein gültiges Objekt ist (defensiv, für
+ * Zustände, die nicht über createInitialState()/migrateState() gelaufen
+ * sind, z. B. handgebaute Test-Zustände).
+ * @param {Object} state - Zentraler Idle-Zustand (wird ggf. mutiert).
+ * @returns {void}
+ */
+function ensureComboState(state) {
+  if (!state.combo || typeof state.combo !== 'object') {
+    state.combo = { count: 0, multiplier: 1, multiplierExpiresAt: null };
+  }
+}
+
+/**
+ * MECHANIK A — Schaltpunkt-Combo: verarbeitet das Ergebnis EINES Klicks
+ * auf die Schaltpunkt-Leiste. Treffer (hit=true) erhöht die Combo um 1
+ * und gewährt für IDLE_BALANCE.COMBO_MULTIPLIER_DURATION_MS den per
+ * comboMultiplier() berechneten Ertrags-Multiplikator. Fehlklick
+ * (hit=false) setzt Combo UND aktiven Multiplikator zurück. Mutiert
+ * state.combo. Ignorieren (Leiste läuft unbeklickt ab) ruft diese
+ * Funktion NICHT auf — daher keine Strafe fürs Ignorieren.
+ * @param {Object} state - Zentraler Idle-Zustand (wird mutiert).
+ * @param {boolean} hit - true = Klick innerhalb der perfekten Zone.
+ * @param {number} [nowMs] - Zeitstempel "jetzt" in ms; Standard Date.now()
+ *   (als Parameter überreichbar, damit die Funktion deterministisch/
+ *   testbar bleibt).
+ * @returns {{count:number, multiplier:number, multiplierExpiresAt:(number|null)}} Neuer Combo-Zustand.
+ */
+function applyShiftResult(state, hit, nowMs) {
+  var now = typeof nowMs === 'number' ? nowMs : Date.now();
+  ensureComboState(state);
+  if (hit) {
+    state.combo.count += 1;
+    state.combo.multiplier = comboMultiplier(state.combo.count);
+    state.combo.multiplierExpiresAt = now + IDLE_BALANCE.COMBO_MULTIPLIER_DURATION_MS;
+  } else {
+    state.combo.count = 0;
+    state.combo.multiplier = 1;
+    state.combo.multiplierExpiresAt = null;
+  }
+  return { count: state.combo.count, multiplier: state.combo.multiplier, multiplierExpiresAt: state.combo.multiplierExpiresAt };
+}
+
+/**
+ * Liefert den aktuell aktiven Combo-Ertrags-Multiplikator (1, falls kein
+ * Treffer-Multiplikator gerade aktiv/abgelaufen ist). Reine Funktion —
+ * mutiert state NICHT. Für die Anwendung des Multiplikators auf
+ * passiveEarn()/activeEarn()-Erträge in idle.js gedacht.
+ * @param {Object} state - Zentraler Idle-Zustand.
+ * @param {number} [nowMs] - Zeitstempel "jetzt" in ms; Standard Date.now().
+ * @returns {number} Aktiver Multiplikator (>= 1).
+ */
+function activeComboMultiplier(state, nowMs) {
+  var now = typeof nowMs === 'number' ? nowMs : Date.now();
+  if (!state || !state.combo || typeof state.combo.multiplierExpiresAt !== 'number') return 1;
+  if (now >= state.combo.multiplierExpiresAt) return 1;
+  return state.combo.multiplier || 1;
+}
+
+/**
+ * Würfelt das nächste Zufallsintervall (Sekunden) bis zur nächsten
+ * Schaltpunkt-Leiste, zwischen SHIFT_INTERVAL_MIN_SECONDS und
+ * SHIFT_INTERVAL_MAX_SECONDS. Zufälligkeit wird als Parameter
+ * übergeben (Standard Math.random), damit die Funktion testbar bleibt.
+ * @param {Function} [randomFn] - Zufallsfunktion, liefert [0,1); Standard Math.random.
+ * @returns {number} Sekunden bis zur nächsten Schaltpunkt-Leiste.
+ */
+function nextShiftIntervalSeconds(randomFn) {
+  var rnd = typeof randomFn === 'function' ? randomFn : Math.random;
+  var min = IDLE_BALANCE.SHIFT_INTERVAL_MIN_SECONDS;
+  var max = IDLE_BALANCE.SHIFT_INTERVAL_MAX_SECONDS;
+  return min + rnd() * (max - min);
+}
+
 var IdleCore = {
   IDLE_STATE_KEY: IDLE_STATE_KEY,
   IDLE_STATE_VERSION: IDLE_STATE_VERSION,
@@ -501,6 +652,11 @@ var IdleCore = {
   upgradeBike: upgradeBike,
   selectBike: selectBike,
   creditKm: creditKm,
+  comboMultiplier: comboMultiplier,
+  perfectZoneWidth: perfectZoneWidth,
+  applyShiftResult: applyShiftResult,
+  activeComboMultiplier: activeComboMultiplier,
+  nextShiftIntervalSeconds: nextShiftIntervalSeconds,
 };
 
 if (typeof window !== 'undefined') {
