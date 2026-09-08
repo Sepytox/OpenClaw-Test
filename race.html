@@ -498,6 +498,7 @@
     <a href="shop.html">Aftermarket</a>
     <a href="quiz.html">Quiz</a>
     <a href="wheel.html">Wheel</a>
+    <a href="garage.html">🏠 Garage</a>
     <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
 </nav>
 
@@ -593,6 +594,7 @@
     <div class="endless-result-banner" id="endlessResultBanner">
         <h2>&#8734; Endlos-Rennen — Ergebnis beim Stopp</h2>
         <div class="endless-result-grid" id="endlessResultGrid"></div>
+        <p class="garage-hint" style="margin-top:0.75rem;"><a href="garage.html" class="btn btn-outline" style="font-size:0.82rem;">🏠 In deiner Garage ansehen</a></p>
     </div>
 
     <!-- SINGLE MODE DASHBOARD -->
@@ -710,6 +712,7 @@
     <div class="records-section">
         <h2>🏆 Rekorde (localStorage)</h2>
         <div class="highscore-readout" id="highscoreReadout" style="margin:0 0 0.75rem;padding:0.55rem 0.9rem;border:1px solid var(--accent);border-radius:8px;font-weight:600;display:inline-block;">🏁 Highscore: noch keiner</div>
+        <p class="garage-hint" id="raceGarageHint" hidden style="margin:0 0 0.75rem;"><a href="garage.html" class="btn btn-outline" style="font-size:0.82rem;">🏠 In deiner Garage ansehen</a></p>
         <div class="record-list" id="recordList">
             <div style="color:#333;font-size:0.85rem;">Noch keine Rennen gefahren</div>
         </div>
@@ -1529,6 +1532,11 @@ function showEndlessResult() {
     banner.classList.add('show');
     saveRecord(s, RACE_BIKES[currentBike1]);
     if (raceMode === 'compare') saveRecord(sim2State, RACE_BIKES[currentBike2]);
+
+    try {
+        if (typeof window.VroooomStats !== 'undefined') window.VroooomStats.recordEndlessRun(s.time);
+        if (typeof window.VroooomAchievements !== 'undefined') window.VroooomAchievements.checkNow();
+    } catch (e) { /* Gamification-Hook darf den Endlos-Modus nie blockieren */ }
 }
 
 function saveRecord(state, bike) {
@@ -1581,6 +1589,13 @@ function finishRace(state, bike) {
     saveRecord(state, bike);
     saveHighscore(state, bike);
     updateSplits();
+
+    try {
+        if (typeof window.VroooomStats !== 'undefined') window.VroooomStats.recordRaceFinish(state.t100);
+        if (typeof window.VroooomAchievements !== 'undefined') window.VroooomAchievements.checkNow();
+        const hint = document.getElementById('raceGarageHint');
+        if (hint) hint.hidden = false;
+    } catch (e) { /* Gamification-Hook darf ein Rennergebnis nie blockieren */ }
 }
 
 // ==========================================
@@ -1686,6 +1701,8 @@ document.addEventListener('keydown', e => {
 drawTrack();
 
 </script>
+    <script src="stats.js"></script>
+    <script src="achievements.js"></script>
     <script src="theme-toggle.js"></script>
     <script src="settings.js"></script>
     <script src="scroll-reveal.js"></script>

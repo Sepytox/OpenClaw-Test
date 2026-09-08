@@ -321,6 +321,7 @@
     <a href="shop.html">Aftermarket</a>
     <a href="quiz.html">Quiz</a>
     <a href="wheel.html" class="active">Wheel</a>
+    <a href="garage.html">🏠 Garage</a>
     <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
 </nav>
 
@@ -361,6 +362,7 @@
                     <button class="btn-outline-sm" onclick="shareResult()">📤 Teilen</button>
                     <button class="btn-ghost-sm" onclick="spinWheel()">🔄 Nochmal drehen</button>
                 </div>
+                <p class="garage-hint" style="margin-top:0.65rem;"><a href="garage.html" class="btn btn-outline" style="font-size:0.82rem;">🏠 In deiner Garage ansehen</a></p>
             </div>
 
             <div class="spin-history" id="spinHistory" style="display:none;">
@@ -601,6 +603,11 @@ function determineResult() {
     showResult(bike);
     launchConfetti();
     updateHistory();
+
+    try {
+        if (typeof window.VroooomStats !== 'undefined') window.VroooomStats.recordWheelSpin(bike.key);
+        if (typeof window.VroooomAchievements !== 'undefined') window.VroooomAchievements.checkNow();
+    } catch (e) { /* Gamification-Hook darf den Spin nie blockieren */ }
 }
 
 /**
@@ -711,6 +718,8 @@ document.addEventListener('keydown', e => {
 });
 
 </script>
+    <script src="stats.js"></script>
+    <script src="achievements.js"></script>
     <script src="theme-toggle.js"></script>
     <script src="settings.js"></script>
     <script src="scroll-reveal.js"></script>

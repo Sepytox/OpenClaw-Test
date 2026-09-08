@@ -324,6 +324,28 @@
     .hero { padding: 3rem 1rem 2.5rem; }
     .hero-cta-row { flex-direction: column; align-items: stretch; }
 }
+
+/* ====================================================
+   GARAGE-NAV-WIDGET — Gamification (Garage/Achievements)
+   ==================================================== */
+.garage-nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+.garage-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.15em;
+    padding: 0 0.35em;
+    background: var(--accent);
+    color: #fff;
+    border-radius: var(--radius-full, 999px);
+    font-size: 0.72em;
+    font-weight: 700;
+    line-height: 1.5;
+}
     </style>
 </head>
 <body>
@@ -335,6 +357,7 @@
         <a href="shop.html">Aftermarket</a>
         <a href="quiz.html">Quiz</a>
         <a href="wheel.html">Wheel</a>
+        <a href="garage.html" class="garage-nav-link">🏠 Garage <span class="garage-nav-badge" id="garageNavFavCount" hidden>0</span></a>
         <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">☀️</button>
     </nav>
 
@@ -1017,6 +1040,46 @@
         };
 
         /* ==========================================
+           Garage-Nav-Widget + Gamification-Helper (additiv)
+           ========================================== */
+        /**
+         * Aktualisiert das Favoriten-Badge im Garage-Nav-Link (Anzahl live
+         * Favoriten). Rein additiv, darf nie einen Fehler werfen.
+         * @returns {void}
+         */
+        function updateGarageNavBadge() {
+            try {
+                var badge = document.getElementById('garageNavFavCount');
+                if (!badge) return;
+                var count = Favorites.getAll().length;
+                badge.textContent = String(count);
+                badge.hidden = count === 0;
+            } catch (e) { /* darf Nav nie blockieren */ }
+        }
+
+        /**
+         * Trägt ein Bike als "zuletzt angesehen" in vroooom_garage_recentlyViewed
+         * ein (dedupliziert, neueste zuerst, auf 8 Einträge gekappt). Spiegelt
+         * die Capping-Logik aus garage.js (VroooomGarage.addToRecentlyViewed),
+         * hier dupliziert, damit index.html kein zusätzliches Skript laden muss.
+         * @param {string} bikeKey - Bike-ID des geöffneten Motorrads.
+         * @returns {void}
+         */
+        function recordGarageRecentlyView(bikeKey) {
+            try {
+                var KEY = 'vroooom_garage_recentlyViewed';
+                var raw = localStorage.getItem(KEY);
+                var list = [];
+                try { list = raw ? JSON.parse(raw) : []; } catch (e) { list = []; }
+                if (!Array.isArray(list)) list = [];
+                list = list.filter(function(entry) { return entry && entry.bikeKey !== bikeKey; });
+                list.unshift({ bikeKey: bikeKey, viewedAt: new Date().toISOString() });
+                if (list.length > 8) list = list.slice(0, 8);
+                localStorage.setItem(KEY, JSON.stringify(list));
+            } catch (e) { /* darf Modal.open nie blockieren */ }
+        }
+
+        /* ==========================================
            Favorites System
            ========================================== */
         var Favorites = (function() {
@@ -1033,6 +1096,11 @@
                 save();
                 renderAll();
                 FavoritesSection.render();
+                updateGarageNavBadge();
+                try {
+                    if (typeof window.VroooomStats !== 'undefined') window.VroooomStats.recordFavoritesCount(favs.length);
+                    if (typeof window.VroooomAchievements !== 'undefined') window.VroooomAchievements.checkNow({ favoritesCount: favs.length });
+                } catch (e) { /* Gamification-Hook darf Favoriten nie blockieren */ }
             }
 
             function renderAll() {
@@ -1101,6 +1169,10 @@
                 data[bikeKey].push({ rating: rating, text: text, date: new Date().toLocaleDateString('de-DE') });
                 save();
                 updateCardBadge(bikeKey);
+                try {
+                    if (typeof window.VroooomStats !== 'undefined') window.VroooomStats.recordReview();
+                    if (typeof window.VroooomAchievements !== 'undefined') window.VroooomAchievements.checkNow();
+                } catch (e) { /* Gamification-Hook darf Reviews nie blockieren */ }
             }
 
             function getAvg(bikeKey) {
@@ -1553,6 +1625,11 @@
             function open(bikeKey, triggerEl) {
                 var bike = BIKES[bikeKey];
                 if (!bike) return;
+                try {
+                    if (typeof window.VroooomStats !== 'undefined') window.VroooomStats.recordBikeView(bikeKey);
+                    recordGarageRecentlyView(bikeKey);
+                    if (typeof window.VroooomAchievements !== 'undefined') window.VroooomAchievements.checkNow();
+                } catch (e) { /* Gamification-Hook darf das Modal nie blockieren */ }
                 currentBikeKey = bikeKey;
                 lastTrigger = triggerEl || null;
                 titleEl.textContent = bike.name;
@@ -1821,6 +1898,7 @@
             Favorites.renderAll();
             FavoritesSection.render();
             Reviews.updateAllBadges();
+            updateGarageNavBadge();
             // MaintenanceCalc wird erst im unteren <script>-Block definiert
             // (siehe "Init MaintenanceCalc on page load" weiter unten) —
             // hier NICHT erneut aufrufen, sonst ReferenceError (Mängelliste 1.1).
@@ -2122,6 +2200,8 @@
         } catch(e) {}
     }
     </script>
+    <script src="stats.js"></script>
+    <script src="achievements.js"></script>
     <script src="settings.js"></script>
     <script src="scroll-reveal.js"></script>
 </body>

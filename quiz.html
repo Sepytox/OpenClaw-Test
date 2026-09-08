@@ -485,6 +485,7 @@
     <a href="shop.html">Aftermarket</a>
     <a href="quiz.html" class="active">Quiz</a>
     <a href="wheel.html">Wheel</a>
+    <a href="garage.html">🏠 Garage</a>
     <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
 </nav>
 
@@ -585,6 +586,7 @@
                 <button class="btn-share" onclick="shareResult()">📤 Teilen</button>
                 <button class="btn-retry" onclick="restartQuiz()">🔄 Nochmal</button>
             </div>
+            <p class="garage-hint" style="margin-top:0.75rem;"><a href="garage.html" class="btn btn-outline" style="font-size:0.82rem;">🏠 In deiner Garage ansehen</a></p>
         </div>
     </div>
 </div>
@@ -830,6 +832,11 @@ function calculateResult() {
 
     // Show results
     showResults(topCat, sorted, pcts);
+
+    try {
+        if (typeof window.VroooomStats !== 'undefined') window.VroooomStats.recordQuizCompletion(pcts[topCat]);
+        if (typeof window.VroooomAchievements !== 'undefined') window.VroooomAchievements.checkNow();
+    } catch (e) { /* Gamification-Hook darf das Quiz-Ergebnis nie blockieren */ }
 }
 
 function showResults(topCat, sorted, pcts) {
@@ -953,6 +960,8 @@ function restartQuiz() {
 }
 
 </script>
+    <script src="stats.js"></script>
+    <script src="achievements.js"></script>
     <script src="theme-toggle.js"></script>
     <script src="settings.js"></script>
     <script src="scroll-reveal.js"></script>
