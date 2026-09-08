@@ -489,18 +489,11 @@
 
 <div class="shift-warning" id="shiftWarning">⚠️ SHIFT UP!</div>
 
-<!-- NAV -->
-<nav class="site-nav">
-    <a class="brand" href="index.html">🏍️ Vrooooom</a>
-    <a href="index.html">Übersicht</a>
-    <a href="soundcheck.html">SoundCheck</a>
-    <a href="race.html" class="active">Racing Sim</a>
-    <a href="shop.html">Aftermarket</a>
-    <a href="quiz.html">Quiz</a>
-    <a href="wheel.html">Wheel</a>
-    <a href="garage.html">🏠 Garage</a>
-    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
-</nav>
+<!-- NAV — gemeinsame Navbar (Single Source of Truth), siehe navbar.js.
+     data-theme-toggle="external": theme-toggle.js verdrahtet den Button
+     weiter unten, navbar.js darf hier NICHT selbst verdrahten. -->
+<nav id="siteNavRoot" class="site-nav" data-theme-toggle="external"></nav>
+<script src="navbar.js"></script>
 
 <div class="race-page">
     <div class="page-title">

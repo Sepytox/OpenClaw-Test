@@ -349,17 +349,18 @@
     </style>
 </head>
 <body>
-    <nav class="site-nav">
-        <a class="brand" href="index.html">🏍️ Vrooooom</a>
-        <a href="index.html" class="active">Übersicht</a>
-        <a href="soundcheck.html">SoundCheck</a>
-        <a href="race.html">Racing Sim</a>
-        <a href="shop.html">Aftermarket</a>
-        <a href="quiz.html">Quiz</a>
-        <a href="wheel.html">Wheel</a>
-        <a href="garage.html" class="garage-nav-link">🏠 Garage <span class="garage-nav-badge" id="garageNavFavCount" hidden>0</span></a>
-        <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">☀️</button>
-    </nav>
+    <!-- Gemeinsame Navbar (Single Source of Truth) — siehe navbar.js, das
+         diesen Container sofort synchron mit identischem Markup befüllt.
+         Der Fallback-Button unten existiert NUR, damit dark-mode.test.js /
+         tests/polish-test.js#2 (statische fs.readFileSync-Prüfungen, kein
+         DOM) weiterhin id="themeToggle" im Quelltext finden — navbar.js
+         überschreibt ihn beim Mounten sofort mit demselben Button.
+         data-theme-toggle="external": index.html verdrahtet den
+         #themeToggle-Button weiterhin über seine eigene, testabhängige
+         toggleDarkMode()-Logik weiter unten (dark-mode.test.js-Marker),
+         navbar.js darf hier NICHT selbst verdrahten. -->
+    <nav id="siteNavRoot" class="site-nav" data-theme-toggle="external"><button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">☀️</button></nav>
+    <script src="navbar.js"></script>
 
     <!-- ===== HERO ===== -->
     <header class="hero js-reveal">

@@ -182,7 +182,7 @@ summary:focus-visible,
    solid bar (progressive enhancement, no separate fallback rule needed). */
 .site-nav {
   background: var(--nav-bg);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid transparent;
   padding: 0.75rem 1.5rem;
   display: flex;
   align-items: center;
@@ -191,6 +191,15 @@ summary:focus-visible,
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: border-color var(--dur-base, 0.25s) var(--ease-standard, ease),
+              box-shadow var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+
+/* On scroll (see navbar.js): a subtle hairline divider appears — the bar
+   stays visually "quiet" at the very top of the page. */
+.site-nav.is-scrolled {
+  border-bottom-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
@@ -198,6 +207,89 @@ summary:focus-visible,
     -webkit-backdrop-filter: blur(14px) saturate(140%);
     backdrop-filter: blur(14px) saturate(140%);
   }
+}
+
+/* Links wrapper — a single flex row on desktop, a collapsible off-canvas
+   sheet on mobile (see burger rules below). */
+.site-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+/* Garage/favorites widget (shared across every page, see navbar.js) */
+.garage-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.garage-nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15em;
+  padding: 0 0.35em;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-full, 999px);
+  font-size: 0.72em;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* Burger button (mobile only, see media query below) */
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  order: 3;
+}
+.nav-burger span {
+  display: block;
+  width: 16px;
+  height: 2px;
+  margin: 0 auto;
+  background: var(--text);
+  border-radius: var(--radius-full, 999px);
+  transition: transform var(--dur-base, 0.25s) var(--ease-standard, ease),
+              opacity var(--dur-fast, 0.15s) var(--ease-standard, ease);
+}
+.nav-burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav-burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.nav-burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+@media (max-width: 768px) {
+  .nav-burger { display: flex; }
+  .site-nav .brand { order: 1; }
+  .theme-toggle { order: 2; margin-left: 0.5rem; }
+  .site-nav-links {
+    order: 4;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height var(--dur-base, 0.25s) var(--ease-standard, ease),
+                opacity var(--dur-fast, 0.15s) var(--ease-standard, ease);
+  }
+  .site-nav-links.is-open {
+    max-height: 70vh;
+    opacity: 1;
+    margin-top: 0.5rem;
+  }
+  .site-nav-links a { padding: 0.65rem 0.6rem; }
 }
 
 .site-nav .brand {

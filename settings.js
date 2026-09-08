@@ -135,6 +135,30 @@
   }
   recordPageVisit();
 
+  /* ── Shared Navbar (nur auf Seiten ohne eigenes <script src="navbar.js">) ──
+   * Läuft auf JEDER Seite, die settings.js einbindet — auch auf
+   * soundcheck.html (geschützte Datei, wird hier bewusst NICHT
+   * angefasst). Auf den 6 bearbeitbaren Seiten hat navbar.js bereits per
+   * eigenem <script>-Tag gemountet (window.VroooomNavbar existiert dann
+   * schon), daher passiert dort nichts weiter. Auf soundcheck.html
+   * existiert dieser globale Namespace nicht, weshalb navbar.js hier zur
+   * Laufzeit nachgeladen wird — es mountet sich beim Laden selbst in das
+   * bestehende, unveränderte <nav class="site-nav">. Komplett defensiv
+   * (try/catch), damit bestehende Seiten nie blockiert werden.
+   * @returns {void}
+   */
+  function ensureSharedNavbar() {
+    try {
+      if (window.VroooomNavbar) return;
+      var script = document.createElement('script');
+      script.src = 'navbar.js';
+      document.body.appendChild(script);
+    } catch (e) {
+      /* Navbar-Nachladen darf nie eine bestehende Seite blockieren */
+    }
+  }
+  ensureSharedNavbar();
+
   /* ── Build Settings Panel HTML ──────────────────────────────── */
   function themeOption(value, icon, previewClass, name, desc) {
     var active = state.theme === value ? ' active' : '';
