@@ -103,8 +103,16 @@ var IDLE_BALANCE = {
   PRESTIGE_BONUS_PER_LEVEL: 0.05,
   /** Je 5 kumulierte Tuning-Level (über alle Bikes) gibt es +1 Bonus-Trophäe beim Saisonabschluss. */
   TROPHY_LEVEL_BONUS_DIVISOR: 5,
-  /** @todo Phase C (feat(idle-parts)) — Ertrag-Multiplikator aus gesammelten Teilen (aktuell ungenutzt). */
+  /* ── Phase C: Teile-Sammlung ──────────────────────────────────── */
+  /** @deprecated Abgelöst durch die individuellen bonusPct-Werte in IDLE_PART_SETS (siehe setBonuses()); bleibt als inaktiver Platzhalter erhalten. */
   PARTS_BONUS_MULTIPLIER: 1,
+  /** Wahrscheinlichkeit (0–1) pro abgeschlossener Runde, dass überhaupt ein Teil dropt. */
+  PART_DROP_CHANCE_PER_LAP: 0.035,
+  /** Relative Gewichtung der drei Seltenheitsstufen bei einem Drop (müssen nicht auf 100 summieren). */
+  PART_RARITY_WEIGHTS: { common: 70, rare: 25, legendary: 5 },
+  /** km-Gutschrift, wenn ein bereits besessenes Teil erneut dropt (Dubletten→km), je Seltenheitsstufe. */
+  PART_DUPLICATE_KM_VALUE: { common: 15, rare: 60, legendary: 250 },
+
   /** @todo Phase C (feat(idle-offline)) — Anteil des Passivertrags, der offline gutgeschrieben wird (0=kein Offline-Ertrag). */
   OFFLINE_EARN_FRACTION: 0,
 
@@ -198,6 +206,67 @@ var IDLE_CONTRACTS = [
   { id: 'zoneBreiter10', name: 'Perfekt-Zone 10% breiter', beschreibung: 'Die Schaltpunkt-Zone ist dauerhaft 10 Prozentpunkte breiter.', kostenTrophaeen: 4, effect: 'zoneWidthBonusPct', value: 10 },
   { id: 'offlineVerdoppelt', name: 'Offline-Ertrag verdoppelt', beschreibung: 'Verdoppelt die Offline-Ertragsdeckelung von 4 auf 8 Stunden.', kostenTrophaeen: 6, effect: 'offlineCapMultiplier', value: 2 },
   { id: 'tuningGuenstiger15', name: 'Tuning 15% günstiger', beschreibung: 'Alle Tuning-Kosten sinken dauerhaft um 15%.', kostenTrophaeen: 4, effect: 'tuningCostMultiplier', value: 0.85 },
+];
+
+/**
+ * IDLE_PART_SETS — die 7 Teile-Sets (Ausrüstungs-Kategorien). Ist ein Set
+ * komplett (alle 3 Seltenheitsstufen besessen, siehe setBonuses()), gilt
+ * dessen bonusPct permanent und dauerhaft auf den Gesamtertrag.
+ */
+var IDLE_PART_SETS = [
+  { id: 'vergaser', name: 'Vergaser', bonusPct: 3 },
+  { id: 'auspuff', name: 'Auspuff', bonusPct: 4 },
+  { id: 'kettensatz', name: 'Kettensatz', bonusPct: 2 },
+  { id: 'verkleidung', name: 'Verkleidung', bonusPct: 5 },
+  { id: 'helm', name: 'Helm', bonusPct: 3 },
+  { id: 'bremsen', name: 'Bremsen', bonusPct: 4 },
+  { id: 'felgen', name: 'Felgen', bonusPct: 3 },
+];
+
+/**
+ * Baut einen einzelnen IDLE_PARTS-Eintrag.
+ * @param {string} id - Eindeutige Teile-id.
+ * @param {string} name - Anzeigename.
+ * @param {string} setId - id des zugehörigen IDLE_PART_SETS-Eintrags.
+ * @param {string} rarity - Seltenheitsstufe ('common'|'rare'|'legendary').
+ * @returns {Object} Vollständiger IDLE_PARTS-Eintrag.
+ */
+function makeIdlePart(id, name, setId, rarity) {
+  return { id: id, name: name, setId: setId, rarity: rarity };
+}
+
+/**
+ * IDLE_PARTS — 21 Teile über 7 Sets × 3 Seltenheitsstufen (common/rare/
+ * legendary), rundenbasiert per rollPartDrop() erspielbar.
+ */
+var IDLE_PARTS = [
+  makeIdlePart('vergaser_standard', 'Standard-Vergaser', 'vergaser', 'common'),
+  makeIdlePart('vergaser_sport', 'Sport-Vergaser', 'vergaser', 'rare'),
+  makeIdlePart('vergaser_racing', 'Racing-Vergaser', 'vergaser', 'legendary'),
+
+  makeIdlePart('auspuff_standard', 'Standard-Auspuff', 'auspuff', 'common'),
+  makeIdlePart('auspuff_slipon', 'Slip-On-Auspuff', 'auspuff', 'rare'),
+  makeIdlePart('auspuff_vollanlage', 'Voll-Titan-Anlage', 'auspuff', 'legendary'),
+
+  makeIdlePart('kette_standard', 'Standard-Kettensatz', 'kettensatz', 'common'),
+  makeIdlePart('kette_verstaerkt', 'Verstärkter Kettensatz', 'kettensatz', 'rare'),
+  makeIdlePart('kette_gold', 'Gold-Kettensatz', 'kettensatz', 'legendary'),
+
+  makeIdlePart('verkleidung_standard', 'Standard-Verkleidung', 'verkleidung', 'common'),
+  makeIdlePart('verkleidung_carbon', 'Carbon-Verkleidung', 'verkleidung', 'rare'),
+  makeIdlePart('verkleidung_replika', 'Renn-Replika-Verkleidung', 'verkleidung', 'legendary'),
+
+  makeIdlePart('helm_standard', 'Standard-Helm', 'helm', 'common'),
+  makeIdlePart('helm_carbon', 'Carbon-Helm', 'helm', 'rare'),
+  makeIdlePart('helm_replica', 'Replica-Rennhelm', 'helm', 'legendary'),
+
+  makeIdlePart('bremsen_standard', 'Standard-Bremsanlage', 'bremsen', 'common'),
+  makeIdlePart('bremsen_sport', 'Sport-Bremsanlage', 'bremsen', 'rare'),
+  makeIdlePart('bremsen_renn', 'Renn-Bremsanlage', 'bremsen', 'legendary'),
+
+  makeIdlePart('felgen_standard', 'Standard-Felgen', 'felgen', 'common'),
+  makeIdlePart('felgen_leicht', 'Leichtmetall-Felgen', 'felgen', 'rare'),
+  makeIdlePart('felgen_carbon', 'Carbon-Felgen', 'felgen', 'legendary'),
 ];
 
 /**
@@ -411,6 +480,20 @@ function migratePrestige(raw, fresh) {
 }
 
 /**
+ * Migriert das parts-Feld (gesammelte Teile-ids) defensiv — unbekannte/
+ * ungültige ids werden verworfen.
+ * @param {*} raw - Rohes Zustandsobjekt (evtl. null/korrupt).
+ * @param {Object} fresh - Frischer Referenzzustand für Standardwerte.
+ * @returns {Object} Gültiges parts-Objekt.
+ */
+function migrateParts(raw, fresh) {
+  var rp = raw && raw.parts && typeof raw.parts === 'object' ? raw.parts : {};
+  return {
+    collected: Array.isArray(rp.collected) ? rp.collected.filter(function (id) { return !!getPartById(id); }) : fresh.parts.collected.slice(),
+  };
+}
+
+/**
  * Migriert/validiert ein aus localStorage geparstes Rohobjekt zu einem
  * garantiert gültigen, aktuellen Idle-Zustand. Fehlt das Objekt komplett,
  * ist es kein Objekt, fehlt/veraltet die version, oder fehlen/haben
@@ -432,7 +515,7 @@ function migrateState(raw) {
     bikeLevels: raw.bikeLevels && typeof raw.bikeLevels === 'object' ? raw.bikeLevels : fresh.bikeLevels,
     lastSavedAt: typeof raw.lastSavedAt === 'number' ? raw.lastSavedAt : fresh.lastSavedAt,
     prestige: migratePrestige(raw, fresh),
-    parts: raw.parts && typeof raw.parts === 'object' ? raw.parts : fresh.parts,
+    parts: migrateParts(raw, fresh),
     offline: raw.offline && typeof raw.offline === 'object' ? raw.offline : fresh.offline,
     combo: raw.combo && typeof raw.combo === 'object' ? {
       count: typeof raw.combo.count === 'number' && raw.combo.count >= 0 ? raw.combo.count : 0,
@@ -879,6 +962,124 @@ function perfectZoneWidthForState(state, combo) {
   return perfectZoneWidth(combo, IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT + bonus);
 }
 
+/* ============================================================
+   TEILE-SAMMLUNG — feat(idle-parts)
+   ============================================================ */
+
+/**
+ * Findet ein Teil anhand seiner id.
+ * @param {string} partId - id des Teils.
+ * @returns {Object|null} Eintrag aus IDLE_PARTS, oder null.
+ */
+function getPartById(partId) {
+  for (var i = 0; i < IDLE_PARTS.length; i++) {
+    if (IDLE_PARTS[i].id === partId) return IDLE_PARTS[i];
+  }
+  return null;
+}
+
+/**
+ * Wählt anhand IDLE_BALANCE.PART_RARITY_WEIGHTS eine gewichtete
+ * Seltenheitsstufe. Zufälligkeit wird als Parameter übergeben, damit die
+ * Funktion deterministisch testbar bleibt.
+ * @param {Function} rnd - Zufallsfunktion, liefert [0,1).
+ * @returns {string} 'common'|'rare'|'legendary'.
+ */
+function pickWeightedRarity(rnd) {
+  var weights = IDLE_BALANCE.PART_RARITY_WEIGHTS;
+  var total = weights.common + weights.rare + weights.legendary;
+  var roll = rnd() * total;
+  if (roll < weights.common) return 'common';
+  if (roll < weights.common + weights.rare) return 'rare';
+  return 'legendary';
+}
+
+/**
+ * Würfelt EINEN Teile-Drop (z. B. nach einer abgeschlossenen Runde):
+ * zuerst, OB überhaupt ein Teil dropt (IDLE_BALANCE.PART_DROP_CHANCE_PER_
+ * LAP), dann — falls ja — gewichtet WELCHE Seltenheitsstufe
+ * (pickWeightedRarity), dann ein zufälliges Teil aus dieser Stufe.
+ * Zufälligkeit wird als Parameter übergeben (Standard Math.random), damit
+ * die Funktion deterministisch testbar bleibt (eine Fake-Funktion, die
+ * eine vorgegebene Zahlenfolge zurückgibt, macht das Ergebnis exakt
+ * reproduzierbar).
+ * @param {Function} [rng] - Zufallsfunktion, liefert [0,1); Standard Math.random.
+ * @returns {string|null} id des gedroppten Teils, oder null (kein Drop).
+ */
+function rollPartDrop(rng) {
+  var rnd = typeof rng === 'function' ? rng : Math.random;
+  if (rnd() >= IDLE_BALANCE.PART_DROP_CHANCE_PER_LAP) return null;
+  var rarity = pickWeightedRarity(rnd);
+  var candidates = IDLE_PARTS.filter(function (p) { return p.rarity === rarity; });
+  if (candidates.length === 0) return null;
+  var idx = Math.floor(rnd() * candidates.length);
+  if (idx >= candidates.length) idx = candidates.length - 1;
+  return candidates[idx].id;
+}
+
+/**
+ * Stellt sicher, dass state.parts ein gültiges Objekt ist (defensiv, für
+ * Zustände, die nicht über createInitialState()/migrateState() gelaufen
+ * sind).
+ * @param {Object} state - Zentraler Idle-Zustand (wird ggf. mutiert).
+ * @returns {void}
+ */
+function ensurePartsState(state) {
+  if (!state.parts || typeof state.parts !== 'object' || !Array.isArray(state.parts.collected)) {
+    state.parts = { collected: [] };
+  }
+}
+
+/**
+ * Fügt ein gedropptes Teil zum Zustand hinzu. Ist das Teil bereits
+ * besessen (Dublette), wird stattdessen sein IDLE_BALANCE.PART_DUPLICATE_
+ * KM_VALUE (je Seltenheitsstufe) als km gutgeschrieben (Dubletten→km-
+ * Umwandlung) — die Sammlung selbst bleibt unverändert. Mutiert state.
+ * @param {Object} state - Zentraler Idle-Zustand (wird mutiert).
+ * @param {string} partId - id des gedropptes Teils (siehe rollPartDrop()).
+ * @returns {{isNew: boolean, awardedKm: number, part: (Object|null)}} Ergebnis.
+ */
+function addPart(state, partId) {
+  var part = getPartById(partId);
+  if (!part) return { isNew: false, awardedKm: 0, part: null };
+  ensurePartsState(state);
+
+  var alreadyOwned = state.parts.collected.indexOf(partId) !== -1;
+  if (alreadyOwned) {
+    var value = IDLE_BALANCE.PART_DUPLICATE_KM_VALUE[part.rarity] || 0;
+    creditKm(state, value);
+    return { isNew: false, awardedKm: value, part: part };
+  }
+
+  state.parts.collected.push(partId);
+  return { isNew: true, awardedKm: 0, part: part };
+}
+
+/**
+ * Berechnet die aggregierten Set-Boni aus der aktuellen Teile-Sammlung:
+ * für jedes IDLE_PART_SETS-Set, dessen 3 Teile ALLE besessen sind, zählt
+ * dessen bonusPct dauerhaft zum Gesamtertrag. Reine Funktion — mutiert
+ * state NICHT.
+ * @param {Object} state - Zentraler Idle-Zustand.
+ * @returns {{totalBonusMultiplier: number, totalBonusPct: number, completedSets: string[]}} Aggregierte Boni.
+ */
+function setBonuses(state) {
+  var owned = state && state.parts && Array.isArray(state.parts.collected) ? state.parts.collected : [];
+  var completedSets = [];
+  var totalBonusPct = 0;
+
+  IDLE_PART_SETS.forEach(function (set) {
+    var partIds = IDLE_PARTS.filter(function (p) { return p.setId === set.id; }).map(function (p) { return p.id; });
+    var allOwned = partIds.length > 0 && partIds.every(function (id) { return owned.indexOf(id) !== -1; });
+    if (allOwned) {
+      completedSets.push(set.id);
+      totalBonusPct += set.bonusPct;
+    }
+  });
+
+  return { totalBonusMultiplier: 1 + totalBonusPct / 100, totalBonusPct: totalBonusPct, completedSets: completedSets };
+}
+
 var IdleCore = {
   IDLE_STATE_KEY: IDLE_STATE_KEY,
   IDLE_STATE_VERSION: IDLE_STATE_VERSION,
@@ -919,6 +1120,14 @@ var IdleCore = {
   finishSeason: finishSeason,
   effectiveTuningCost: effectiveTuningCost,
   perfectZoneWidthForState: perfectZoneWidthForState,
+
+  /* ── Phase C: Teile-Sammlung ──────────────────────────────────────── */
+  IDLE_PART_SETS: IDLE_PART_SETS,
+  IDLE_PARTS: IDLE_PARTS,
+  getPartById: getPartById,
+  rollPartDrop: rollPartDrop,
+  addPart: addPart,
+  setBonuses: setBonuses,
 };
 
 if (typeof window !== 'undefined') {
