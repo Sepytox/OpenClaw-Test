@@ -30,13 +30,16 @@
             <div class="idle-layout">
                 <!-- ===== FAHR-BEREICH ===== -->
                 <section class="idle-drive js-reveal" aria-label="Fahrt">
-                    <!-- Platzhalter: Strecken-Canvas kommt in Phase B -->
-                    <div class="idle-track-placeholder" id="idleTrackPlaceholder">
-                        🛣️ Streckenanzeige (Canvas) folgt in Phase B
+                    <!-- Renn-Strecke (Canvas): Bike fährt automatisch eine Runde, Rundenzeit
+                         skaliert mit der aktuellen Geschwindigkeit. -->
+                    <div class="idle-track-wrap" id="idleTrackWrap">
+                        <canvas id="idleTrackCanvas" class="idle-track-canvas" aria-label="Animierte Renn-Strecke"></canvas>
+                        <div class="idle-handover" id="idleHandover" aria-live="polite"></div>
                     </div>
-                    <!-- Platzhalter: Tacho kommt in Phase B -->
-                    <div class="idle-tacho-placeholder" id="idleTachoPlaceholder">
-                        🏎️ Tacho folgt in Phase B
+
+                    <!-- Tacho (Canvas): Halbkreis-Gauge, Nadel folgt der aktuellen Bike-Geschwindigkeit. -->
+                    <div class="idle-tacho-wrap" id="idleTachoWrap">
+                        <canvas id="idleTachoCanvas" class="idle-tacho-canvas" aria-label="Tacho — aktuelle Geschwindigkeit"></canvas>
                     </div>
 
                     <div class="idle-km-display">

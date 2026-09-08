@@ -42,27 +42,65 @@
   padding: 1.5rem;
 }
 
-/* ── Strecke/Tacho-Platzhalter (Phase B füllt sie mit Canvas/Tacho) ── */
-.idle-track-placeholder,
-.idle-tacho-placeholder {
+/* ── Renn-Strecke (Canvas) ──────────────────────────────────────── */
+.idle-track-wrap {
+  position: relative;
+  aspect-ratio: 16 / 6;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+  transition: transform var(--dur-slow, 0.4s) var(--ease-spring, ease);
+}
+.idle-track-wrap.is-pulsing {
+  animation: idle-track-zoom-pulse 0.6s var(--ease-spring, ease);
+}
+@keyframes idle-track-zoom-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+.idle-track-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* "Neues Bike in der Garage"-Übergabe-Banner, überlagert die Strecke kurz. */
+.idle-handover {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: var(--text-subtle);
-  font-size: 0.85em;
-  background: linear-gradient(135deg, var(--accent-dim), transparent);
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-md, 10px);
-  padding: 1rem;
+  padding: 0.5rem 1rem;
+  font-weight: var(--fw-bold);
+  font-size: 1.05em;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-base, 0.25s) var(--ease-standard, ease);
 }
-.idle-track-placeholder {
-  aspect-ratio: 16 / 6;
-  margin-bottom: 1rem;
+.idle-handover.is-visible {
+  opacity: 1;
 }
-.idle-tacho-placeholder {
+
+/* ── Tacho (Canvas) ──────────────────────────────────────────────── */
+.idle-tacho-wrap {
   aspect-ratio: 16 / 5;
   margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+}
+.idle-tacho-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* ── km/Währungs-Anzeige ────────────────────────────────────────── */
@@ -223,4 +261,11 @@
 @media (max-width: 600px) {
   .idle-shop-item { flex-direction: column; align-items: stretch; text-align: center; }
   .idle-shop-item-action { justify-content: center; }
+}
+
+/* ── prefers-reduced-motion: Zusatzbewegung reduzieren, Spiel bleibt nutzbar ── */
+@media (prefers-reduced-motion: reduce) {
+  .idle-track-wrap.is-pulsing { animation: none; }
+  .idle-gas-btn.is-pulsing { animation: none; }
+  .idle-handover { transition: none; }
 }
