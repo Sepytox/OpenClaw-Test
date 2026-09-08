@@ -76,6 +76,11 @@
     'Hypersportler (Track)': '🔥',
   };
 
+  /** Emoji-Zuordnung je Teile-Seltenheitsstufe (feat(idle-parts)), rein dekorativ. */
+  var PART_RARITY_ICONS = { common: '⚙️', rare: '🔧', legendary: '💎' };
+  /** Anzeigedauer (ms) eines Teile-Drop-Toasts, bevor er wieder ausblendet. */
+  var PART_TOAST_VISIBLE_MS = 3200;
+
   /** Zentraler, aus localStorage geladener Idle-Zustand (siehe idle-core.js). */
   var state = IdleCore.loadState();
   /** Aktuell angezeigter (sanft nachlaufender) km-Wert für die Tween-Animation. */
@@ -145,15 +150,17 @@
   /**
    * Aggregiert ALLE Ertrags-Multiplikatoren, die auf JEDEN km-Ertrag
    * (aktiv wie passiv) angewendet werden: den Schaltpunkt-Combo-
-   * Multiplikator (siehe activeComboMultiplier) UND den permanenten
-   * Werksvertrag-/Prestige-Bonus (siehe IdleCore.contractEffects).
+   * Multiplikator (siehe activeComboMultiplier), den permanenten
+   * Werksvertrag-/Prestige-Bonus (siehe IdleCore.contractEffects) UND
+   * den permanenten Teile-Set-Bonus (siehe IdleCore.setBonuses).
    * @param {number} nowMs - Aktueller Zeitstempel (ms), für activeComboMultiplier.
    * @returns {number} Gesamt-Multiplikator (>= 1).
    */
   function totalEarnMultiplier(nowMs) {
     var combo = IdleCore.activeComboMultiplier(state, nowMs);
     var contract = IdleCore.contractEffects(state).earnMultiplier;
-    return combo * contract;
+    var parts = IdleCore.setBonuses(state).totalBonusMultiplier;
+    return combo * contract * parts;
   }
 
   /**
@@ -283,14 +290,15 @@
 
   /**
    * Rendert alle Teile der Seite neu (Bike-Karte, Shop-Liste, Saison-/
-   * Werksvertrags-Übersicht). Die km-Anzeige wird separat im Game-Loop
-   * weich nachgezogen, siehe updateKmDisplay().
+   * Werksvertrags-Übersicht, Teile-Sammlung). Die km-Anzeige wird
+   * separat im Game-Loop weich nachgezogen, siehe updateKmDisplay().
    * @returns {void}
    */
   function renderAll() {
     renderBikeCard();
     renderShopList();
     renderSeasonPanel();
+    renderPartsPanel();
   }
 
   /**
@@ -407,7 +415,12 @@
 
     var lapSeconds = TRACK_LAP_SECONDS_SLOW - (TRACK_LAP_SECONDS_SLOW - TRACK_LAP_SECONDS_FAST) * (speedPct / 100);
     var angularSpeed = (2 * Math.PI) / Math.max(0.5, lapSeconds);
-    trackAngle = (trackAngle + angularSpeed * dtSeconds) % (2 * Math.PI);
+    var rawAngle = trackAngle + angularSpeed * dtSeconds;
+    if (rawAngle >= 2 * Math.PI) {
+      var lapsCompleted = Math.floor(rawAngle / (2 * Math.PI));
+      for (var lapIndex = 0; lapIndex < lapsCompleted; lapIndex++) onLapCompleted();
+    }
+    trackAngle = rawAngle % (2 * Math.PI);
 
     var cx = w / 2, cy = h / 2;
     var rx = w * 0.42, ry = h * 0.34;
@@ -996,6 +1009,112 @@
       IdleCore.saveState(state);
       renderAll();
     });
+  }
+
+  /* ============================================================
+     TEILE-SAMMLUNG — feat(idle-parts)
+     ============================================================ */
+
+  /**
+   * Rendert die Teile-Sammlung, gruppiert nach Set: besessene Teile
+   * farbig, fehlende als Silhouette; pro Set wird dessen Ertrags-Bonus
+   * gezeigt (hervorgehoben, sobald das Set komplett ist).
+   * @returns {void}
+   */
+  function renderPartsPanel() {
+    var container = document.getElementById('idlePartsSets');
+    if (!container) return;
+    container.innerHTML = '';
+
+    var owned = state.parts.collected;
+
+    IdleCore.IDLE_PART_SETS.forEach(function (set) {
+      var partsInSet = IdleCore.IDLE_PARTS.filter(function (p) { return p.setId === set.id; });
+      var allOwned = partsInSet.length > 0 && partsInSet.every(function (p) { return owned.indexOf(p.id) !== -1; });
+
+      var card = document.createElement('div');
+      card.className = 'idle-part-set' + (allOwned ? ' is-complete' : '');
+
+      var header = document.createElement('div');
+      header.className = 'idle-part-set-header';
+      var h4 = document.createElement('h4');
+      h4.textContent = set.name;
+      var bonus = document.createElement('span');
+      bonus.className = 'idle-part-set-bonus';
+      bonus.textContent = (allOwned ? '✅ ' : '') + '+' + set.bonusPct + '% Ertrag';
+      header.appendChild(h4);
+      header.appendChild(bonus);
+      card.appendChild(header);
+
+      var itemsRow = document.createElement('div');
+      itemsRow.className = 'idle-part-set-items';
+      partsInSet.forEach(function (part) {
+        var isOwned = owned.indexOf(part.id) !== -1;
+        var chip = document.createElement('div');
+        chip.className = 'idle-part-chip ' + (isOwned ? 'is-owned' : 'is-missing');
+        chip.title = isOwned ? part.name : 'Noch nicht gefunden';
+
+        var icon = document.createElement('span');
+        icon.textContent = PART_RARITY_ICONS[part.rarity] || '⚙️';
+        var label = document.createElement('span');
+        label.className = 'idle-part-chip-label';
+        label.textContent = isOwned ? part.name : '???';
+
+        chip.appendChild(icon);
+        chip.appendChild(label);
+        itemsRow.appendChild(chip);
+      });
+      card.appendChild(itemsRow);
+
+      container.appendChild(card);
+    });
+  }
+
+  /**
+   * Zeigt einen kurzen Toast für einen Teile-Drop: neues Teil oder
+   * (bei einer Dublette) die umgewandelte km-Gutschrift.
+   * @param {{isNew: boolean, awardedKm: number, part: Object}} result - Ergebnis von IdleCore.addPart().
+   * @returns {void}
+   */
+  function showPartToast(result) {
+    var container = document.getElementById('idleToastContainer');
+    if (!container || !result || !result.part) return;
+
+    var toast = document.createElement('div');
+    toast.className = 'idle-toast';
+    toast.textContent = result.isNew
+      ? '🎁 Neues Teil gefunden: ' + result.part.name
+      : '♻️ Dublette umgewandelt: ' + result.part.name + ' (+' + formatKm(result.awardedKm) + ' km)';
+    container.appendChild(toast);
+
+    window.requestAnimationFrame(function () { toast.classList.add('is-visible'); });
+    setTimeout(function () {
+      toast.classList.remove('is-visible');
+      setTimeout(function () {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 400);
+    }, PART_TOAST_VISIBLE_MS);
+  }
+
+  /**
+   * Wird bei jeder abgeschlossenen Runde auf der Renn-Strecke aufgerufen
+   * (siehe renderTrack()'s Rundenerkennung): zählt die Runden-Statistik
+   * hoch und würfelt einen möglichen Teile-Drop (IdleCore.rollPartDrop).
+   * Bei einem Drop wird das Teil hinzugefügt (oder als Dublette in km
+   * umgewandelt), gespeichert, die Sammlung neu gerendert und ein Toast
+   * gezeigt.
+   * @returns {void}
+   */
+  function onLapCompleted() {
+    IdleCore.recordLap(state);
+    var partId = IdleCore.rollPartDrop(Math.random);
+    if (partId) {
+      var result = IdleCore.addPart(state, partId);
+      IdleCore.saveState(state);
+      renderPartsPanel();
+      renderBikeCard();
+      showPartToast(result);
+    }
   }
 
   /**

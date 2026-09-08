@@ -456,10 +456,108 @@
   .idle-contract-item { flex-direction: column; align-items: stretch; text-align: center; }
 }
 
+/* ── Teile-Sammlung — feat(idle-parts) ──────────────────────────── */
+.idle-parts-section h2 { font-size: 1.15em; margin-bottom: 0.5rem; }
+.idle-parts-intro {
+  color: var(--text-muted);
+  font-size: 0.88em;
+  margin-bottom: 1.1rem;
+  max-width: 720px;
+}
+.idle-parts-sets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.idle-part-set {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.9rem 1rem;
+  transition: border-color var(--dur-fast, 0.15s) var(--ease-standard, ease);
+}
+.idle-part-set.is-complete { border-color: var(--accent); }
+.idle-part-set-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.6rem;
+}
+.idle-part-set-header h4 { font-size: 0.95em; margin: 0; }
+.idle-part-set-bonus {
+  font-size: 0.78em;
+  color: var(--text-subtle);
+}
+.idle-part-set.is-complete .idle-part-set-bonus { color: var(--accent); font-weight: var(--fw-semibold); }
+.idle-part-set-items {
+  display: flex;
+  gap: 0.5rem;
+}
+.idle-part-chip {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem 0.3rem;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 1.3em;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.idle-part-chip.is-owned {
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  border-color: var(--accent);
+}
+.idle-part-chip.is-missing {
+  filter: grayscale(1);
+  opacity: 0.35;
+}
+.idle-part-chip-label {
+  display: block;
+  font-size: 0.6em;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Teile-Drop-Toast */
+.idle-toast-container {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 500;
+  pointer-events: none;
+}
+.idle-toast {
+  background: var(--card-bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.75rem 1.1rem;
+  box-shadow: var(--shadow-md);
+  font-size: 0.88em;
+  color: var(--text);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.idle-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 600px) {
+  .idle-toast-container { left: 1rem; right: 1rem; }
+}
+
 /* ── prefers-reduced-motion: Zusatzbewegung reduzieren, Spiel bleibt nutzbar ── */
 @media (prefers-reduced-motion: reduce) {
   .idle-track-wrap.is-pulsing { animation: none; }
   .idle-gas-btn.is-pulsing { animation: none; }
   .idle-handover { transition: none; }
   .idle-shift { transition: none; }
+  .idle-toast { transition: none; }
 }
