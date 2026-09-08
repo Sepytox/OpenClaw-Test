@@ -375,6 +375,30 @@
 
 <script>
 // ==========================================
+// ACCENT COLORS (aus design.css gelesen, nicht hartkodiert — siehe
+// Redesign: ein Farbwechsel im Design-System wirkt sich so automatisch
+// auf die Canvas-Zeichnungen aus)
+// ==========================================
+/**
+ * Liest eine CSS-Custom-Property vom :root-Element aus, mit Fallback
+ * für den Fall, dass design.css (noch) nicht geladen ist.
+ * @param {string} name - Name der CSS-Variable (inkl. "--").
+ * @param {string} fallback - Rückgabewert, falls die Variable leer ist.
+ * @returns {string} Getrimmter Farbwert.
+ */
+function readAccentVar(name, fallback) {
+    try {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+        return (v && v.trim()) || fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
+const WHEEL_ACCENT = readAccentVar('--accent', '#1f6d4a');
+const WHEEL_ACCENT_2 = readAccentVar('--accent-hover', '#2fa06b');
+const WHEEL_ACCENT_DEEP = '#134a32';
+
+// ==========================================
 // BIKE DATA — aus der geteilten Quelle bikes-data.js abgeleitet
 // ==========================================
 // Reihenfolge/Auswahl entspricht dem bisherigen Glücksrad-Sortiment.
@@ -423,10 +447,10 @@ const SEGMENT_COLORS = [
     '#001a1a', '#1a0000'
 ];
 const SEGMENT_BORDERS = [
-    '#ff8800', '#ff6600', '#cc3300', '#ff6600', '#ff6600',
-    '#cc3300', '#ff6600', '#ff8800', '#333333', '#cc3300',
-    '#ff6600', '#ff8800', '#cc3300', '#333333', '#ff6600',
-    '#ff8800', '#cc3300'
+    WHEEL_ACCENT_2, WHEEL_ACCENT, WHEEL_ACCENT_DEEP, WHEEL_ACCENT, WHEEL_ACCENT,
+    WHEEL_ACCENT_DEEP, WHEEL_ACCENT, WHEEL_ACCENT_2, '#333333', WHEEL_ACCENT_DEEP,
+    WHEEL_ACCENT, WHEEL_ACCENT_2, WHEEL_ACCENT_DEEP, '#333333', WHEEL_ACCENT,
+    WHEEL_ACCENT_2, WHEEL_ACCENT_DEEP
 ];
 
 // State
@@ -530,7 +554,7 @@ function drawWheel() {
     ctx.arc(cx, cy, 35, 0, Math.PI * 2);
     ctx.fillStyle = gradient;
     ctx.fill();
-    ctx.strokeStyle = '#ff6600';
+    ctx.strokeStyle = WHEEL_ACCENT;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -651,7 +675,7 @@ function updateHistory() {
 // CONFETTI
 // ==========================================
 function launchConfetti() {
-    const colors = ['#ff6600', '#ff8800', '#cc3300', '#fff', '#ffcc00'];
+    const colors = [WHEEL_ACCENT, WHEEL_ACCENT_2, WHEEL_ACCENT_DEEP, '#fff', '#ffcc00'];
     for (let i = 0; i < 50; i++) {
         setTimeout(() => {
             const el = document.createElement('div');

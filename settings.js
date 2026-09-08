@@ -173,7 +173,7 @@
           '<div class="settings-section">',
             '<div class="settings-section-title">🌙 Theme</div>',
             '<div class="theme-options">',
-              themeOption('dark',  '🌑', 'theme-preview-neon',   'Dark Mode',  'Orange/Schwarz — Standard'),
+              themeOption('dark',  '🌑', 'theme-preview-neon',   'Dark Mode',  'Anthrazit & Grün — Standard'),
               themeOption('light', '☀️', 'theme-preview-light',  'Light Mode', 'Hell & aufgeräumt'),
             '</div>',
           '</div>',

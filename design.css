@@ -31,62 +31,80 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* Typography scale */
+  /* Typography scale — readable sans stack for body copy, editorial serif
+     stack for display headlines (hero/section titles). Both are
+     system-font-only (no external/Google Fonts, per no-external-resources
+     policy). */
   --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', ui-serif, serif;
   --font-hero: clamp(2.1rem, 5vw, 3.4rem);
   --font-h1: clamp(1.6rem, 4vw, 2.5rem);
   --font-h2: clamp(1.25rem, 2.6vw, 1.75rem);
   --line-height-body: 1.65;
   --line-height-tight: 1.2;
+
+  /* Weight + letter-spacing scale (used together with --font-display for
+     a clear hierarchy: hero > section title > card title > body > caption) */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-black: 800;
+  --ls-tight: -0.01em;
+  --ls-normal: 0em;
+  --ls-wide: 0.03em;
 }
 
-/* === DARK MODE (default) === */
+/* === DARK MODE (default) ===
+   Elegant dark grey (not black) with a single deep racing-green accent. */
 :root {
-  --bg: #080808;
-  --bg-secondary: #0e0e0e;
-  --card-bg: #111111;
-  --border: #222222;
-  --border-hover: #ff6600;
-  --text: #f0f0f0;
-  --text-muted: #888;
-  --text-subtle: #555;
-  --accent: #ff6600;
-  --accent-hover: #ff8800;
-  --accent-dim: rgba(255, 102, 0, 0.12);
-  --nav-bg: rgba(8,8,8,0.88);
+  --bg: #1c1c1e;
+  --bg-secondary: #232326;
+  --card-bg: #28282b;
+  --border: #38383c;
+  --border-hover: #1f6d4a;
+  --text: #f1f1ef;
+  --text-muted: #9c9c9e;
+  --text-subtle: #6e6e70;
+  --accent: #1f6d4a;
+  --accent-hover: #2fa06b;
+  --accent-dim: rgba(31, 109, 74, 0.18);
+  --nav-bg: rgba(28,28,30,0.88);
   --shadow: 0 2px 12px rgba(0,0,0,0.4);
 
   /* Elevation + glow tokens (dark) */
-  --shadow-sm: 0 1px 4px rgba(0,0,0,0.35);
-  --shadow-md: 0 8px 24px rgba(0,0,0,0.45);
-  --shadow-lg: 0 20px 44px rgba(0,0,0,0.55);
-  --shadow-glow: 0 0 0 1px rgba(255,102,0,0.35), 0 8px 28px rgba(255,102,0,0.18);
-  --glass-bg: rgba(20,20,20,0.55);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.3);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 20px 44px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 0 1px rgba(31,109,74,0.4), 0 8px 28px rgba(31,109,74,0.22);
+  --glass-bg: rgba(36,36,39,0.55);
   --glass-border: rgba(255,255,255,0.08);
 }
 
-/* === LIGHT MODE === */
+/* === LIGHT MODE ===
+   Near-white background, anthracite text (not pure black), same restrained
+   green accent as dark mode. */
 [data-theme="light"] {
-  --bg: #f5f5f5;
+  --bg: #fafafa;
   --bg-secondary: #ffffff;
   --card-bg: #ffffff;
-  --border: #e0e0e0;
-  --border-hover: #ff6600;
-  --text: #1a1a1a;
-  --text-muted: #666;
-  --text-subtle: #999;
-  --accent: #ff6600;
-  --accent-hover: #e55a00;
-  --accent-dim: rgba(255, 102, 0, 0.08);
-  --nav-bg: rgba(245,245,245,0.88);
-  --shadow: 0 2px 12px rgba(0,0,0,0.1);
+  --border: #e4e4e1;
+  --border-hover: #1f6d4a;
+  --text: #232320;
+  --text-muted: #63635e;
+  --text-subtle: #9a9a93;
+  --accent: #1f6d4a;
+  --accent-hover: #154a32;
+  --accent-dim: rgba(31, 109, 74, 0.08);
+  --nav-bg: rgba(250,250,250,0.88);
+  --shadow: 0 2px 12px rgba(20,20,20,0.08);
 
   /* Elevation + glow tokens (light) */
-  --shadow-sm: 0 1px 4px rgba(20,20,20,0.06);
-  --shadow-md: 0 8px 24px rgba(20,20,20,0.10);
-  --shadow-lg: 0 20px 44px rgba(20,20,20,0.14);
-  --shadow-glow: 0 0 0 1px rgba(255,102,0,0.25), 0 8px 24px rgba(255,102,0,0.14);
-  --glass-bg: rgba(255,255,255,0.55);
+  --shadow-sm: 0 1px 4px rgba(20,20,20,0.05);
+  --shadow-md: 0 8px 24px rgba(20,20,20,0.08);
+  --shadow-lg: 0 20px 44px rgba(20,20,20,0.12);
+  --shadow-glow: 0 0 0 1px rgba(31,109,74,0.22), 0 8px 24px rgba(31,109,74,0.12);
+  --glass-bg: rgba(255,255,255,0.6);
   --glass-border: rgba(20,20,20,0.08);
 }
 
@@ -103,7 +121,15 @@ body {
   transition: background var(--dur-base) var(--ease-standard), color var(--dur-base) var(--ease-standard);
 }
 
-h1, h2, h3, h4 { line-height: var(--line-height-tight); }
+/* Display typography hierarchy: serif display stack, tight tracking, bold
+   weight for headlines (hero/section/card titles); body copy keeps the
+   readable sans stack set on <body> above. */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-tight);
+  line-height: var(--line-height-tight);
+}
 
 /* Visible keyboard focus for every interactive element (touch users are
    unaffected — :focus-visible only engages for keyboard/programmatic focus). */

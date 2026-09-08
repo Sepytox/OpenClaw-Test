@@ -934,8 +934,8 @@ footer {
   flex-shrink: 0;
   border: 1px solid var(--border);
 }
-.theme-preview-neon     { background: linear-gradient(135deg, #080808, #ff6600); }
-.theme-preview-light    { background: linear-gradient(135deg, #f5f5f5, #ff6600); }
+.theme-preview-neon     { background: linear-gradient(135deg, #1c1c1e, var(--accent)); }
+.theme-preview-light    { background: linear-gradient(135deg, #fafafa, var(--accent)); }
 .theme-preview-dark-pro { background: linear-gradient(135deg, #111, #444); }
 
 .theme-option-info { display: flex; flex-direction: column; gap: 1px; }
