@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <script src="bikes-data.js"></script>
+    <script src="bike-image.js"></script>
     <style>
 /* PAGE */
         .shop-page { max-width:1200px;margin:0 auto;padding:1.5rem 1rem 4rem; }
@@ -30,6 +31,7 @@
         }
         .shop-bike-info { flex: 1; min-width: 200px; }
         .shop-bike-icon { font-size: 3rem; margin-bottom: 0.3rem; }
+        .shop-bike-photo { width: 220px; max-width: 100%; margin-bottom: 0.6rem; }
         .shop-bike-name { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 0.2rem; }
         .shop-bike-sub { color: #777; font-size: 0.9rem; }
         .shop-bike-selector select {
@@ -982,7 +984,11 @@ function selectBike() {
 
 function updateHero() {
     const bike = SHOP_BIKES[currentBike];
-    document.getElementById('heroBikeIcon').textContent = bike.icon;
+    const shared = SHARED_BIKES[currentBike];
+    document.getElementById('heroBikeIcon').innerHTML = BikeImage.markup(
+        { id: currentBike, name: bike.name, category: shared ? shared.category : '' },
+        { eager: true, className: 'shop-bike-photo' }
+    );
     document.getElementById('heroBikeName').textContent = bike.name;
     document.getElementById('heroBikeSub').textContent = bike.sub;
 }

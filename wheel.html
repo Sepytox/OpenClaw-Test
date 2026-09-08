@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <script src="bikes-data.js"></script>
+    <script src="bike-image.js"></script>
     <style>
             color: var(--accent);
             background: var(--accent-dim);
@@ -200,6 +201,7 @@
             filter: drop-shadow(0 0 10px var(--accent));
             animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .result-icon-big .bike-photo-wrap { max-width: 220px; margin: 0 auto; }
         @keyframes pop-in {
             from { transform: scale(0.3); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
@@ -346,7 +348,7 @@
             <h2>🏍️ Dein Bike</h2>
             <div class="result-empty" id="resultEmpty">❓<br><small style="font-size:0.9rem;color:#444">Drehe das Rad!</small></div>
             <div class="result-bike-display" id="resultBike">
-                <span class="result-icon-big" id="resIcon">🏍️</span>
+                <div class="result-icon-big" id="resIcon">🏍️</div>
                 <div class="result-bike-name-big" id="resBikeName">—</div>
                 <div class="result-bike-sub-big" id="resBikeSub">—</div>
                 <div class="result-spec-grid" id="resSpecs"></div>
@@ -640,7 +642,10 @@ function showResult(bike) {
     const display = document.getElementById('resultBike');
     display.className = 'result-bike-display active';
 
-    document.getElementById('resIcon').textContent = bike.icon;
+    document.getElementById('resIcon').innerHTML = BikeImage.markup(
+        { id: bike.key, name: bike.name, category: bike.category },
+        { eager: true }
+    );
     document.getElementById('resBikeName').textContent = bike.name;
     document.getElementById('resBikeSub').textContent = bike.sub;
 

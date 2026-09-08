@@ -440,3 +440,28 @@ summary:focus-visible,
 }
 
 .btn-outline:active { transform: translateY(0) scale(0.97); }
+
+/* ── Bike Image (bike-image.js) ─────────────────────────────────
+   Echtes Foto (images/bikes/<id>.jpg) bevorzugt, sonst eine
+   kategorie-spezifische SVG-Illustration (Sport, Naked, Touring/Adventure,
+   Retro, Offroad, Cruiser) — nie ein externer Bild-Request. Einheitliches
+   Seitenverhältnis, abgerundete Ecken und sanftes Fade-in überall dort, wo
+   eine Motorrad-Visualisierung erscheint (Grid/Modal, Shop-Hero,
+   Glücksrad-Ergebnis, Garage-Traum-Bike). */
+.bike-photo-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+.bike-photo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+.bike-photo.is-loaded { opacity: 1; }
