@@ -113,8 +113,11 @@ var IDLE_BALANCE = {
   /** km-Gutschrift, wenn ein bereits besessenes Teil erneut dropt (Dubletten→km), je Seltenheitsstufe. */
   PART_DUPLICATE_KM_VALUE: { common: 15, rare: 60, legendary: 250 },
 
-  /** @todo Phase C (feat(idle-offline)) — Anteil des Passivertrags, der offline gutgeschrieben wird (0=kein Offline-Ertrag). */
-  OFFLINE_EARN_FRACTION: 0,
+  /* ── Phase C: Offline-Ertrag ──────────────────────────────────── */
+  /** Anteil des Passivertrags, der offline (bis zum Cap) gutgeschrieben wird (1 = voller Passivertrag). */
+  OFFLINE_EARN_FRACTION: 1,
+  /** Offline-Ertrags-Deckelung in Sekunden (4h), ggf. verdoppelt durch den "Offline verdoppelt"-Werksvertrag. */
+  OFFLINE_CAP_SECONDS: 4 * 60 * 60,
 
   /* ── Phase B: Schaltpunkt-Combo (MECHANIK A) ────────────────────
    * Alle ca. 15–30s erscheint eine Schaltpunkt-Leiste mit wandernder
@@ -494,6 +497,19 @@ function migrateParts(raw, fresh) {
 }
 
 /**
+ * Migriert das offline-Feld (Zeitstempel der letzten Sichtung) defensiv.
+ * @param {*} raw - Rohes Zustandsobjekt (evtl. null/korrupt).
+ * @param {Object} fresh - Frischer Referenzzustand für Standardwerte.
+ * @returns {Object} Gültiges offline-Objekt.
+ */
+function migrateOffline(raw, fresh) {
+  var ro = raw && raw.offline && typeof raw.offline === 'object' ? raw.offline : {};
+  return {
+    lastSeenAt: typeof ro.lastSeenAt === 'number' ? ro.lastSeenAt : fresh.offline.lastSeenAt,
+  };
+}
+
+/**
  * Migriert/validiert ein aus localStorage geparstes Rohobjekt zu einem
  * garantiert gültigen, aktuellen Idle-Zustand. Fehlt das Objekt komplett,
  * ist es kein Objekt, fehlt/veraltet die version, oder fehlen/haben
@@ -516,7 +532,7 @@ function migrateState(raw) {
     lastSavedAt: typeof raw.lastSavedAt === 'number' ? raw.lastSavedAt : fresh.lastSavedAt,
     prestige: migratePrestige(raw, fresh),
     parts: migrateParts(raw, fresh),
-    offline: raw.offline && typeof raw.offline === 'object' ? raw.offline : fresh.offline,
+    offline: migrateOffline(raw, fresh),
     combo: raw.combo && typeof raw.combo === 'object' ? {
       count: typeof raw.combo.count === 'number' && raw.combo.count >= 0 ? raw.combo.count : 0,
       multiplier: typeof raw.combo.multiplier === 'number' && raw.combo.multiplier >= 1 ? raw.combo.multiplier : 1,
@@ -553,8 +569,12 @@ function loadState() {
 
 /**
  * Persistiert den zentralen Idle-Zustand in localStorage (setzt
- * lastSavedAt auf jetzt). Rein additiv/defensiv — darf die Seite nie
- * blockieren, falls localStorage nicht verfügbar/voll ist.
+ * lastSavedAt UND — falls vorhanden — offline.lastSeenAt auf jetzt, damit
+ * der nächste Ladevorgang die tatsächlich verstrichene Abwesenheitszeit
+ * für offlineEarn() korrekt berechnen kann; das deckt automatisch alle
+ * Aufruf-Stellen ab, siehe idle.js wireLifecycleSave()). Rein additiv/
+ * defensiv — darf die Seite nie blockieren, falls localStorage nicht
+ * verfügbar/voll ist.
  * @param {Object} state - Zu speichernder Idle-Zustand.
  * @returns {void}
  */
@@ -562,6 +582,7 @@ function saveState(state) {
   try {
     if (typeof localStorage === 'undefined' || localStorage === null) return;
     state.lastSavedAt = Date.now();
+    if (state.offline && typeof state.offline === 'object') state.offline.lastSeenAt = state.lastSavedAt;
     localStorage.setItem(IDLE_STATE_KEY, JSON.stringify(state));
   } catch (e) {
     /* bewusst ignoriert — darf App nie blockieren */
@@ -1080,6 +1101,33 @@ function setBonuses(state) {
   return { totalBonusMultiplier: 1 + totalBonusPct / 100, totalBonusPct: totalBonusPct, completedSets: completedSets };
 }
 
+/* ============================================================
+   OFFLINE-ERTRAG — feat(idle-offline)
+   ============================================================ */
+
+/**
+ * Berechnet den Ertrag für die Zeit, die seit dem letzten Besuch
+ * verstrichen ist (awaySeconds), gedeckelt auf IDLE_BALANCE.OFFLINE_CAP_
+ * SECONDS (4h) — verdoppelt auf 8h durch den "Offline-Ertrag
+ * verdoppelt"-Werksvertrag (siehe contractEffects().offlineCapMultiplier).
+ * Wendet denselben Ertrags-Multiplikator (Werksverträge + Prestige-Level)
+ * UND die Teile-Set-Boni an wie der normale Passivertrag — NICHT jedoch
+ * den Schaltpunkt-Combo-Multiplikator (der ist an Live-Interaktion
+ * gebunden und daher offline nie aktiv). Reine Funktion — mutiert state
+ * NICHT.
+ * @param {Object} state - Zentraler Idle-Zustand.
+ * @param {number} awaySeconds - Verstrichene Abwesenheitszeit in Sekunden (>= 0).
+ * @returns {number} Gutzuschreibende km (>= 0).
+ */
+function offlineEarn(state, awaySeconds) {
+  if (!state || !awaySeconds || awaySeconds <= 0) return 0;
+  var effects = contractEffects(state);
+  var cap = IDLE_BALANCE.OFFLINE_CAP_SECONDS * effects.offlineCapMultiplier;
+  var cappedSeconds = Math.min(awaySeconds, cap);
+  var bonus = setBonuses(state).totalBonusMultiplier;
+  return passiveEarn(state, cappedSeconds) * IDLE_BALANCE.OFFLINE_EARN_FRACTION * effects.earnMultiplier * bonus;
+}
+
 var IdleCore = {
   IDLE_STATE_KEY: IDLE_STATE_KEY,
   IDLE_STATE_VERSION: IDLE_STATE_VERSION,
@@ -1128,6 +1176,9 @@ var IdleCore = {
   rollPartDrop: rollPartDrop,
   addPart: addPart,
   setBonuses: setBonuses,
+
+  /* ── Phase C: Offline-Ertrag ──────────────────────────────────────── */
+  offlineEarn: offlineEarn,
 };
 
 if (typeof window !== 'undefined') {
