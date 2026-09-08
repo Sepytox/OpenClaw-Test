@@ -326,6 +326,13 @@
   color: var(--text);
   margin-bottom: 0.9rem;
 }
+/* Author `display:flex` above would otherwise always beat the browser's
+   UA `[hidden]{display:none}` rule (author origin outranks UA origin
+   regardless of selector specificity) — restore the hidden-attribute
+   behaviour explicitly. */
+.idle-combo-badge[hidden] {
+  display: none;
+}
 .idle-combo-badge #idleComboMultiplier {
   color: var(--accent);
   font-weight: var(--fw-bold);
