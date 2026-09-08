@@ -374,6 +374,88 @@
   width: 120px;
 }
 
+/* ── Saison & Werksverträge (MECHANIK B) — feat(idle-prestige) ─── */
+.idle-season h2 { font-size: 1.15em; margin-bottom: 0.5rem; }
+.idle-season-intro {
+  color: var(--text-muted);
+  font-size: 0.88em;
+  margin-bottom: 1.1rem;
+  max-width: 720px;
+}
+.idle-season-summary {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+}
+.idle-season-stat {
+  flex: 1;
+  min-width: 120px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+.idle-season-stat-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78em;
+  margin-bottom: 0.2rem;
+}
+.idle-season-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: 1.3em;
+  color: var(--accent);
+}
+.idle-season-finish-btn {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 0.4rem;
+}
+.idle-season-hint {
+  color: var(--text-muted);
+  font-size: 0.82em;
+  text-align: center;
+  margin-bottom: 1.25rem;
+  min-height: 1.1em;
+}
+.idle-contracts-heading {
+  font-size: 1em;
+  margin-bottom: 0.75rem;
+}
+.idle-contracts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.idle-contract-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.85rem 1rem;
+}
+.idle-contract-item.is-owned { border-color: var(--accent); }
+.idle-contract-item-info { flex: 1; min-width: 200px; }
+.idle-contract-item-info h4 { font-size: 0.98em; margin-bottom: 0.15rem; }
+.idle-contract-item-info p { color: var(--text-muted); font-size: 0.8em; margin: 0; }
+.idle-contract-item-action { flex-shrink: 0; }
+.idle-contract-badge {
+  font-size: 0.78em;
+  color: var(--text-subtle);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .idle-contract-item { flex-direction: column; align-items: stretch; text-align: center; }
+}
+
 /* ── prefers-reduced-motion: Zusatzbewegung reduzieren, Spiel bleibt nutzbar ── */
 @media (prefers-reduced-motion: reduce) {
   .idle-track-wrap.is-pulsing { animation: none; }

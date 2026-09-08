@@ -114,6 +114,35 @@
                 <div class="idle-shop-list" id="idleShopList"></div>
             </section>
 
+            <!-- ===== SAISON & WERKSVERTRÄGE (MECHANIK B, feat(idle-prestige)) ===== -->
+            <section class="idle-season js-reveal" aria-label="Saison & Werksverträge">
+                <h2>🏆 Saison &amp; Werksverträge</h2>
+                <p class="idle-season-intro">Ab der Ninja ZX-10R kannst du die Saison abschliessen: km und besessene Bikes werden zurückgesetzt, aber du verdienst permanente TROPHÄEN, die dauerhafte Werksverträge kaufen.</p>
+
+                <div class="idle-season-summary">
+                    <div class="idle-season-stat">
+                        <span class="idle-season-stat-label">Saison</span>
+                        <span class="idle-season-stat-value" id="idleSeasonNumber">1</span>
+                    </div>
+                    <div class="idle-season-stat">
+                        <span class="idle-season-stat-label">Trophäen</span>
+                        <span class="idle-season-stat-value" id="idleSeasonTrophies">0</span>
+                    </div>
+                    <div class="idle-season-stat">
+                        <span class="idle-season-stat-label">Bei Abschluss</span>
+                        <span class="idle-season-stat-value" id="idleSeasonProjected">+0 🏆</span>
+                    </div>
+                </div>
+
+                <button type="button" class="btn idle-season-finish-btn" id="idleFinishSeasonBtn" disabled>
+                    🏁 Saison abschliessen
+                </button>
+                <p class="idle-season-hint" id="idleSeasonHint"></p>
+
+                <h3 class="idle-contracts-heading">Werksverträge</h3>
+                <div class="idle-contracts-list" id="idleContractsList"></div>
+            </section>
+
         </main>
     </div>
 

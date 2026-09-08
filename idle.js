@@ -143,6 +143,20 @@
   }
 
   /**
+   * Aggregiert ALLE Ertrags-Multiplikatoren, die auf JEDEN km-Ertrag
+   * (aktiv wie passiv) angewendet werden: den Schaltpunkt-Combo-
+   * Multiplikator (siehe activeComboMultiplier) UND den permanenten
+   * Werksvertrag-/Prestige-Bonus (siehe IdleCore.contractEffects).
+   * @param {number} nowMs - Aktueller Zeitstempel (ms), für activeComboMultiplier.
+   * @returns {number} Gesamt-Multiplikator (>= 1).
+   */
+  function totalEarnMultiplier(nowMs) {
+    var combo = IdleCore.activeComboMultiplier(state, nowMs);
+    var contract = IdleCore.contractEffects(state).earnMultiplier;
+    return combo * contract;
+  }
+
+  /**
    * Rendert die Bike-Detailkarte (Name, Kategorie, Statistik-Balken,
    * Tuning-Level, Upgrade-Button inkl. Preis/Deaktivierung).
    * @returns {void}
@@ -161,7 +175,7 @@
     var levelEl = document.getElementById('idleBikeLevel');
     if (levelEl) levelEl.textContent = String(info.level);
 
-    var cost = IdleCore.tuningCost(info.bike.id, info.level);
+    var cost = IdleCore.effectiveTuningCost(state, info.bike.id, info.level);
     var upgradeBtn = document.getElementById('idleUpgradeBtn');
     var costEl = document.getElementById('idleUpgradeCost');
     if (costEl) costEl.textContent = cost === null ? 'MAX' : formatKm(cost);
@@ -268,14 +282,15 @@
   }
 
   /**
-   * Rendert alle Teile der Seite neu (Bike-Karte + Shop-Liste). Die
-   * km-Anzeige wird separat im Game-Loop weich nachgezogen, siehe
-   * updateKmDisplay().
+   * Rendert alle Teile der Seite neu (Bike-Karte, Shop-Liste, Saison-/
+   * Werksvertrags-Übersicht). Die km-Anzeige wird separat im Game-Loop
+   * weich nachgezogen, siehe updateKmDisplay().
    * @returns {void}
    */
   function renderAll() {
     renderBikeCard();
     renderShopList();
+    renderSeasonPanel();
   }
 
   /**
@@ -305,7 +320,7 @@
     var btn = document.getElementById('idleGasBtn');
     if (!btn) return;
     btn.addEventListener('click', function () {
-      var earned = IdleCore.activeEarn(state) * IdleCore.activeComboMultiplier(state, Date.now());
+      var earned = IdleCore.activeEarn(state) * totalEarnMultiplier(Date.now());
       IdleCore.creditKm(state, earned);
       btn.classList.remove('is-pulsing');
       // Reflow erzwingen, damit die Animation bei schnellem Mehrfach-Klick erneut startet.
@@ -750,7 +765,7 @@
     shiftState.active = true;
     shiftState.elapsedSeconds = 0;
     shiftState.resultShown = false;
-    shiftState.zoneWidthPct = IdleCore.perfectZoneWidth(state.combo ? state.combo.count : 0, IdleCore.IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT);
+    shiftState.zoneWidthPct = IdleCore.perfectZoneWidthForState(state, state.combo ? state.combo.count : 0);
 
     var zoneEl = document.getElementById('idleShiftZone');
     var trackEl = document.getElementById('idleShiftTrack');
@@ -865,6 +880,124 @@
     }
   }
 
+  /* ============================================================
+     MECHANIK B — SAISON & WERKSVERTRÄGE — feat(idle-prestige)
+     ============================================================ */
+
+  /**
+   * Rendert die Saison-Übersicht (Saisonnummer, Trophäen, projizierte
+   * Trophäen bei Abschluss) sowie den "Saison abschliessen"-Button
+   * (nur aktiviert, wenn IdleCore.canFinishSeason() zustimmt) inkl.
+   * erklärendem Hinweistext.
+   * @returns {void}
+   */
+  function renderSeasonPanel() {
+    var numberEl = document.getElementById('idleSeasonNumber');
+    var trophiesEl = document.getElementById('idleSeasonTrophies');
+    var projectedEl = document.getElementById('idleSeasonProjected');
+    var finishBtn = document.getElementById('idleFinishSeasonBtn');
+    var hintEl = document.getElementById('idleSeasonHint');
+
+    if (numberEl) numberEl.textContent = String((state.prestige.level || 0) + 1);
+    if (trophiesEl) trophiesEl.textContent = String(state.prestige.trophies || 0);
+    var projected = IdleCore.trophiesForSeason(state);
+    if (projectedEl) projectedEl.textContent = '+' + projected + ' 🏆';
+
+    var canFinish = IdleCore.canFinishSeason(state);
+    if (finishBtn) finishBtn.disabled = !canFinish;
+    if (hintEl) {
+      hintEl.textContent = canFinish
+        ? 'Setzt km und besessene Bikes zurück — Trophäen, Werksverträge, Teile und Statistiken bleiben erhalten.'
+        : 'Verfügbar, sobald du die Kawasaki Ninja ZX-10R besitzt.';
+    }
+
+    renderContractsList();
+  }
+
+  /**
+   * Rendert die Werksverträge-Liste: besessene Verträge (Abzeichen),
+   * kaufbare Verträge ("Kaufen"-Button) und noch unerreichbare Verträge
+   * (Preis-Anzeige, deaktiviert).
+   * @returns {void}
+   */
+  function renderContractsList() {
+    var list = document.getElementById('idleContractsList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    IdleCore.IDLE_CONTRACTS.forEach(function (contract) {
+      var owned = state.prestige.contracts.indexOf(contract.id) !== -1;
+
+      var item = document.createElement('div');
+      item.className = 'idle-contract-item' + (owned ? ' is-owned' : '');
+
+      var info = document.createElement('div');
+      info.className = 'idle-contract-item-info';
+      var h4 = document.createElement('h4');
+      h4.textContent = contract.name;
+      var p = document.createElement('p');
+      p.textContent = contract.beschreibung;
+      info.appendChild(h4);
+      info.appendChild(p);
+      item.appendChild(info);
+
+      var action = document.createElement('div');
+      action.className = 'idle-contract-item-action';
+
+      if (owned) {
+        var badge = document.createElement('span');
+        badge.className = 'idle-contract-badge';
+        badge.textContent = '✅ Aktiv';
+        action.appendChild(badge);
+      } else {
+        var buyBtn = document.createElement('button');
+        buyBtn.type = 'button';
+        buyBtn.className = 'btn-outline';
+        buyBtn.textContent = 'Kaufen — ' + contract.kostenTrophaeen + ' 🏆';
+        buyBtn.disabled = !IdleCore.canBuyContract(state, contract.id);
+        buyBtn.addEventListener('click', function () {
+          var result = IdleCore.buyContract(state, contract.id);
+          if (result.success) {
+            IdleCore.saveState(state);
+            renderAll();
+          }
+        });
+        action.appendChild(buyBtn);
+      }
+
+      item.appendChild(action);
+      list.appendChild(item);
+    });
+  }
+
+  /**
+   * Verdrahtet den "Saison abschliessen"-Button: zeigt einen klaren
+   * deutschen Bestätigungsdialog (was zurückgesetzt wird vs. was
+   * dauerhaft erhalten bleibt) und führt bei Bestätigung
+   * IdleCore.finishSeason() aus. Ersetzt die lokale state-Referenz durch
+   * den neuen, zurückgesetzten Zustand.
+   * @returns {void}
+   */
+  function wireSeasonControls() {
+    var finishBtn = document.getElementById('idleFinishSeasonBtn');
+    if (!finishBtn) return;
+    finishBtn.addEventListener('click', function () {
+      if (!IdleCore.canFinishSeason(state)) return;
+      var projected = IdleCore.trophiesForSeason(state);
+      var confirmed = window.confirm(
+        'Saison abschliessen?\n\n' +
+        'Zurückgesetzt werden: deine Kilometer (km) und alle besessenen Bikes ' +
+        '(du startest wieder beim Startbike bzw. dem Bike aus einem aktiven Werksvertrag).\n\n' +
+        'Erhalten bleiben: Trophäen (+' + projected + ' 🏆 durch diese Saison), ' +
+        'Werksverträge, deine Teile-Sammlung und alle Statistiken.'
+      );
+      if (!confirmed) return;
+      state = IdleCore.finishSeason(state);
+      IdleCore.saveState(state);
+      renderAll();
+    });
+  }
+
   /**
    * Verdrahtet regelmässiges Auto-Speichern sowie ein finales Speichern,
    * bevor die Seite verlassen/versteckt wird (Tab-Wechsel, Schliessen).
@@ -903,7 +1036,7 @@
     // einen riesigen Sprung, wenn ein hintergründiger Tab zurückkehrt).
     var clampedDt = Math.min(Math.max(dtSeconds, 0), IdleCore.IDLE_BALANCE.MAX_TICK_DELTA_SECONDS);
 
-    var earned = IdleCore.passiveEarn(state, clampedDt) * IdleCore.activeComboMultiplier(state, Date.now());
+    var earned = IdleCore.passiveEarn(state, clampedDt) * totalEarnMultiplier(Date.now());
     IdleCore.creditKm(state, earned);
 
     updateKmDisplay();
@@ -936,6 +1069,7 @@
     wireUpgradeButton();
     wireShiftInteraction();
     wireSoundControls();
+    wireSeasonControls();
     wireLifecycleSave();
     window.requestAnimationFrame(tick);
   }
