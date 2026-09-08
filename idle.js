@@ -81,10 +81,31 @@
   /** Anzeigedauer (ms) eines Teile-Drop-Toasts, bevor er wieder ausblendet. */
   var PART_TOAST_VISIBLE_MS = 3200;
 
+  /** Mindest-Abwesenheitszeit (Sekunden), ab der ein Offline-Willkommens-Banner gezeigt wird (verhindert Rauschen bei schnellen Reloads/Tab-Wechseln). */
+  var OFFLINE_MIN_AWAY_SECONDS = 30;
+
   /** Zentraler, aus localStorage geladener Idle-Zustand (siehe idle-core.js). */
   var state = IdleCore.loadState();
-  /** Aktuell angezeigter (sanft nachlaufender) km-Wert für die Tween-Animation. */
-  var displayedKm = state.km;
+
+  /** In km gutgeschriebener Offline-Ertrag beim Laden (0, falls keine/zu kurze Abwesenheit). Siehe showOfflineBanner() in initIdlePage(). */
+  var offlineEarnedKm = 0;
+  (function creditOfflineEarnings() {
+    if (!state.offline || typeof state.offline.lastSeenAt !== 'number') return;
+    var awaySeconds = (Date.now() - state.offline.lastSeenAt) / 1000;
+    if (awaySeconds < OFFLINE_MIN_AWAY_SECONDS) return;
+    var earned = IdleCore.offlineEarn(state, awaySeconds);
+    if (earned > 0) {
+      IdleCore.creditKm(state, earned);
+      offlineEarnedKm = earned;
+      // Sofort speichern (aktualisiert auch offline.lastSeenAt, siehe
+      // idle-core.js saveState()) — verhindert Doppel-Gutschrift, falls
+      // die Seite vor dem nächsten Auto-Save/beforeunload erneut geladen wird.
+      IdleCore.saveState(state);
+    }
+  })();
+
+  /** Aktuell angezeigter (sanft nachlaufender) km-Wert für die Tween-Animation — startet VOR dem Offline-Ertrag, damit dieser sichtbar "hochzählt". */
+  var displayedKm = state.km - offlineEarnedKm;
   /** Zeitstempel des letzten Game-Loop-Frames (für Delta-Zeit-Berechnung). */
   var lastFrameTime = null;
 
@@ -1172,6 +1193,34 @@
     window.requestAnimationFrame(tick);
   }
 
+  /* ============================================================
+     OFFLINE-ERTRAG — feat(idle-offline)
+     ============================================================ */
+
+  /**
+   * Zeigt das "Willkommen zurück"-Banner mit dem beim Laden
+   * gutgeschriebenen Offline-Ertrag (siehe offlineEarnedKm oben) und
+   * verdrahtet dessen Schliessen-Button. No-op, falls kein Offline-
+   * Ertrag gutgeschrieben wurde.
+   * @returns {void}
+   */
+  function showOfflineBanner() {
+    if (offlineEarnedKm <= 0) return;
+    var banner = document.getElementById('idleOfflineBanner');
+    var textEl = document.getElementById('idleOfflineBannerText');
+    var closeBtn = document.getElementById('idleOfflineBannerClose');
+    if (!banner || !textEl) return;
+
+    textEl.textContent = '👋 Willkommen zurück! Während du weg warst, hast du ' + formatKm(offlineEarnedKm) + ' km gesammelt.';
+    banner.hidden = false;
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        banner.hidden = true;
+      });
+    }
+  }
+
   /**
    * Initialisiert die Idle-Racer-Seite: rendert den initialen Zustand,
    * verdrahtet alle Buttons + das Auto-Speichern und startet den
@@ -1184,6 +1233,7 @@
     initCanvases();
     tachoDisplayPct = getCurrentBikeInfo().stats.geschwindigkeitPct;
     updateComboBadge();
+    showOfflineBanner();
     wireGasButton();
     wireUpgradeButton();
     wireShiftInteraction();

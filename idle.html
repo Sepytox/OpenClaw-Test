@@ -24,6 +24,13 @@
         <p>Fahre, sammle Kilometer und kaufe dir Bike für Bike den kompletten Kawasaki-Fuhrpark — auch während du wegschaust.</p>
     </header>
 
+    <!-- Offline-Willkommens-Banner (feat(idle-offline)): erscheint nur, falls beim
+         Laden Abwesenheits-km gutgeschrieben wurden. -->
+    <div class="idle-offline-banner" id="idleOfflineBanner" hidden aria-live="polite">
+        <span id="idleOfflineBannerText"></span>
+        <button type="button" class="idle-offline-banner-close" id="idleOfflineBannerClose" aria-label="Banner schliessen">✕</button>
+    </div>
+
     <div class="container">
         <main>
 
