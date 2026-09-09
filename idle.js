@@ -1,0 +1,1326 @@
+/**
+ * idle.js — Kawasaki Idle Racer: Seitensteuerung (DOM + Game-Loop).
+ *
+ * Konsumiert das DOM-freie idle-core.js (window.IdleCore) und übernimmt
+ * ALLES, was idle-core.js bewusst NICHT tut: DOM-Bindings, Rendering,
+ * den requestAnimationFrame-Game-Loop mit Delta-Zeit (entkoppelt von der
+ * Render-Rate, tab-inactive-safe per IDLE_BALANCE.MAX_TICK_DELTA_SECONDS)
+ * sowie sanft animierte ("tweenende") Zahlenanzeigen.
+ *
+ * Persistiert den Zustand regelmässig sowie bei jeder Kauf-/Tuning-
+ * Aktion und beim Verlassen der Seite (siehe wireLifecycleSave()).
+ */
+(function () {
+  'use strict';
+
+  if (typeof window === 'undefined' || !window.IdleCore) return;
+  var IdleCore = window.IdleCore;
+
+  /** Intervall (ms) für periodisches Auto-Speichern des Zustands. */
+  var AUTO_SAVE_INTERVAL_MS = 5000;
+  /** Glättungsfaktor pro Frame für die "tweenende" km-Anzeige (0..1, höher = schneller). */
+  var KM_DISPLAY_EASE = 0.12;
+  /** Differenz-Schwelle (km), unterhalb derer die Anzeige direkt auf den Zielwert springt. */
+  var KM_DISPLAY_SNAP_THRESHOLD = 0.05;
+
+  /* ── Phase B: Renn-Strecke (Canvas) ─────────────────────────────── */
+  /** Rundenzeit (Sekunden) bei Geschwindigkeit 0% (langsamstes Bike, Level 0). */
+  var TRACK_LAP_SECONDS_SLOW = 16;
+  /** Rundenzeit (Sekunden) bei Geschwindigkeit 100% (schnellstes/getuntestes Bike). */
+  var TRACK_LAP_SECONDS_FAST = 3.5;
+  /** Anzahl der Trail-Punkte hinter dem Bike-Marker (Glow-Trail). */
+  var TRACK_TRAIL_LENGTH = 14;
+  /** Ab dieser Geschwindigkeit (%) werden Speed-Lines gezeichnet. */
+  var TRACK_SPEED_LINES_THRESHOLD_PCT = 45;
+
+  /* ── Phase B: Tacho (Canvas) ─────────────────────────────────────── */
+  /** Glättungsfaktor pro Frame für die Tacho-Nadel (0..1, höher = schneller). */
+  var TACHO_NEEDLE_EASE = 0.09;
+
+  /* ── Phase B: "Neues Bike in der Garage"-Übergabe ───────────────── */
+  /** Anzeigedauer (ms) des Übergabe-Banners nach einem Bike-Kauf. */
+  var HANDOVER_BANNER_MS = 2200;
+
+  /* ── Phase B: Schaltpunkt-Combo (MECHANIK A) — UI-Konstanten ────── */
+  /** Fixe Mitte der perfekten Zone (% der Leistenbreite) — "in der Mitte". */
+  var SHIFT_ZONE_CENTER_PCT = 50;
+  /** Anzeigedauer (ms) des Treffer-/Fehlklick-Flashs, bevor die Leiste ausblendet. */
+  var SHIFT_RESULT_FLASH_MS = 550;
+
+  /* ── Phase B: Web Audio Motorsound (synthetisiert, standardmässig AUS) ── */
+  /** Motor-Grundfrequenz (Hz) bei Geschwindigkeit 0%. */
+  var ENGINE_BASE_HZ = 52;
+  /** Zusätzliche Frequenz (Hz) bei Geschwindigkeit 100%, addiert auf ENGINE_BASE_HZ. */
+  var ENGINE_RANGE_HZ = 190;
+  /** Zeitkonstante (s) für sanfte Frequenz-/Lautstärke-Übergänge (Web Audio setTargetAtTime). */
+  var ENGINE_SMOOTH_TIME_CONSTANT = 0.12;
+  /** Zusätzlicher Frequenz-Boost (Hz) des kurzen "Rev-up"-Effekts bei "Gas geben". */
+  var ENGINE_REV_UP_BOOST_HZ = 55;
+  /** Dauer (s) des "Rev-up"-Effekts, bevor er zur Grundfrequenz zurückklingt. */
+  var ENGINE_REV_UP_DECAY_SECONDS = 0.35;
+  /** Maximale Master-Lautstärke (0..1) bei Lautstärke-Regler = 100%. */
+  var ENGINE_MAX_GAIN = 0.22;
+
+  /** Emoji-Zuordnung je Bike-Kategorie, rein dekorativ (kein externes Bildmaterial). */
+  var CATEGORY_ICONS = {
+    'Einsteiger-Naked': '🔰',
+    'Off-Road': '⛰️',
+    'Cruiser': '😎',
+    'Sportler': '🏍️',
+    'Klassiker': '🕰️',
+    'Naked': '💪',
+    'Adventure': '🌍',
+    'Sport Tourer': '🚀',
+    'Supersportler': '🏆',
+    'Hypersportler': '⚡',
+    'Hypersportler (Track)': '🔥',
+  };
+
+  /** Emoji-Zuordnung je Teile-Seltenheitsstufe (feat(idle-parts)), rein dekorativ. */
+  var PART_RARITY_ICONS = { common: '⚙️', rare: '🔧', legendary: '💎' };
+  /** Anzeigedauer (ms) eines Teile-Drop-Toasts, bevor er wieder ausblendet. */
+  var PART_TOAST_VISIBLE_MS = 3200;
+
+  /** Mindest-Abwesenheitszeit (Sekunden), ab der ein Offline-Willkommens-Banner gezeigt wird (verhindert Rauschen bei schnellen Reloads/Tab-Wechseln). */
+  var OFFLINE_MIN_AWAY_SECONDS = 30;
+
+  /** Zentraler, aus localStorage geladener Idle-Zustand (siehe idle-core.js). */
+  var state = IdleCore.loadState();
+
+  /** In km gutgeschriebener Offline-Ertrag beim Laden (0, falls keine/zu kurze Abwesenheit). Siehe showOfflineBanner() in initIdlePage(). */
+  var offlineEarnedKm = 0;
+  (function creditOfflineEarnings() {
+    if (!state.offline || typeof state.offline.lastSeenAt !== 'number') return;
+    var awaySeconds = (Date.now() - state.offline.lastSeenAt) / 1000;
+    if (awaySeconds < OFFLINE_MIN_AWAY_SECONDS) return;
+    var earned = IdleCore.offlineEarn(state, awaySeconds);
+    if (earned > 0) {
+      IdleCore.creditKm(state, earned);
+      offlineEarnedKm = earned;
+      // Sofort speichern (aktualisiert auch offline.lastSeenAt, siehe
+      // idle-core.js saveState()) — verhindert Doppel-Gutschrift, falls
+      // die Seite vor dem nächsten Auto-Save/beforeunload erneut geladen wird.
+      IdleCore.saveState(state);
+    }
+  })();
+
+  /** Aktuell angezeigter (sanft nachlaufender) km-Wert für die Tween-Animation — startet VOR dem Offline-Ertrag, damit dieser sichtbar "hochzählt". */
+  var displayedKm = state.km - offlineEarnedKm;
+  /** Zeitstempel des letzten Game-Loop-Frames (für Delta-Zeit-Berechnung). */
+  var lastFrameTime = null;
+
+  /** true, wenn das System "Bewegung reduzieren" bevorzugt (prefers-reduced-motion). */
+  var reducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  /* ── Renn-Strecke: Laufzeit-Zustand ──────────────────────────────── */
+  /** Aktueller Winkel (Radiant) des Bike-Markers auf der Oval-Strecke. */
+  var trackAngle = 0;
+  /** Trail-Punkte (Glow-Trail) hinter dem Bike-Marker, je {x, y}. */
+  var trackTrail = [];
+  /** DOM-Referenzen für Canvas + 2D-Kontext (einmalig aufgelöst, siehe initCanvases()). */
+  var trackCanvas = null, trackCtx = null;
+  var tachoCanvas = null, tachoCtx = null;
+
+  /* ── Tacho: Laufzeit-Zustand ─────────────────────────────────────── */
+  /** Aktuell angezeigter (weich nachlaufender) Tacho-Nadel-Prozentwert. */
+  var tachoDisplayPct = 0;
+
+  /* ── "Neues Bike in der Garage"-Übergabe ────────────────────────── */
+  /** Timeout-Handle des aktuell angezeigten Übergabe-Banners (für Re-Trigger). */
+  var handoverTimeoutId = null;
+
+  /* ── Web Audio Motorsound: Laufzeit-Zustand (lazy, erst nach Nutzer-Geste) ── */
+  var audioCtx = null;
+  var masterGain = null;
+  var engineOsc = null;
+  var subOsc = null;
+  var noiseGain = null;
+
+  /* ── Schaltpunkt-Combo (MECHANIK A): Laufzeit-Zustand einer Leiste ── */
+  var shiftState = {
+    active: false,
+    elapsedSeconds: 0,
+    zoneWidthPct: IdleCore.IDLE_BALANCE.COMBO_ZONE_BASE_WIDTH_PCT,
+    resultShown: false,
+  };
+  /** Sekunden bis zur nächsten Schaltpunkt-Leiste (zufällig 15–30s, siehe idle-core.js). */
+  var shiftTimerSeconds = IdleCore.nextShiftIntervalSeconds();
+
+  /**
+   * Formatiert eine km-Zahl für die Anzeige (deutsches Zahlenformat,
+   * abgerundet auf ganze km).
+   * @param {number} value - Roh-km-Wert.
+   * @returns {string} Formatierte Zeichenkette.
+   */
+  function formatKm(value) {
+    return Math.floor(Math.max(0, value)).toLocaleString('de-DE');
+  }
+
+  /**
+   * Formatiert eine Spielzeit (Sekunden) als "Xh Ym" bzw. "Ym" (feat(idle-stats)).
+   * @param {number} totalSeconds - Spielzeit in Sekunden.
+   * @returns {string} Formatierte Zeichenkette.
+   */
+  function formatPlayTime(totalSeconds) {
+    var minutes = Math.floor(Math.max(0, totalSeconds) / 60);
+    var hours = Math.floor(minutes / 60);
+    var remMinutes = minutes % 60;
+    return hours > 0 ? (hours + 'h ' + remMinutes + 'm') : (remMinutes + 'm');
+  }
+
+  /**
+   * Liefert das aktuell gefahrene Bike-Objekt inkl. Level und
+   * abgeleiteten Statistiken.
+   * @returns {{bike: Object, level: number, stats: Object}} Aktuelles Bike + Stats.
+   */
+  function getCurrentBikeInfo() {
+    var bike = IdleCore.getBikeById(state.currentBikeId) || IdleCore.IDLE_BIKES[0];
+    var level = IdleCore.getBikeLevel(state, bike.id);
+    var stats = IdleCore.deriveBikeStats(bike, level);
+    return { bike: bike, level: level, stats: stats };
+  }
+
+  /**
+   * Aggregiert ALLE Ertrags-Multiplikatoren, die auf JEDEN km-Ertrag
+   * (aktiv wie passiv) angewendet werden: den Schaltpunkt-Combo-
+   * Multiplikator (siehe activeComboMultiplier), den permanenten
+   * Werksvertrag-/Prestige-Bonus (siehe IdleCore.contractEffects) UND
+   * den permanenten Teile-Set-Bonus (siehe IdleCore.setBonuses).
+   * @param {number} nowMs - Aktueller Zeitstempel (ms), für activeComboMultiplier.
+   * @returns {number} Gesamt-Multiplikator (>= 1).
+   */
+  function totalEarnMultiplier(nowMs) {
+    var combo = IdleCore.activeComboMultiplier(state, nowMs);
+    var contract = IdleCore.contractEffects(state).earnMultiplier;
+    var parts = IdleCore.setBonuses(state).totalBonusMultiplier;
+    return combo * contract * parts;
+  }
+
+  /**
+   * Rendert die Bike-Detailkarte (Name, Kategorie, Statistik-Balken,
+   * Tuning-Level, Upgrade-Button inkl. Preis/Deaktivierung).
+   * @returns {void}
+   */
+  function renderBikeCard() {
+    var info = getCurrentBikeInfo();
+    var nameEl = document.getElementById('idleBikeName');
+    var metaEl = document.getElementById('idleBikeMeta');
+    if (nameEl) nameEl.textContent = info.bike.name;
+    if (metaEl) metaEl.textContent = info.bike.kategorie + ' · ' + info.bike.topspeed + ' km/h · ' + info.bike.ps + ' PS';
+
+    setBar('idleStatSpeedFill', 'idleStatSpeedVal', info.stats.geschwindigkeitPct);
+    setBar('idleStatAccelFill', 'idleStatAccelVal', info.stats.beschleunigungPct);
+    setBar('idleStatErtragFill', 'idleStatErtragVal', info.stats.ertragBonusPct);
+
+    var levelEl = document.getElementById('idleBikeLevel');
+    if (levelEl) levelEl.textContent = String(info.level);
+
+    var cost = IdleCore.effectiveTuningCost(state, info.bike.id, info.level);
+    var upgradeBtn = document.getElementById('idleUpgradeBtn');
+    var costEl = document.getElementById('idleUpgradeCost');
+    if (costEl) costEl.textContent = cost === null ? 'MAX' : formatKm(cost);
+    if (upgradeBtn) upgradeBtn.disabled = cost === null || state.km < cost;
+  }
+
+  /**
+   * Setzt Breite + Prozent-Text eines Statistik-Balkens.
+   * @param {string} fillId - Element-id des Fülleistens-Elements.
+   * @param {string} valueId - Element-id des Prozent-Text-Elements.
+   * @param {number} pct - Prozentwert (0–100).
+   * @returns {void}
+   */
+  function setBar(fillId, valueId, pct) {
+    var fillEl = document.getElementById(fillId);
+    var valueEl = document.getElementById(valueId);
+    if (fillEl) fillEl.style.width = pct + '%';
+    if (valueEl) valueEl.textContent = Math.round(pct) + '%';
+  }
+
+  /**
+   * Rendert die Bike-Shop-Liste: bereits besessene Bikes (mit "Fahren"-
+   * Button, hervorgehoben falls aktuell aktiv), das nächste käufliche
+   * Bike (mit Preis + Kaufen-Button, deaktiviert falls zu teuer) sowie
+   * alle noch gesperrten, zukünftigen Bikes (nur Vorschau, keine
+   * Interaktion).
+   * @returns {void}
+   */
+  function renderShopList() {
+    var list = document.getElementById('idleShopList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    IdleCore.IDLE_BIKES.forEach(function (bike, index) {
+      var owned = state.ownedBikeIds.indexOf(bike.id) !== -1;
+      var isCurrent = state.currentBikeId === bike.id;
+      var isNextToBuy = !owned && index === state.ownedBikeIds.length;
+
+      var item = document.createElement('div');
+      item.className = 'idle-shop-item' + (isCurrent ? ' is-current' : '') + (!owned && !isNextToBuy ? ' is-locked' : '');
+
+      var icon = document.createElement('span');
+      icon.className = 'idle-shop-item-icon';
+      icon.textContent = CATEGORY_ICONS[bike.kategorie] || '🏍️';
+      item.appendChild(icon);
+
+      var info = document.createElement('div');
+      info.className = 'idle-shop-item-info';
+      var h4 = document.createElement('h4');
+      h4.textContent = bike.name;
+      var p = document.createElement('p');
+      p.textContent = bike.kategorie + ' · ' + bike.topspeed + ' km/h · ' + bike.ps + ' PS';
+      info.appendChild(h4);
+      info.appendChild(p);
+      item.appendChild(info);
+
+      var action = document.createElement('div');
+      action.className = 'idle-shop-item-action';
+
+      if (owned) {
+        if (isCurrent) {
+          var badge = document.createElement('span');
+          badge.className = 'idle-shop-item-badge';
+          badge.textContent = '🏁 Aktuell gefahren';
+          action.appendChild(badge);
+        } else {
+          var selectBtn = document.createElement('button');
+          selectBtn.type = 'button';
+          selectBtn.className = 'btn-outline';
+          selectBtn.textContent = 'Fahren';
+          selectBtn.addEventListener('click', function () {
+            IdleCore.selectBike(state, bike.id);
+            IdleCore.saveState(state);
+            renderAll();
+          });
+          action.appendChild(selectBtn);
+        }
+      } else if (isNextToBuy) {
+        var buyBtn = document.createElement('button');
+        buyBtn.type = 'button';
+        buyBtn.className = 'btn idle-buy-btn';
+        buyBtn.textContent = 'Kaufen — ' + formatKm(bike.kaufpreisKm) + ' km';
+        buyBtn.disabled = state.km < bike.kaufpreisKm;
+        buyBtn.addEventListener('click', function () {
+          var result = IdleCore.buyNextBike(state);
+          if (result.success) {
+            IdleCore.selectBike(state, result.bike.id);
+            IdleCore.saveState(state);
+            renderAll();
+            triggerBikeHandover(result.bike);
+          }
+        });
+        action.appendChild(buyBtn);
+      } else {
+        var lockedBadge = document.createElement('span');
+        lockedBadge.className = 'idle-shop-item-badge';
+        lockedBadge.textContent = '🔒 ' + formatKm(bike.kaufpreisKm) + ' km';
+        action.appendChild(lockedBadge);
+      }
+
+      item.appendChild(action);
+      list.appendChild(item);
+    });
+  }
+
+  /**
+   * Rendert alle Teile der Seite neu (Bike-Karte, Shop-Liste, Saison-/
+   * Werksvertrags-Übersicht, Teile-Sammlung, Statistik-Panel). Die
+   * km-Anzeige wird separat im Game-Loop weich nachgezogen, siehe
+   * updateKmDisplay().
+   * @returns {void}
+   */
+  function renderAll() {
+    renderBikeCard();
+    renderShopList();
+    renderSeasonPanel();
+    renderPartsPanel();
+    renderStatsPanel();
+  }
+
+  /**
+   * Zieht die angezeigte km-Zahl weich in Richtung des tatsächlichen
+   * state.km nach (einfache Lerp-"Tween"-Animation statt hartem Sprung)
+   * und schreibt sie in die DOM-Anzeige.
+   * @returns {void}
+   */
+  function updateKmDisplay() {
+    var diff = state.km - displayedKm;
+    if (Math.abs(diff) < KM_DISPLAY_SNAP_THRESHOLD) {
+      displayedKm = state.km;
+    } else {
+      displayedKm += diff * KM_DISPLAY_EASE;
+    }
+    var el = document.getElementById('idleKmValue');
+    if (el) el.textContent = formatKm(displayedKm);
+  }
+
+  /**
+   * Verdrahtet den "Gas geben"-Button: schreibt sofort activeEarn() auf
+   * den Zustand gut, löst eine kurze Puls-Animation aus und aktualisiert
+   * die abhängigen Anzeigen (Shop-Kaufbarkeit, Upgrade-Kosten).
+   * @returns {void}
+   */
+  function wireGasButton() {
+    var btn = document.getElementById('idleGasBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var earned = IdleCore.activeEarn(state) * totalEarnMultiplier(Date.now());
+      IdleCore.creditKm(state, earned);
+      btn.classList.remove('is-pulsing');
+      // Reflow erzwingen, damit die Animation bei schnellem Mehrfach-Klick erneut startet.
+      void btn.offsetWidth;
+      btn.classList.add('is-pulsing');
+      renderAll();
+      revUpEngineSound();
+    });
+  }
+
+  /**
+   * Verdrahtet den Tuning-Upgrade-Button der Bike-Detailkarte.
+   * @returns {void}
+   */
+  function wireUpgradeButton() {
+    var btn = document.getElementById('idleUpgradeBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var result = IdleCore.upgradeBike(state, state.currentBikeId);
+      if (result.success) {
+        IdleCore.saveState(state);
+        renderAll();
+      }
+    });
+  }
+
+  /* ============================================================
+     RENN-STRECKE + TACHO (Canvas) — feat(idle-visuals)
+     ============================================================ */
+
+  /**
+   * Passt die Backing-Store-Grösse eines Canvas an seine tatsächliche
+   * CSS-Anzeigegrösse an (inkl. devicePixelRatio), damit Zeichnungen auf
+   * hochauflösenden Displays nicht unscharf wirken.
+   * @param {HTMLCanvasElement} canvas - Zu skalierendes Canvas-Element.
+   * @returns {CanvasRenderingContext2D|null} 2D-Kontext des Canvas, oder null.
+   */
+  function resizeCanvasToDisplaySize(canvas) {
+    if (!canvas) return null;
+    var ratio = window.devicePixelRatio || 1;
+    var width = Math.max(1, Math.round(canvas.clientWidth * ratio));
+    var height = Math.max(1, Math.round(canvas.clientHeight * ratio));
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+    var ctx = canvas.getContext('2d');
+    if (ctx) ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    return ctx;
+  }
+
+  /**
+   * Löst die Canvas-Elemente (Strecke + Tacho) einmalig auf und skaliert
+   * sie initial. Wird zusätzlich bei jedem Fenster-Resize erneut aufgerufen.
+   * @returns {void}
+   */
+  function initCanvases() {
+    trackCanvas = document.getElementById('idleTrackCanvas');
+    tachoCanvas = document.getElementById('idleTachoCanvas');
+    trackCtx = resizeCanvasToDisplaySize(trackCanvas);
+    tachoCtx = resizeCanvasToDisplaySize(tachoCanvas);
+    window.addEventListener('resize', function () {
+      trackCtx = resizeCanvasToDisplaySize(trackCanvas);
+      tachoCtx = resizeCanvasToDisplaySize(tachoCanvas);
+    });
+  }
+
+  /**
+   * Rendert EINEN Frame der Oval-Renn-Strecke: bewegt den Bike-Marker
+   * entlang einer ovalen Bahn, deren Rundenzeit mit der aktuellen
+   * Geschwindigkeit (geschwindigkeitPct) sichtbar schrumpft — schneller
+   * gefahren wird spürbar mehr Runden/Sekunde. Bei ausreichender
+   * Geschwindigkeit werden zusätzlich Speed-Lines + ein Glow-Trail
+   * gezeichnet (respektiert prefers-reduced-motion).
+   * @param {number} dtSeconds - Verstrichene Zeit seit dem letzten Frame (Sekunden, gedeckelt).
+   * @param {number} speedPct - Aktuelle Geschwindigkeit des Bikes (0–100%).
+   * @returns {void}
+   */
+  function renderTrack(dtSeconds, speedPct) {
+    if (!trackCtx || !trackCanvas) return;
+    var w = trackCanvas.clientWidth;
+    var h = trackCanvas.clientHeight;
+    if (w <= 0 || h <= 0) return;
+
+    var lapSeconds = TRACK_LAP_SECONDS_SLOW - (TRACK_LAP_SECONDS_SLOW - TRACK_LAP_SECONDS_FAST) * (speedPct / 100);
+    var angularSpeed = (2 * Math.PI) / Math.max(0.5, lapSeconds);
+    var rawAngle = trackAngle + angularSpeed * dtSeconds;
+    if (rawAngle >= 2 * Math.PI) {
+      var lapsCompleted = Math.floor(rawAngle / (2 * Math.PI));
+      for (var lapIndex = 0; lapIndex < lapsCompleted; lapIndex++) onLapCompleted();
+    }
+    trackAngle = rawAngle % (2 * Math.PI);
+
+    var cx = w / 2, cy = h / 2;
+    var rx = w * 0.42, ry = h * 0.34;
+    var bikeX = cx + Math.cos(trackAngle) * rx;
+    var bikeY = cy + Math.sin(trackAngle) * ry;
+
+    trackCtx.clearRect(0, 0, w, h);
+
+    // Oval-Fahrbahn.
+    trackCtx.beginPath();
+    trackCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    trackCtx.lineWidth = Math.max(2, h * 0.05);
+    trackCtx.strokeStyle = 'rgba(150,150,150,0.35)';
+    trackCtx.stroke();
+
+    if (!reducedMotion) {
+      // Glow-Trail: verblassende Punkte entlang der zurückliegenden Positionen.
+      trackTrail.push({ x: bikeX, y: bikeY });
+      if (trackTrail.length > TRACK_TRAIL_LENGTH) trackTrail.shift();
+      trackTrail.forEach(function (point, index) {
+        var alpha = (index / trackTrail.length) * 0.35;
+        trackCtx.beginPath();
+        trackCtx.arc(point.x, point.y, Math.max(2, h * 0.035), 0, Math.PI * 2);
+        trackCtx.fillStyle = 'rgba(47,160,107,' + alpha.toFixed(3) + ')';
+        trackCtx.fill();
+      });
+
+      // Speed-Lines hinter dem Bike ab spürbarem Tempo.
+      if (speedPct >= TRACK_SPEED_LINES_THRESHOLD_PCT) {
+        var tangentAngle = trackAngle - Math.PI / 2;
+        var lineCount = 3;
+        for (var i = 0; i < lineCount; i++) {
+          var lx = cx + Math.cos(trackAngle - (i + 1) * 0.14) * rx;
+          var ly = cy + Math.sin(trackAngle - (i + 1) * 0.14) * ry;
+          trackCtx.beginPath();
+          trackCtx.moveTo(lx, ly);
+          trackCtx.lineTo(lx - Math.cos(tangentAngle) * (6 + i * 3), ly - Math.sin(tangentAngle) * (6 + i * 3));
+          trackCtx.strokeStyle = 'rgba(241,241,239,' + (0.35 - i * 0.1) + ')';
+          trackCtx.lineWidth = 2;
+          trackCtx.stroke();
+        }
+      }
+    } else {
+      trackTrail.length = 0;
+    }
+
+    // Bike-Marker.
+    trackCtx.beginPath();
+    trackCtx.arc(bikeX, bikeY, Math.max(4, h * 0.06), 0, Math.PI * 2);
+    trackCtx.fillStyle = '#1f6d4a';
+    trackCtx.shadowColor = reducedMotion ? 'transparent' : 'rgba(47,160,107,0.8)';
+    trackCtx.shadowBlur = reducedMotion ? 0 : 10;
+    trackCtx.fill();
+    trackCtx.shadowBlur = 0;
+  }
+
+  /**
+   * Rendert EINEN Frame des Halbkreis-Tachos: zeichnet Skalenstriche +
+   * eine weich nachlaufende Nadel, die sich zur aktuellen Geschwindigkeit
+   * des Bikes hin bewegt (siehe deriveBikeStats().geschwindigkeitPct).
+   * Ein Bike-Wechsel/-Kauf erzeugt dadurch automatisch einen sichtbaren
+   * Nadel-Sweep vom alten zum neuen Wert.
+   * @param {number} speedPct - Ziel-Geschwindigkeit des Bikes (0–100%).
+   * @param {number} kmh - Anzuzeigende km/h-Zahl (rein informativ).
+   * @returns {void}
+   */
+  function renderTacho(speedPct, kmh) {
+    if (!tachoCtx || !tachoCanvas) return;
+    var w = tachoCanvas.clientWidth;
+    var h = tachoCanvas.clientHeight;
+    if (w <= 0 || h <= 0) return;
+
+    var diff = speedPct - tachoDisplayPct;
+    tachoDisplayPct += diff * TACHO_NEEDLE_EASE;
+    if (Math.abs(diff) < 0.05) tachoDisplayPct = speedPct;
+
+    var cx = w / 2, cy = h * 0.92;
+    var radius = Math.min(w * 0.46, h * 0.85);
+
+    tachoCtx.clearRect(0, 0, w, h);
+
+    // Skalenbogen + feine Skalenstriche (Halbkreis, 180°→0°).
+    tachoCtx.beginPath();
+    tachoCtx.arc(cx, cy, radius, Math.PI, 0, false);
+    tachoCtx.lineWidth = Math.max(2, radius * 0.04);
+    tachoCtx.strokeStyle = 'rgba(150,150,150,0.35)';
+    tachoCtx.stroke();
+
+    var tickCount = 24;
+    for (var i = 0; i <= tickCount; i++) {
+      var tickAngle = Math.PI - (i / tickCount) * Math.PI;
+      var isMajor = i % 4 === 0;
+      var inner = radius * (isMajor ? 0.82 : 0.9);
+      var outer = radius * 0.98;
+      tachoCtx.beginPath();
+      tachoCtx.moveTo(cx + Math.cos(tickAngle) * inner, cy - Math.sin(tickAngle) * inner);
+      tachoCtx.lineTo(cx + Math.cos(tickAngle) * outer, cy - Math.sin(tickAngle) * outer);
+      tachoCtx.lineWidth = isMajor ? 2 : 1;
+      tachoCtx.strokeStyle = 'rgba(156,156,158,0.6)';
+      tachoCtx.stroke();
+    }
+
+    // Nadel.
+    var needleAngle = Math.PI - (tachoDisplayPct / 100) * Math.PI;
+    var needleLen = radius * 0.78;
+    tachoCtx.beginPath();
+    tachoCtx.moveTo(cx, cy);
+    tachoCtx.lineTo(cx + Math.cos(needleAngle) * needleLen, cy - Math.sin(needleAngle) * needleLen);
+    tachoCtx.lineWidth = Math.max(2, radius * 0.05);
+    tachoCtx.lineCap = 'round';
+    tachoCtx.strokeStyle = '#1f6d4a';
+    tachoCtx.stroke();
+
+    tachoCtx.beginPath();
+    tachoCtx.arc(cx, cy, Math.max(3, radius * 0.07), 0, Math.PI * 2);
+    tachoCtx.fillStyle = '#1f6d4a';
+    tachoCtx.fill();
+
+    // km/h-Zahl.
+    tachoCtx.fillStyle = '#9c9c9e';
+    tachoCtx.font = (Math.max(10, radius * 0.16)) + 'px sans-serif';
+    tachoCtx.textAlign = 'center';
+    tachoCtx.fillText(Math.round(kmh) + ' km/h', cx, cy - radius * 0.22);
+  }
+
+  /**
+   * Zeigt kurz das "Neues Bike in der Garage"-Übergabe-Banner über der
+   * Strecke an und löst einen Zoom-Puls des Strecken-Containers aus. Die
+   * Tacho-Nadel sweept dabei automatisch vom alten zum neuen Wert (siehe
+   * renderTacho()'s Easing zusammen mit dem geänderten currentBikeId).
+   * @param {Object} bike - Das neu gekaufte Bike (IDLE_BIKES-Eintrag).
+   * @returns {void}
+   */
+  function triggerBikeHandover(bike) {
+    var banner = document.getElementById('idleHandover');
+    var trackWrap = document.getElementById('idleTrackWrap');
+    if (banner) {
+      banner.textContent = '🏁 Neues Bike in der Garage: ' + bike.name;
+      banner.classList.add('is-visible');
+      if (handoverTimeoutId) clearTimeout(handoverTimeoutId);
+      handoverTimeoutId = setTimeout(function () {
+        banner.classList.remove('is-visible');
+      }, HANDOVER_BANNER_MS);
+    }
+    if (trackWrap && !reducedMotion) {
+      trackWrap.classList.remove('is-pulsing');
+      void trackWrap.offsetWidth;
+      trackWrap.classList.add('is-pulsing');
+    }
+  }
+
+  /* ============================================================
+     WEB AUDIO MOTORSOUND (synthetisiert) — feat(idle-sound)
+     ============================================================ */
+
+  /**
+   * Prüft, ob die Web Audio API im aktuellen Browser verfügbar ist.
+   * @returns {boolean} true, falls AudioContext (ggf. mit webkit-Präfix) existiert.
+   */
+  function hasWebAudio() {
+    return !!(window.AudioContext || window.webkitAudioContext);
+  }
+
+  /**
+   * Erzeugt einen kurzen, in sich geschlossenen Loop aus gefiltertem
+   * weissem Rauschen (Textur für den Motorsound-Untergrund).
+   * @param {AudioContext} ctx - Aktiver AudioContext.
+   * @returns {AudioBufferSourceNode} Startbare, loopende Rauschquelle.
+   */
+  function createNoiseLoop(ctx) {
+    var bufferSeconds = 2;
+    var buffer = ctx.createBuffer(1, ctx.sampleRate * bufferSeconds, ctx.sampleRate);
+    var data = buffer.getChannelData(0);
+    for (var i = 0; i < data.length; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    var source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    return source;
+  }
+
+  /**
+   * Erzeugt (einmalig, lazy) den synthetisierten Motorsound-Signalgraph:
+   * zwei Oszillatoren (Grund-/Sub-Frequenz) + gefiltertes Rauschen für
+   * Textur, zusammengeführt in einem Master-Gain (initial stumm). MUSS
+   * erst nach einer Nutzer-Geste aufgerufen werden (Autoplay-Policy).
+   * @returns {AudioContext|null} Der aktive AudioContext, oder null falls Web Audio fehlt.
+   */
+  function ensureAudioEngine() {
+    if (!hasWebAudio()) return null;
+    if (!audioCtx) {
+      try {
+        var AudioCtxCtor = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioCtxCtor();
+
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0;
+        masterGain.connect(audioCtx.destination);
+
+        engineOsc = audioCtx.createOscillator();
+        engineOsc.type = 'sawtooth';
+        engineOsc.frequency.value = ENGINE_BASE_HZ;
+        engineOsc.connect(masterGain);
+        engineOsc.start();
+
+        subOsc = audioCtx.createOscillator();
+        subOsc.type = 'sine';
+        subOsc.frequency.value = ENGINE_BASE_HZ / 2;
+        var subGain = audioCtx.createGain();
+        subGain.gain.value = 0.5;
+        subOsc.connect(subGain);
+        subGain.connect(masterGain);
+        subOsc.start();
+
+        var noiseSource = createNoiseLoop(audioCtx);
+        var noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.value = 400;
+        noiseGain = audioCtx.createGain();
+        noiseGain.gain.value = 0.06;
+        noiseSource.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(masterGain);
+        noiseSource.start();
+      } catch (e) {
+        audioCtx = null;
+        return null;
+      }
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  /**
+   * Aktualisiert Frequenz + Lautstärke des Motorsounds gemäss der
+   * aktuellen Geschwindigkeit UND dem Sound-EIN/AUS-/Lautstärke-Zustand.
+   * Sanfte Übergänge per setTargetAtTime (kein hörbares Klicken). No-op,
+   * falls der Motor noch nie gestartet wurde (Sound war nie aktiviert).
+   * @param {number} speedPct - Aktuelle Geschwindigkeit des Bikes (0–100%).
+   * @returns {void}
+   */
+  function updateEngineSound(speedPct) {
+    if (!audioCtx || !engineOsc || !subOsc || !masterGain) return;
+    var now = audioCtx.currentTime;
+    var targetHz = ENGINE_BASE_HZ + (speedPct / 100) * ENGINE_RANGE_HZ;
+    engineOsc.frequency.setTargetAtTime(targetHz, now, ENGINE_SMOOTH_TIME_CONSTANT);
+    subOsc.frequency.setTargetAtTime(targetHz / 2, now, ENGINE_SMOOTH_TIME_CONSTANT);
+
+    var targetGain = state.sound.enabled ? state.sound.volume * ENGINE_MAX_GAIN : 0;
+    masterGain.gain.setTargetAtTime(targetGain, now, ENGINE_SMOOTH_TIME_CONSTANT);
+  }
+
+  /**
+   * Löst einen kurzen "Rev-up"-Effekt aus (Frequenz-Spitze, die wieder
+   * zur aktuellen Geschwindigkeit zurückklingt), beim Klick auf
+   * "Gas geben". No-op, falls Sound nicht aktiviert/erzeugt ist.
+   * @returns {void}
+   */
+  function revUpEngineSound() {
+    if (!audioCtx || !engineOsc || !state.sound.enabled) return;
+    var now = audioCtx.currentTime;
+    var info = getCurrentBikeInfo();
+    var baseHz = ENGINE_BASE_HZ + (info.stats.geschwindigkeitPct / 100) * ENGINE_RANGE_HZ;
+    engineOsc.frequency.cancelScheduledValues(now);
+    engineOsc.frequency.setValueAtTime(baseHz + ENGINE_REV_UP_BOOST_HZ, now);
+    engineOsc.frequency.setTargetAtTime(baseHz, now + 0.02, ENGINE_REV_UP_DECAY_SECONDS);
+  }
+
+  /**
+   * Verdrahtet den Motorsound-Toggle-Button + Lautstärke-Regler. Erzeugt
+   * den AudioContext erst beim ersten Einschalten (Nutzer-Geste, siehe
+   * Autoplay-Policy). Persistiert EIN/AUS + Lautstärke in state.sound.
+   * @returns {void}
+   */
+  function wireSoundControls() {
+    var toggleBtn = document.getElementById('idleSoundToggle');
+    var volumeInput = document.getElementById('idleSoundVolume');
+    if (!toggleBtn || !volumeInput) return;
+
+    if (!hasWebAudio()) {
+      toggleBtn.disabled = true;
+      toggleBtn.textContent = '🔇 Motorsound nicht verfügbar';
+      volumeInput.disabled = true;
+      return;
+    }
+
+    volumeInput.value = String(Math.round((state.sound.volume || 0) * 100));
+
+    function refreshToggleLabel() {
+      toggleBtn.setAttribute('aria-pressed', state.sound.enabled ? 'true' : 'false');
+      toggleBtn.textContent = state.sound.enabled ? '🔊 Motorsound: AN' : '🔈 Motorsound: AUS';
+    }
+    refreshToggleLabel();
+
+    toggleBtn.addEventListener('click', function () {
+      ensureAudioEngine();
+      state.sound.enabled = !state.sound.enabled;
+      IdleCore.saveState(state);
+      refreshToggleLabel();
+      updateEngineSound(getCurrentBikeInfo().stats.geschwindigkeitPct);
+    });
+
+    volumeInput.addEventListener('input', function () {
+      state.sound.volume = Math.max(0, Math.min(100, Number(volumeInput.value) || 0)) / 100;
+      updateEngineSound(getCurrentBikeInfo().stats.geschwindigkeitPct);
+    });
+    volumeInput.addEventListener('change', function () {
+      IdleCore.saveState(state);
+    });
+  }
+
+  /* ============================================================
+     SCHALTPUNKT-COMBO (MECHANIK A) — feat(idle-combo) UI-Wiring
+     ============================================================ */
+
+  /**
+   * Aktualisiert die dauerhafte Combo-/Multiplikator-Anzeige unterhalb der
+   * Renn-Strecke (ausgeblendet, solange Combo 0 ist).
+   * @returns {void}
+   */
+  function updateComboBadge() {
+    var badge = document.getElementById('idleComboBadge');
+    var countEl = document.getElementById('idleComboCount');
+    var multEl = document.getElementById('idleComboMultiplier');
+    if (!badge || !countEl || !multEl) return;
+
+    if (!state.combo || state.combo.count <= 0) {
+      badge.hidden = true;
+      return;
+    }
+    badge.hidden = false;
+    countEl.textContent = '🔥 Combo ×' + state.combo.count;
+    var activeMultiplier = IdleCore.activeComboMultiplier(state, Date.now());
+    multEl.textContent = activeMultiplier > 1 ? ('· Multiplikator ×' + formatMultiplier(activeMultiplier)) : '';
+  }
+
+  /**
+   * Formatiert einen Multiplikator ohne unnötige Nachkommastelle (z. B.
+   * 2 statt "2.0", aber 2.5 bleibt "2.5").
+   * @param {number} value - Roh-Multiplikator.
+   * @returns {string} Formatierte Zeichenkette.
+   */
+  function formatMultiplier(value) {
+    return (Math.round(value * 10) / 10).toString().replace(/\.0$/, '');
+  }
+
+  /**
+   * Startet eine neue Schaltpunkt-Leiste: berechnet die (mit steigender
+   * Combo schrumpfende) perfekte Zone per IdleCore.perfectZoneWidth() und
+   * macht die Leiste sichtbar/interaktiv.
+   * @returns {void}
+   */
+  function startShift() {
+    shiftState.active = true;
+    shiftState.elapsedSeconds = 0;
+    shiftState.resultShown = false;
+    shiftState.zoneWidthPct = IdleCore.perfectZoneWidthForState(state, state.combo ? state.combo.count : 0);
+
+    var zoneEl = document.getElementById('idleShiftZone');
+    var trackEl = document.getElementById('idleShiftTrack');
+    var wrapEl = document.getElementById('idleShift');
+    var halfWidth = shiftState.zoneWidthPct / 2;
+    if (zoneEl) {
+      zoneEl.style.left = (SHIFT_ZONE_CENTER_PCT - halfWidth) + '%';
+      zoneEl.style.width = shiftState.zoneWidthPct + '%';
+    }
+    if (trackEl) trackEl.classList.remove('is-hit', 'is-miss');
+    if (wrapEl) {
+      wrapEl.classList.add('is-active');
+      wrapEl.setAttribute('aria-hidden', 'false');
+    }
+    renderShiftMarker(0);
+  }
+
+  /**
+   * Positioniert den Schaltpunkt-Marker gemäss dem Sweep-Fortschritt.
+   * @param {number} progressPct - Fortschritt des Marker-Durchlaufs (0–100).
+   * @returns {void}
+   */
+  function renderShiftMarker(progressPct) {
+    var markerEl = document.getElementById('idleShiftMarker');
+    if (markerEl) markerEl.style.left = progressPct + '%';
+  }
+
+  /**
+   * Beendet die aktuell aktive Schaltpunkt-Leiste. Bei einem tatsächlichen
+   * Klick (isIgnore=false) wird IdleCore.applyShiftResult() aufgerufen und
+   * ein kurzer Treffer-/Fehlklick-Flash gezeigt; läuft die Leiste
+   * unbeklickt ab (isIgnore=true), wird NICHTS an der Combo verändert
+   * (keine Strafe fürs Ignorieren) und die Leiste blendet sofort aus.
+   * @param {boolean} hit - true, falls im grünen Bereich geklickt wurde.
+   * @param {boolean} isIgnore - true, falls die Leiste unbeklickt abgelaufen ist.
+   * @returns {void}
+   */
+  function endShift(hit, isIgnore) {
+    if (shiftState.resultShown) return;
+    shiftState.resultShown = true;
+
+    var trackEl = document.getElementById('idleShiftTrack');
+    if (!isIgnore) {
+      IdleCore.applyShiftResult(state, hit, Date.now());
+      IdleCore.recordComboPeak(state, state.combo.count);
+      IdleCore.saveState(state);
+      if (trackEl) trackEl.classList.add(hit ? 'is-hit' : 'is-miss');
+      renderAll();
+      updateComboBadge();
+    }
+
+    var wrapEl = document.getElementById('idleShift');
+    setTimeout(function () {
+      if (wrapEl) {
+        wrapEl.classList.remove('is-active');
+        wrapEl.setAttribute('aria-hidden', 'true');
+      }
+      shiftState.active = false;
+      shiftTimerSeconds = IdleCore.nextShiftIntervalSeconds();
+    }, isIgnore ? 0 : SHIFT_RESULT_FLASH_MS);
+  }
+
+  /**
+   * Wertet einen Klick/Tastendruck auf die aktuell aktive Schaltpunkt-
+   * Leiste aus: prüft, ob sich der Marker gerade innerhalb der perfekten
+   * Zone befindet, und beendet die Leiste entsprechend als Treffer/Fehlklick.
+   * @returns {void}
+   */
+  function evaluateShiftClick() {
+    if (!shiftState.active || shiftState.resultShown) return;
+    var progressPct = Math.min(100, (shiftState.elapsedSeconds / IdleCore.IDLE_BALANCE.SHIFT_SWEEP_DURATION_SECONDS) * 100);
+    var half = shiftState.zoneWidthPct / 2;
+    var hit = progressPct >= (SHIFT_ZONE_CENTER_PCT - half) && progressPct <= (SHIFT_ZONE_CENTER_PCT + half);
+    endShift(hit, false);
+  }
+
+  /**
+   * Verdrahtet die Klick-/Tastatur-Interaktion (Enter/Leertaste) der
+   * Schaltpunkt-Leiste.
+   * @returns {void}
+   */
+  function wireShiftInteraction() {
+    var trackEl = document.getElementById('idleShiftTrack');
+    if (!trackEl) return;
+    trackEl.addEventListener('click', evaluateShiftClick);
+    trackEl.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        evaluateShiftClick();
+      }
+    });
+  }
+
+  /**
+   * EIN Game-Loop-Tick der Schaltpunkt-Leiste: zählt entweder bis zur
+   * nächsten zufälligen Leiste herunter, oder lässt den Marker der
+   * aktiven Leiste weiterwandern und wertet ein unbeklicktes Ablaufen
+   * (Ignorieren, keine Strafe) als solches aus.
+   * @param {number} dtSeconds - Verstrichene Zeit seit dem letzten Frame (Sekunden, gedeckelt).
+   * @returns {void}
+   */
+  function tickShift(dtSeconds) {
+    if (!shiftState.active) {
+      shiftTimerSeconds -= dtSeconds;
+      if (shiftTimerSeconds <= 0) startShift();
+      return;
+    }
+    shiftState.elapsedSeconds += dtSeconds;
+    var progressPct = Math.min(100, (shiftState.elapsedSeconds / IdleCore.IDLE_BALANCE.SHIFT_SWEEP_DURATION_SECONDS) * 100);
+    renderShiftMarker(progressPct);
+    if (progressPct >= 100 && !shiftState.resultShown) {
+      endShift(false, true);
+    }
+  }
+
+  /* ============================================================
+     MECHANIK B — SAISON & WERKSVERTRÄGE — feat(idle-prestige)
+     ============================================================ */
+
+  /**
+   * Rendert die Saison-Übersicht (Saisonnummer, Trophäen, projizierte
+   * Trophäen bei Abschluss) sowie den "Saison abschliessen"-Button
+   * (nur aktiviert, wenn IdleCore.canFinishSeason() zustimmt) inkl.
+   * erklärendem Hinweistext.
+   * @returns {void}
+   */
+  function renderSeasonPanel() {
+    var numberEl = document.getElementById('idleSeasonNumber');
+    var trophiesEl = document.getElementById('idleSeasonTrophies');
+    var projectedEl = document.getElementById('idleSeasonProjected');
+    var finishBtn = document.getElementById('idleFinishSeasonBtn');
+    var hintEl = document.getElementById('idleSeasonHint');
+
+    if (numberEl) numberEl.textContent = String((state.prestige.level || 0) + 1);
+    if (trophiesEl) trophiesEl.textContent = String(state.prestige.trophies || 0);
+    var projected = IdleCore.trophiesForSeason(state);
+    if (projectedEl) projectedEl.textContent = '+' + projected + ' 🏆';
+
+    var canFinish = IdleCore.canFinishSeason(state);
+    if (finishBtn) finishBtn.disabled = !canFinish;
+    if (hintEl) {
+      hintEl.textContent = canFinish
+        ? 'Setzt km und besessene Bikes zurück — Trophäen, Werksverträge, Teile und Statistiken bleiben erhalten.'
+        : 'Verfügbar, sobald du die Kawasaki Ninja ZX-10R besitzt.';
+    }
+
+    renderContractsList();
+  }
+
+  /**
+   * Rendert die Werksverträge-Liste: besessene Verträge (Abzeichen),
+   * kaufbare Verträge ("Kaufen"-Button) und noch unerreichbare Verträge
+   * (Preis-Anzeige, deaktiviert).
+   * @returns {void}
+   */
+  function renderContractsList() {
+    var list = document.getElementById('idleContractsList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    IdleCore.IDLE_CONTRACTS.forEach(function (contract) {
+      var owned = state.prestige.contracts.indexOf(contract.id) !== -1;
+
+      var item = document.createElement('div');
+      item.className = 'idle-contract-item' + (owned ? ' is-owned' : '');
+
+      var info = document.createElement('div');
+      info.className = 'idle-contract-item-info';
+      var h4 = document.createElement('h4');
+      h4.textContent = contract.name;
+      var p = document.createElement('p');
+      p.textContent = contract.beschreibung;
+      info.appendChild(h4);
+      info.appendChild(p);
+      item.appendChild(info);
+
+      var action = document.createElement('div');
+      action.className = 'idle-contract-item-action';
+
+      if (owned) {
+        var badge = document.createElement('span');
+        badge.className = 'idle-contract-badge';
+        badge.textContent = '✅ Aktiv';
+        action.appendChild(badge);
+      } else {
+        var buyBtn = document.createElement('button');
+        buyBtn.type = 'button';
+        buyBtn.className = 'btn-outline';
+        buyBtn.textContent = 'Kaufen — ' + contract.kostenTrophaeen + ' 🏆';
+        buyBtn.disabled = !IdleCore.canBuyContract(state, contract.id);
+        buyBtn.addEventListener('click', function () {
+          var result = IdleCore.buyContract(state, contract.id);
+          if (result.success) {
+            IdleCore.saveState(state);
+            renderAll();
+          }
+        });
+        action.appendChild(buyBtn);
+      }
+
+      item.appendChild(action);
+      list.appendChild(item);
+    });
+  }
+
+  /**
+   * Verdrahtet den "Saison abschliessen"-Button: zeigt einen klaren
+   * deutschen Bestätigungsdialog (was zurückgesetzt wird vs. was
+   * dauerhaft erhalten bleibt) und führt bei Bestätigung
+   * IdleCore.finishSeason() aus. Ersetzt die lokale state-Referenz durch
+   * den neuen, zurückgesetzten Zustand.
+   * @returns {void}
+   */
+  function wireSeasonControls() {
+    var finishBtn = document.getElementById('idleFinishSeasonBtn');
+    if (!finishBtn) return;
+    finishBtn.addEventListener('click', function () {
+      if (!IdleCore.canFinishSeason(state)) return;
+      var projected = IdleCore.trophiesForSeason(state);
+      var confirmed = window.confirm(
+        'Saison abschliessen?\n\n' +
+        'Zurückgesetzt werden: deine Kilometer (km) und alle besessenen Bikes ' +
+        '(du startest wieder beim Startbike bzw. dem Bike aus einem aktiven Werksvertrag).\n\n' +
+        'Erhalten bleiben: Trophäen (+' + projected + ' 🏆 durch diese Saison), ' +
+        'Werksverträge, deine Teile-Sammlung und alle Statistiken.'
+      );
+      if (!confirmed) return;
+      state = IdleCore.finishSeason(state);
+      IdleCore.saveState(state);
+      renderAll();
+    });
+  }
+
+  /* ============================================================
+     TEILE-SAMMLUNG — feat(idle-parts)
+     ============================================================ */
+
+  /**
+   * Rendert die Teile-Sammlung, gruppiert nach Set: besessene Teile
+   * farbig, fehlende als Silhouette; pro Set wird dessen Ertrags-Bonus
+   * gezeigt (hervorgehoben, sobald das Set komplett ist).
+   * @returns {void}
+   */
+  function renderPartsPanel() {
+    var container = document.getElementById('idlePartsSets');
+    if (!container) return;
+    container.innerHTML = '';
+
+    var owned = state.parts.collected;
+
+    IdleCore.IDLE_PART_SETS.forEach(function (set) {
+      var partsInSet = IdleCore.IDLE_PARTS.filter(function (p) { return p.setId === set.id; });
+      var allOwned = partsInSet.length > 0 && partsInSet.every(function (p) { return owned.indexOf(p.id) !== -1; });
+
+      var card = document.createElement('div');
+      card.className = 'idle-part-set' + (allOwned ? ' is-complete' : '');
+
+      var header = document.createElement('div');
+      header.className = 'idle-part-set-header';
+      var h4 = document.createElement('h4');
+      h4.textContent = set.name;
+      var bonus = document.createElement('span');
+      bonus.className = 'idle-part-set-bonus';
+      bonus.textContent = (allOwned ? '✅ ' : '') + '+' + set.bonusPct + '% Ertrag';
+      header.appendChild(h4);
+      header.appendChild(bonus);
+      card.appendChild(header);
+
+      var itemsRow = document.createElement('div');
+      itemsRow.className = 'idle-part-set-items';
+      partsInSet.forEach(function (part) {
+        var isOwned = owned.indexOf(part.id) !== -1;
+        var chip = document.createElement('div');
+        chip.className = 'idle-part-chip ' + (isOwned ? 'is-owned' : 'is-missing');
+        chip.title = isOwned ? part.name : 'Noch nicht gefunden';
+
+        var icon = document.createElement('span');
+        icon.textContent = PART_RARITY_ICONS[part.rarity] || '⚙️';
+        var label = document.createElement('span');
+        label.className = 'idle-part-chip-label';
+        label.textContent = isOwned ? part.name : '???';
+
+        chip.appendChild(icon);
+        chip.appendChild(label);
+        itemsRow.appendChild(chip);
+      });
+      card.appendChild(itemsRow);
+
+      container.appendChild(card);
+    });
+  }
+
+  /**
+   * Zeigt einen kurzen Toast für einen Teile-Drop: neues Teil oder
+   * (bei einer Dublette) die umgewandelte km-Gutschrift.
+   * @param {{isNew: boolean, awardedKm: number, part: Object}} result - Ergebnis von IdleCore.addPart().
+   * @returns {void}
+   */
+  function showPartToast(result) {
+    var container = document.getElementById('idleToastContainer');
+    if (!container || !result || !result.part) return;
+
+    var toast = document.createElement('div');
+    toast.className = 'idle-toast';
+    toast.textContent = result.isNew
+      ? '🎁 Neues Teil gefunden: ' + result.part.name
+      : '♻️ Dublette umgewandelt: ' + result.part.name + ' (+' + formatKm(result.awardedKm) + ' km)';
+    container.appendChild(toast);
+
+    window.requestAnimationFrame(function () { toast.classList.add('is-visible'); });
+    setTimeout(function () {
+      toast.classList.remove('is-visible');
+      setTimeout(function () {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 400);
+    }, PART_TOAST_VISIBLE_MS);
+  }
+
+  /**
+   * Wird bei jeder abgeschlossenen Runde auf der Renn-Strecke aufgerufen
+   * (siehe renderTrack()'s Rundenerkennung): zählt die Runden-Statistik
+   * hoch und würfelt einen möglichen Teile-Drop (IdleCore.rollPartDrop).
+   * Bei einem Drop wird das Teil hinzugefügt (oder als Dublette in km
+   * umgewandelt), gespeichert, die Sammlung neu gerendert und ein Toast
+   * gezeigt.
+   * @returns {void}
+   */
+  function onLapCompleted() {
+    IdleCore.recordLap(state);
+    renderStatsPanel();
+    var partId = IdleCore.rollPartDrop(Math.random);
+    if (partId) {
+      var result = IdleCore.addPart(state, partId);
+      IdleCore.saveState(state);
+      renderPartsPanel();
+      renderBikeCard();
+      showPartToast(result);
+    }
+  }
+
+  /* ============================================================
+     STATISTIKEN — feat(idle-stats)
+     ============================================================ */
+
+  /**
+   * Rendert das Statistik-Panel (Gesamt-km, Runden, beste Combo,
+   * Spielzeit) sowie die Saison-Historie-Liste.
+   * @returns {void}
+   */
+  function renderStatsPanel() {
+    var grid = document.getElementById('idleStatsGrid');
+    if (grid) {
+      grid.innerHTML = '';
+      var tiles = [
+        { label: 'Gesamt-km', value: formatKm(state.totalKmEarned) + ' km' },
+        { label: 'Runden', value: String(state.stats.laps) },
+        { label: 'Beste Combo', value: '×' + state.stats.bestCombo },
+        { label: 'Spielzeit', value: formatPlayTime(state.stats.playTimeSeconds) },
+      ];
+      tiles.forEach(function (tile) {
+        var tileEl = document.createElement('div');
+        tileEl.className = 'idle-stat-tile';
+        var labelEl = document.createElement('span');
+        labelEl.className = 'idle-stat-tile-label';
+        labelEl.textContent = tile.label;
+        var valueEl = document.createElement('span');
+        valueEl.className = 'idle-stat-tile-value';
+        valueEl.textContent = tile.value;
+        tileEl.appendChild(labelEl);
+        tileEl.appendChild(valueEl);
+        grid.appendChild(tileEl);
+      });
+    }
+
+    var historyList = document.getElementById('idleSeasonHistory');
+    if (historyList) {
+      historyList.innerHTML = '';
+      var history = state.stats.seasonHistory;
+      if (!history || history.length === 0) {
+        var emptyEl = document.createElement('li');
+        emptyEl.className = 'idle-season-history-empty';
+        emptyEl.textContent = 'Noch keine Saison abgeschlossen.';
+        historyList.appendChild(emptyEl);
+      } else {
+        history.slice().reverse().forEach(function (entry) {
+          var li = document.createElement('li');
+          var strong = document.createElement('strong');
+          strong.textContent = 'Saison ' + entry.season;
+          var trophies = document.createElement('span');
+          trophies.textContent = '+' + entry.trophiesEarned + ' 🏆';
+          li.appendChild(strong);
+          li.appendChild(trophies);
+          historyList.appendChild(li);
+        });
+      }
+    }
+  }
+
+  /**
+   * Verdrahtet regelmässiges Auto-Speichern sowie ein finales Speichern,
+   * bevor die Seite verlassen/versteckt wird (Tab-Wechsel, Schliessen).
+   * @returns {void}
+   */
+  function wireLifecycleSave() {
+    setInterval(function () {
+      IdleCore.saveState(state);
+    }, AUTO_SAVE_INTERVAL_MS);
+
+    window.addEventListener('beforeunload', function () {
+      IdleCore.saveState(state);
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') IdleCore.saveState(state);
+    });
+  }
+
+  /**
+   * EIN Game-Loop-Frame: berechnet die (auf IDLE_BALANCE.MAX_TICK_DELTA_
+   * SECONDS gedeckelte) verstrichene Zeit seit dem letzten Frame,
+   * schreibt den passiven Ertrag für dieses Delta gut und aktualisiert
+   * die weich nachlaufende km-Anzeige. Die Wirtschaft (Erträge) tickt
+   * damit von der Bildwiederholrate entkoppelt — verstrichene Echtzeit
+   * wird akkumuliert, nicht die Anzahl der Frames gezählt.
+   * @param {number} timestamp - Von requestAnimationFrame übergebener High-Res-Zeitstempel.
+   * @returns {void}
+   */
+  function tick(timestamp) {
+    if (lastFrameTime === null) lastFrameTime = timestamp;
+    var dtSeconds = (timestamp - lastFrameTime) / 1000;
+    lastFrameTime = timestamp;
+
+    // Tab-inactive-safe: ein einzelner Frame darf nie mehr als
+    // MAX_TICK_DELTA_SECONDS an Ertrag auf einmal gutschreiben (verhindert
+    // einen riesigen Sprung, wenn ein hintergründiger Tab zurückkehrt).
+    var clampedDt = Math.min(Math.max(dtSeconds, 0), IdleCore.IDLE_BALANCE.MAX_TICK_DELTA_SECONDS);
+
+    var earned = IdleCore.passiveEarn(state, clampedDt) * totalEarnMultiplier(Date.now());
+    IdleCore.creditKm(state, earned);
+    IdleCore.addPlayTime(state, clampedDt);
+
+    updateKmDisplay();
+
+    // Strecke/Tacho teilen sich denselben Game-Loop-Tick (kein zweiter rAF-Loop).
+    var info = getCurrentBikeInfo();
+    var kmh = (info.bike.topspeed * info.stats.geschwindigkeitPct) / 100;
+    renderTrack(clampedDt, info.stats.geschwindigkeitPct);
+    renderTacho(info.stats.geschwindigkeitPct, kmh);
+    updateEngineSound(info.stats.geschwindigkeitPct);
+    tickShift(clampedDt);
+    updateComboBadge();
+
+    window.requestAnimationFrame(tick);
+  }
+
+  /* ============================================================
+     OFFLINE-ERTRAG — feat(idle-offline)
+     ============================================================ */
+
+  /**
+   * Zeigt das "Willkommen zurück"-Banner mit dem beim Laden
+   * gutgeschriebenen Offline-Ertrag (siehe offlineEarnedKm oben) und
+   * verdrahtet dessen Schliessen-Button. No-op, falls kein Offline-
+   * Ertrag gutgeschrieben wurde.
+   * @returns {void}
+   */
+  function showOfflineBanner() {
+    if (offlineEarnedKm <= 0) return;
+    var banner = document.getElementById('idleOfflineBanner');
+    var textEl = document.getElementById('idleOfflineBannerText');
+    var closeBtn = document.getElementById('idleOfflineBannerClose');
+    if (!banner || !textEl) return;
+
+    textEl.textContent = '👋 Willkommen zurück! Während du weg warst, hast du ' + formatKm(offlineEarnedKm) + ' km gesammelt.';
+    banner.hidden = false;
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        banner.hidden = true;
+      });
+    }
+  }
+
+  /**
+   * Initialisiert die Idle-Racer-Seite: rendert den initialen Zustand,
+   * verdrahtet alle Buttons + das Auto-Speichern und startet den
+   * Game-Loop.
+   * @returns {void}
+   */
+  function initIdlePage() {
+    renderAll();
+    updateKmDisplay();
+    initCanvases();
+    tachoDisplayPct = getCurrentBikeInfo().stats.geschwindigkeitPct;
+    updateComboBadge();
+    showOfflineBanner();
+    wireGasButton();
+    wireUpgradeButton();
+    wireShiftInteraction();
+    wireSoundControls();
+    wireSeasonControls();
+    wireLifecycleSave();
+    window.requestAnimationFrame(tick);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initIdlePage);
+  } else {
+    initIdlePage();
+  }
+})();

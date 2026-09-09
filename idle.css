@@ -1,0 +1,654 @@
+/* ============================================================
+   idle.css — Kawasaki Idle Racer (idle.html)
+   Nutzt ausschliesslich Design-Tokens aus design.css (--bg, --text,
+   --accent, Spacing-/Radius-/Motion-Skalen) — kein eigenes Farbsystem.
+   Layout-Shell für Phase A: Platzhalter für Strecke/Tacho (Phase B
+   füllt sie), km-Anzeige, "Gas geben"-Button, Bike-Shop-Liste und eine
+   Bike-Detailkarte mit gefüllten Statistik-Balken.
+   ============================================================ */
+
+.idle-hero {
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+}
+.idle-hero h1 {
+  font-size: var(--font-h1);
+  margin-bottom: 0.5rem;
+}
+.idle-hero p {
+  color: var(--text-muted);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* ── Offline-Willkommens-Banner — feat(idle-offline) ────────────── */
+.idle-offline-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  max-width: 720px;
+  margin: 0 auto 1.25rem;
+  padding: 0.75rem 1.1rem;
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md, 10px);
+  font-size: 0.92em;
+  text-align: center;
+}
+/* Author `display:flex` above would otherwise always beat the browser's
+   UA `[hidden]{display:none}` rule (author origin outranks UA origin
+   regardless of selector specificity) — restore the hidden-attribute
+   behaviour explicitly (same fix as .idle-combo-badge[hidden] in Phase B). */
+.idle-offline-banner[hidden] {
+  display: none;
+}
+.idle-offline-banner-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1em;
+  line-height: 1;
+  padding: 0.1rem 0.3rem;
+}
+.idle-offline-banner-close:hover { color: var(--text); }
+
+/* ── Zwei-Spalten-Layout: Fahr-Bereich links, Bike-Detailkarte rechts ── */
+.idle-layout {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  margin-bottom: 1.75rem;
+}
+@media (max-width: 900px) {
+  .idle-layout { grid-template-columns: 1fr; }
+}
+
+.idle-drive,
+.idle-bike-card,
+.idle-shop {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.5rem;
+}
+
+/* ── Renn-Strecke (Canvas) ──────────────────────────────────────── */
+.idle-track-wrap {
+  position: relative;
+  aspect-ratio: 16 / 6;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+  transition: transform var(--dur-slow, 0.4s) var(--ease-spring, ease);
+}
+.idle-track-wrap.is-pulsing {
+  animation: idle-track-zoom-pulse 0.6s var(--ease-spring, ease);
+}
+@keyframes idle-track-zoom-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+.idle-track-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* "Neues Bike in der Garage"-Übergabe-Banner, überlagert die Strecke kurz. */
+.idle-handover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  font-weight: var(--fw-bold);
+  font-size: 1.05em;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.idle-handover.is-visible {
+  opacity: 1;
+}
+
+/* ── Tacho (Canvas) ──────────────────────────────────────────────── */
+.idle-tacho-wrap {
+  aspect-ratio: 16 / 5;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  overflow: hidden;
+}
+.idle-tacho-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── km/Währungs-Anzeige ────────────────────────────────────────── */
+.idle-km-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.idle-km-label {
+  color: var(--text-muted);
+  font-size: 0.9em;
+  width: 100%;
+  text-align: center;
+}
+.idle-km-value {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  color: var(--accent);
+  letter-spacing: var(--ls-tight);
+}
+.idle-km-unit {
+  color: var(--text-muted);
+  font-size: 1.1em;
+}
+
+/* ── "Gas geben"-Pill-Button — gross, thumb-friendly ────────────── */
+.idle-gas-btn {
+  display: block;
+  width: 100%;
+  padding: 1.1rem 1.5rem;
+  font-size: 1.15rem;
+  font-weight: var(--fw-bold);
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border: none;
+  border-radius: var(--radius-full, 999px);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--dur-fast, 0.15s) var(--ease-spring, ease),
+              box-shadow var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.idle-gas-btn:hover {
+  box-shadow: var(--shadow-glow, var(--shadow-md));
+  transform: translateY(-2px);
+}
+.idle-gas-btn:active {
+  transform: translateY(0) scale(0.97);
+}
+.idle-gas-btn.is-pulsing {
+  animation: idle-gas-pulse var(--dur-fast, 0.15s) var(--ease-spring, ease);
+}
+@keyframes idle-gas-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+/* ── Bike-Detailkarte (aktuelles Bike + Statistik-Balken) ──────── */
+.idle-bike-card-header h2 {
+  font-size: 1.3em;
+  margin-bottom: 0.15rem;
+}
+.idle-bike-card-header p {
+  color: var(--text-muted);
+  font-size: 0.88em;
+  margin-bottom: 1.1rem;
+}
+
+.idle-stat-row { margin-bottom: 0.9rem; }
+.idle-stat-row:last-of-type { margin-bottom: 1.1rem; }
+.idle-stat-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.86em;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+}
+.idle-stat-track {
+  height: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full, 999px);
+  overflow: hidden;
+}
+.idle-stat-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  transition: width var(--dur-slow, 0.4s) var(--ease-out, ease);
+}
+
+.idle-bike-level {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.92em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+.idle-bike-level strong { color: var(--text); }
+
+.idle-upgrade-btn {
+  width: 100%;
+  justify-content: center;
+}
+.idle-upgrade-btn:disabled,
+.idle-buy-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Bike-Shop-Liste (nächste Bikes kaufen) ─────────────────────── */
+.idle-shop h2 {
+  font-size: 1.15em;
+  margin-bottom: 1rem;
+}
+.idle-shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.idle-shop-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.85rem 1rem;
+  transition: border-color var(--dur-fast, 0.15s) var(--ease-standard, ease);
+}
+.idle-shop-item.is-current { border-color: var(--accent); }
+.idle-shop-item.is-locked { opacity: 0.55; }
+.idle-shop-item-icon { font-size: 1.6em; flex-shrink: 0; }
+.idle-shop-item-info { flex: 1; min-width: 160px; }
+.idle-shop-item-info h4 { font-size: 0.98em; margin-bottom: 0.15rem; }
+.idle-shop-item-info p { color: var(--text-muted); font-size: 0.8em; margin: 0; }
+.idle-shop-item-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.idle-shop-item-badge {
+  font-size: 0.78em;
+  color: var(--text-subtle);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .idle-shop-item { flex-direction: column; align-items: stretch; text-align: center; }
+  .idle-shop-item-action { justify-content: center; }
+}
+
+/* ── Schaltpunkt-Combo (MECHANIK A) ─────────────────────────────── */
+.idle-shift {
+  margin-bottom: 0.9rem;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity var(--dur-base, 0.25s) var(--ease-standard, ease),
+              max-height var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.idle-shift.is-active {
+  opacity: 1;
+  max-height: 6rem;
+  margin-bottom: 1.1rem;
+}
+.idle-shift-hint {
+  display: block;
+  text-align: center;
+  font-size: 0.82em;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+.idle-shift-track {
+  position: relative;
+  height: 30px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full, 999px);
+  overflow: hidden;
+  cursor: pointer;
+}
+.idle-shift-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 33%;
+  width: 34%;
+  background: rgba(47, 160, 107, 0.35);
+  border-left: 2px solid var(--accent-hover);
+  border-right: 2px solid var(--accent-hover);
+}
+.idle-shift-marker {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0%;
+  width: 4px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--text);
+  box-shadow: 0 0 8px var(--text);
+}
+.idle-shift-track.is-hit .idle-shift-zone { background: rgba(47, 160, 107, 0.75); }
+.idle-shift-track.is-miss .idle-shift-zone { background: rgba(200, 60, 60, 0.55); border-color: rgba(200, 60, 60, 0.8); }
+
+.idle-combo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-size: 0.9em;
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  margin-bottom: 0.9rem;
+}
+/* Author `display:flex` above would otherwise always beat the browser's
+   UA `[hidden]{display:none}` rule (author origin outranks UA origin
+   regardless of selector specificity) — restore the hidden-attribute
+   behaviour explicitly. */
+.idle-combo-badge[hidden] {
+  display: none;
+}
+.idle-combo-badge #idleComboMultiplier {
+  color: var(--accent);
+  font-weight: var(--fw-bold);
+}
+
+/* ── Motorsound-Steuerung (Web Audio, synthetisiert, standardmässig AUS) ── */
+.idle-sound-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.idle-sound-toggle {
+  padding: 0.5rem 1rem;
+  font-size: 0.85em;
+  font-weight: var(--fw-semibold);
+  color: var(--text);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full, 999px);
+  cursor: pointer;
+  transition: border-color var(--dur-fast, 0.15s) var(--ease-standard, ease);
+}
+.idle-sound-toggle[aria-pressed="true"] {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  border-color: transparent;
+}
+.idle-sound-volume-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+.idle-sound-volume {
+  width: 120px;
+}
+
+/* ── Saison & Werksverträge (MECHANIK B) — feat(idle-prestige) ─── */
+.idle-season h2 { font-size: 1.15em; margin-bottom: 0.5rem; }
+.idle-season-intro {
+  color: var(--text-muted);
+  font-size: 0.88em;
+  margin-bottom: 1.1rem;
+  max-width: 720px;
+}
+.idle-season-summary {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+}
+.idle-season-stat {
+  flex: 1;
+  min-width: 120px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.75rem 1rem;
+  text-align: center;
+}
+.idle-season-stat-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78em;
+  margin-bottom: 0.2rem;
+}
+.idle-season-stat-value {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: 1.3em;
+  color: var(--accent);
+}
+.idle-season-finish-btn {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 0.4rem;
+}
+.idle-season-hint {
+  color: var(--text-muted);
+  font-size: 0.82em;
+  text-align: center;
+  margin-bottom: 1.25rem;
+  min-height: 1.1em;
+}
+.idle-contracts-heading {
+  font-size: 1em;
+  margin-bottom: 0.75rem;
+}
+.idle-contracts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.idle-contract-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.85rem 1rem;
+}
+.idle-contract-item.is-owned { border-color: var(--accent); }
+.idle-contract-item-info { flex: 1; min-width: 200px; }
+.idle-contract-item-info h4 { font-size: 0.98em; margin-bottom: 0.15rem; }
+.idle-contract-item-info p { color: var(--text-muted); font-size: 0.8em; margin: 0; }
+.idle-contract-item-action { flex-shrink: 0; }
+.idle-contract-badge {
+  font-size: 0.78em;
+  color: var(--text-subtle);
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .idle-contract-item { flex-direction: column; align-items: stretch; text-align: center; }
+}
+
+/* ── Teile-Sammlung — feat(idle-parts) ──────────────────────────── */
+.idle-parts-section h2 { font-size: 1.15em; margin-bottom: 0.5rem; }
+.idle-parts-intro {
+  color: var(--text-muted);
+  font-size: 0.88em;
+  margin-bottom: 1.1rem;
+  max-width: 720px;
+}
+.idle-parts-sets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.idle-part-set {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.9rem 1rem;
+  transition: border-color var(--dur-fast, 0.15s) var(--ease-standard, ease);
+}
+.idle-part-set.is-complete { border-color: var(--accent); }
+.idle-part-set-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.6rem;
+}
+.idle-part-set-header h4 { font-size: 0.95em; margin: 0; }
+.idle-part-set-bonus {
+  font-size: 0.78em;
+  color: var(--text-subtle);
+}
+.idle-part-set.is-complete .idle-part-set-bonus { color: var(--accent); font-weight: var(--fw-semibold); }
+.idle-part-set-items {
+  display: flex;
+  gap: 0.5rem;
+}
+.idle-part-chip {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem 0.3rem;
+  border-radius: var(--radius-sm, 6px);
+  font-size: 1.3em;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.idle-part-chip.is-owned {
+  background: linear-gradient(135deg, var(--accent-dim), transparent);
+  border-color: var(--accent);
+}
+.idle-part-chip.is-missing {
+  filter: grayscale(1);
+  opacity: 0.35;
+}
+.idle-part-chip-label {
+  display: block;
+  font-size: 0.6em;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Teile-Drop-Toast */
+.idle-toast-container {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 500;
+  pointer-events: none;
+}
+.idle-toast {
+  background: var(--card-bg);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.75rem 1.1rem;
+  box-shadow: var(--shadow-md);
+  font-size: 0.88em;
+  color: var(--text);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.idle-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 600px) {
+  .idle-toast-container { left: 1rem; right: 1rem; }
+}
+
+/* ── Statistiken — feat(idle-stats) ─────────────────────────────── */
+.idle-stats-section h2 { font-size: 1.15em; margin-bottom: 1rem; }
+.idle-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.idle-stat-tile {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.85rem 1rem;
+  text-align: center;
+}
+.idle-stat-tile-label {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.78em;
+  margin-bottom: 0.25rem;
+}
+.idle-stat-tile-value {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: 1.25em;
+  color: var(--accent);
+}
+.idle-season-history-heading {
+  font-size: 1em;
+  margin-bottom: 0.6rem;
+}
+.idle-season-history {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+}
+.idle-season-history li {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.idle-season-history li strong { color: var(--text); }
+.idle-season-history-empty {
+  color: var(--text-subtle);
+  font-size: 0.85em;
+}
+
+/* ── prefers-reduced-motion: Zusatzbewegung reduzieren, Spiel bleibt nutzbar ── */
+@media (prefers-reduced-motion: reduce) {
+  .idle-track-wrap.is-pulsing { animation: none; }
+  .idle-gas-btn.is-pulsing { animation: none; }
+  .idle-handover { transition: none; }
+  .idle-shift { transition: none; }
+  .idle-toast { transition: none; }
+}

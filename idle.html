@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kawasaki Idle Racer — Fahre &amp; sammle km | Vrooooom</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23080808'/%3E%3Ctext x='50' y='68' font-size='58' font-family='sans-serif' font-weight='800' text-anchor='middle' fill='%23ff6600'%3EK%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="design.css">
+    <link rel="stylesheet" href="idle.css">
+    <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <script src="idle-core.js"></script>
+</head>
+<body>
+    <!-- Gemeinsame Navbar (Single Source of Truth) — siehe navbar.js.
+         data-theme-toggle="external": theme-toggle.js verdrahtet den
+         Button weiter unten, navbar.js darf hier NICHT selbst
+         verdrahten. -->
+    <nav id="siteNavRoot" class="site-nav" data-theme-toggle="external"></nav>
+    <script src="navbar.js"></script>
+
+    <header class="idle-hero js-reveal">
+        <h1>🏁 Kawasaki Idle Racer</h1>
+        <p>Fahre, sammle Kilometer und kaufe dir Bike für Bike den kompletten Kawasaki-Fuhrpark — auch während du wegschaust.</p>
+    </header>
+
+    <!-- Offline-Willkommens-Banner (feat(idle-offline)): erscheint nur, falls beim
+         Laden Abwesenheits-km gutgeschrieben wurden. -->
+    <div class="idle-offline-banner" id="idleOfflineBanner" hidden aria-live="polite">
+        <span id="idleOfflineBannerText"></span>
+        <button type="button" class="idle-offline-banner-close" id="idleOfflineBannerClose" aria-label="Banner schliessen">✕</button>
+    </div>
+
+    <div class="container">
+        <main>
+
+            <div class="idle-layout">
+                <!-- ===== FAHR-BEREICH ===== -->
+                <section class="idle-drive js-reveal" aria-label="Fahrt">
+                    <!-- Renn-Strecke (Canvas): Bike fährt automatisch eine Runde, Rundenzeit
+                         skaliert mit der aktuellen Geschwindigkeit. -->
+                    <div class="idle-track-wrap" id="idleTrackWrap">
+                        <canvas id="idleTrackCanvas" class="idle-track-canvas" aria-label="Animierte Renn-Strecke"></canvas>
+                        <div class="idle-handover" id="idleHandover" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Tacho (Canvas): Halbkreis-Gauge, Nadel folgt der aktuellen Bike-Geschwindigkeit. -->
+                    <div class="idle-tacho-wrap" id="idleTachoWrap">
+                        <canvas id="idleTachoCanvas" class="idle-tacho-canvas" aria-label="Tacho — aktuelle Geschwindigkeit"></canvas>
+                    </div>
+
+                    <div class="idle-km-display">
+                        <span class="idle-km-label">Gesamtstrecke</span>
+                        <span class="idle-km-value" id="idleKmValue">0</span>
+                        <span class="idle-km-unit">km</span>
+                    </div>
+
+                    <!-- Schaltpunkt-Leiste (MECHANIK A): erscheint alle 15–30s, Klick im
+                         grünen Bereich = Treffer (Combo + Multiplikator). -->
+                    <div class="idle-shift" id="idleShift" aria-hidden="true">
+                        <div class="idle-shift-track" id="idleShiftTrack" role="button" tabindex="0" aria-label="Schaltpunkt — im grünen Bereich klicken">
+                            <div class="idle-shift-zone" id="idleShiftZone"></div>
+                            <div class="idle-shift-marker" id="idleShiftMarker"></div>
+                        </div>
+                        <span class="idle-shift-hint">🎯 Jetzt schalten!</span>
+                    </div>
+
+                    <div class="idle-combo-badge" id="idleComboBadge" hidden>
+                        <span id="idleComboCount">🔥 Combo ×0</span>
+                        <span id="idleComboMultiplier"></span>
+                    </div>
+
+                    <button type="button" class="idle-gas-btn" id="idleGasBtn" aria-label="Gas geben — aktiv Kilometer sammeln">
+                        🏁 Gas geben!
+                    </button>
+
+                    <!-- Motorsound (Web Audio, synthetisiert, standardmässig AUS) -->
+                    <div class="idle-sound-controls">
+                        <button type="button" class="idle-sound-toggle" id="idleSoundToggle" aria-pressed="false">
+                            🔈 Motorsound: AUS
+                        </button>
+                        <label class="idle-sound-volume-label" for="idleSoundVolume">
+                            🔊
+                            <input type="range" id="idleSoundVolume" class="idle-sound-volume" min="0" max="100" value="50" aria-label="Motorsound-Lautstärke">
+                        </label>
+                    </div>
+                </section>
+
+                <!-- ===== AKTUELLES BIKE (Statistik-Balken) ===== -->
+                <section class="idle-bike-card js-reveal" aria-label="Aktuelles Bike">
+                    <div class="idle-bike-card-header">
+                        <h2 id="idleBikeName">—</h2>
+                        <p id="idleBikeMeta">—</p>
+                    </div>
+
+                    <div class="idle-stat-row">
+                        <div class="idle-stat-label"><span>Geschwindigkeit</span><span id="idleStatSpeedVal">0%</span></div>
+                        <div class="idle-stat-track"><div class="idle-stat-fill" id="idleStatSpeedFill"></div></div>
+                    </div>
+                    <div class="idle-stat-row">
+                        <div class="idle-stat-label"><span>Beschleunigung</span><span id="idleStatAccelVal">0%</span></div>
+                        <div class="idle-stat-track"><div class="idle-stat-fill" id="idleStatAccelFill"></div></div>
+                    </div>
+                    <div class="idle-stat-row">
+                        <div class="idle-stat-label"><span>Ertrag-Bonus</span><span id="idleStatErtragVal">0%</span></div>
+                        <div class="idle-stat-track"><div class="idle-stat-fill" id="idleStatErtragFill"></div></div>
+                    </div>
+
+                    <div class="idle-bike-level">
+                        <span>Tuning-Level <strong id="idleBikeLevel">0</strong> / <span id="idleBikeLevelCap">25</span></span>
+                    </div>
+                    <button type="button" class="btn idle-upgrade-btn" id="idleUpgradeBtn">
+                        🔧 Tuning verbessern — <span id="idleUpgradeCost">–</span> km
+                    </button>
+                </section>
+            </div>
+
+            <!-- ===== BIKE-SHOP (nächste Bikes kaufen) ===== -->
+            <section class="idle-shop js-reveal" aria-label="Bike-Shop">
+                <h2>🏍️ Bike-Shop</h2>
+                <div class="idle-shop-list" id="idleShopList"></div>
+            </section>
+
+            <!-- ===== SAISON & WERKSVERTRÄGE (MECHANIK B, feat(idle-prestige)) ===== -->
+            <section class="idle-season js-reveal" aria-label="Saison & Werksverträge">
+                <h2>🏆 Saison &amp; Werksverträge</h2>
+                <p class="idle-season-intro">Ab der Ninja ZX-10R kannst du die Saison abschliessen: km und besessene Bikes werden zurückgesetzt, aber du verdienst permanente TROPHÄEN, die dauerhafte Werksverträge kaufen.</p>
+
+                <div class="idle-season-summary">
+                    <div class="idle-season-stat">
+                        <span class="idle-season-stat-label">Saison</span>
+                        <span class="idle-season-stat-value" id="idleSeasonNumber">1</span>
+                    </div>
+                    <div class="idle-season-stat">
+                        <span class="idle-season-stat-label">Trophäen</span>
+                        <span class="idle-season-stat-value" id="idleSeasonTrophies">0</span>
+                    </div>
+                    <div class="idle-season-stat">
+                        <span class="idle-season-stat-label">Bei Abschluss</span>
+                        <span class="idle-season-stat-value" id="idleSeasonProjected">+0 🏆</span>
+                    </div>
+                </div>
+
+                <button type="button" class="btn idle-season-finish-btn" id="idleFinishSeasonBtn" disabled>
+                    🏁 Saison abschliessen
+                </button>
+                <p class="idle-season-hint" id="idleSeasonHint"></p>
+
+                <h3 class="idle-contracts-heading">Werksverträge</h3>
+                <div class="idle-contracts-list" id="idleContractsList"></div>
+            </section>
+
+            <!-- ===== TEILE-SAMMLUNG (feat(idle-parts)) ===== -->
+            <section class="idle-parts-section js-reveal" aria-label="Teile-Sammlung">
+                <h2>🧰 Teile-Sammlung</h2>
+                <p class="idle-parts-intro">Bei jeder abgeschlossenen Runde besteht eine kleine Chance auf ein Teil. Vervollständige ein Set für einen dauerhaften Ertrags-Bonus.</p>
+                <div class="idle-parts-sets" id="idlePartsSets"></div>
+            </section>
+
+            <!-- ===== STATISTIKEN (feat(idle-stats)) ===== -->
+            <section class="idle-stats-section js-reveal" aria-label="Statistiken">
+                <h2>📊 Statistiken</h2>
+                <div class="idle-stats-grid" id="idleStatsGrid"></div>
+                <h3 class="idle-season-history-heading">Saison-Historie</h3>
+                <ul class="idle-season-history" id="idleSeasonHistory"></ul>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Teile-Drop-Toast (feat(idle-parts)) -->
+    <div class="idle-toast-container" id="idleToastContainer" aria-live="polite"></div>
+
+    <script src="theme-toggle.js"></script>
+    <script src="settings.js"></script>
+    <script src="scroll-reveal.js"></script>
+    <script src="idle.js"></script>
+</body>
+</html>
