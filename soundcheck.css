@@ -282,7 +282,7 @@ main#soundcheckMain {
   border: 1px solid var(--accent);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 0 20px rgba(255,102,0,0.1);
+  box-shadow: 0 0 20px rgba(31,109,74,0.1);
   backdrop-filter: blur(10px);
   transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   display: flex;
@@ -318,7 +318,7 @@ main#soundcheckMain {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--accent);
-  text-shadow: 0 0 8px rgba(255,102,0,0.6);
+  text-shadow: 0 0 8px rgba(31,109,74,0.6);
   margin: 0 0 4px;
 }
 
@@ -412,6 +412,33 @@ main#soundcheckMain {
   flex: 1;
 }
 
+/* "Sound folgt" — Kennzeichnung für Bike/Exhaust-Kombinationen ohne echte
+   Original-Aufnahme (soundcheck.js hasRealAudio()). Wird stattdessen live
+   per Web Audio synthetisiert, statt einen falsch zugeordneten Sound
+   abzuspielen (siehe AUDIO_FILES-Kommentar in soundcheck.js). */
+.sc-badge-synth {
+  display: inline-block;
+  margin-left: 0.4em;
+  padding: 0.08em 0.5em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  background: var(--accent-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full, 999px);
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .sc-badge-synth {
+    display: block;
+    margin: 0.2em 0 0;
+    width: fit-content;
+  }
+}
+
 .sc-exhaust-db {
   font-family: inherit;
   font-size: 0.7em;
@@ -434,7 +461,7 @@ main#soundcheckMain {
   height: 100%;
   border-radius: 3px;
   background: linear-gradient(90deg, var(--accent), #ff0044);
-  box-shadow: 0 0 6px rgba(255,102,0,0.5);
+  box-shadow: 0 0 6px rgba(31,109,74,0.5);
   transition: width 0.4s ease;
 }
 
@@ -459,7 +486,7 @@ main#soundcheckMain {
 .sc-play-btn:hover {
   background: var(--accent);
   color: #0A0E27;
-  box-shadow: 0 0 12px rgba(255,102,0,0.6);
+  box-shadow: 0 0 12px rgba(31,109,74,0.6);
 }
 
 .sc-play-btn.playing {
@@ -727,7 +754,7 @@ main#soundcheckMain {
   height: 14px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 8px rgba(255,102,0,0.8);
+  box-shadow: 0 0 8px rgba(31,109,74,0.8);
   cursor: pointer;
 }
 
@@ -757,7 +784,7 @@ main#soundcheckMain {
 .sc-ctrl-btn:hover {
   background: var(--accent);
   color: #0A0E27;
-  box-shadow: 0 0 12px rgba(255,102,0,0.5);
+  box-shadow: 0 0 12px rgba(31,109,74,0.5);
 }
 
 .sc-ctrl-play {
@@ -807,7 +834,7 @@ main#soundcheckMain {
   border-radius: 50%;
   background: var(--accent);
   cursor: pointer;
-  box-shadow: 0 0 6px rgba(255,102,0,0.7);
+  box-shadow: 0 0 6px rgba(31,109,74,0.7);
 }
 
 /* ============================================================
@@ -876,7 +903,7 @@ main#soundcheckMain {
 
 .sc-exhaust-tab:hover {
   border-color: var(--accent);
-  box-shadow: 0 0 10px rgba(255,102,0,0.25);
+  box-shadow: 0 0 10px rgba(31,109,74,0.25);
 }
 
 .sc-exhaust-tab.active.tab-stock {
@@ -1003,7 +1030,7 @@ main#soundcheckMain {
 .sc-btn-compare-a:hover {
   background: var(--accent);
   color: #0A0E27;
-  box-shadow: 0 0 12px rgba(255,102,0,0.5);
+  box-shadow: 0 0 12px rgba(31,109,74,0.5);
 }
 
 .sc-btn-compare-b {
@@ -1176,7 +1203,7 @@ body.dark-mode .sc-intro {
 
 /* DB bar gradient per type */
 .sc-exhaust-row[data-ex-idx="0"] .sc-db-bar-fill {
-  background: linear-gradient(90deg, var(--accent), rgba(255,102,0,0.5));
+  background: linear-gradient(90deg, var(--accent), rgba(31,109,74,0.5));
 }
 
 .sc-exhaust-row[data-ex-idx="1"] .sc-db-bar-fill {

@@ -54,7 +54,7 @@ section('1 · SHARED_BIKES existiert und enthält erwartete Modelle');
   expectedKeys.forEach(key => {
     assert(Object.prototype.hasOwnProperty.call(SHARED_BIKES, key), `SHARED_BIKES enthält "${key}"`);
   });
-  assert(Object.keys(SHARED_BIKES).length === 19, `SHARED_BIKES enthält alle 19 Modelle (gefunden: ${Object.keys(SHARED_BIKES).length})`);
+  assert(Object.keys(SHARED_BIKES).length === 25, `SHARED_BIKES enthält alle 25 Modelle (gefunden: ${Object.keys(SHARED_BIKES).length})`);
 })();
 
 section('2 · Jedes Modell hat die erforderlichen Felder mit korrektem Typ');
@@ -86,6 +86,14 @@ section('3 · Bekannte Werte stimmen exakt mit index.html überein');
 
   assert(SHARED_BIKES.versys1000.category === 'Adventure', `versys1000.category === "Adventure"`);
   assert(SHARED_BIKES.versys1000.price === 13500, `versys1000.price === 13500 (${SHARED_BIKES.versys1000.price})`);
+
+  // Teil 3 — 6 neue Modelle
+  assert(SHARED_BIKES.ninja7hybrid.ps === 80, `ninja7hybrid.ps === 80 (${SHARED_BIKES.ninja7hybrid.ps})`);
+  assert(SHARED_BIKES.z900se.category === 'Naked', `z900se.category === "Naked"`);
+  assert(SHARED_BIKES.versys650.price === 9700, `versys650.price === 9700 (${SHARED_BIKES.versys650.price})`);
+  assert(SHARED_BIKES.w230.category === 'Klassiker', `w230.category === "Klassiker"`);
+  assert(SHARED_BIKES.klr650.category === 'Off-Road', `klr650.category === "Off-Road"`);
+  assert(SHARED_BIKES.vulcans.category === 'Cruiser', `vulcans.category === "Cruiser"`);
 })();
 
 section('4 · Modul-Export funktioniert für Node (CommonJS)');

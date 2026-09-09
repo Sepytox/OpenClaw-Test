@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <script src="bikes-data.js"></script>
+    <script src="bike-image.js"></script>
     <style>
             color: var(--accent);
             background: var(--accent-dim);
@@ -200,6 +201,7 @@
             filter: drop-shadow(0 0 10px var(--accent));
             animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
+        .result-icon-big .bike-photo-wrap { max-width: 220px; margin: 0 auto; }
         @keyframes pop-in {
             from { transform: scale(0.3); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
@@ -312,18 +314,11 @@
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="site-nav">
-    <a class="brand" href="index.html">🏍️ Vrooooom</a>
-    <a href="index.html">Übersicht</a>
-    <a href="soundcheck.html">SoundCheck</a>
-    <a href="race.html">Racing Sim</a>
-    <a href="shop.html">Aftermarket</a>
-    <a href="quiz.html">Quiz</a>
-    <a href="wheel.html" class="active">Wheel</a>
-    <a href="garage.html">🏠 Garage</a>
-    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
-</nav>
+<!-- NAV — gemeinsame Navbar (Single Source of Truth), siehe navbar.js.
+     data-theme-toggle="external": theme-toggle.js verdrahtet den Button
+     weiter unten, navbar.js darf hier NICHT selbst verdrahten. -->
+<nav id="siteNavRoot" class="site-nav" data-theme-toggle="external"></nav>
+<script src="navbar.js"></script>
 
 <div class="wheel-page">
     <div class="wheel-header">
@@ -353,7 +348,7 @@
             <h2>🏍️ Dein Bike</h2>
             <div class="result-empty" id="resultEmpty">❓<br><small style="font-size:0.9rem;color:#444">Drehe das Rad!</small></div>
             <div class="result-bike-display" id="resultBike">
-                <span class="result-icon-big" id="resIcon">🏍️</span>
+                <div class="result-icon-big" id="resIcon">🏍️</div>
                 <div class="result-bike-name-big" id="resBikeName">—</div>
                 <div class="result-bike-sub-big" id="resBikeSub">—</div>
                 <div class="result-spec-grid" id="resSpecs"></div>
@@ -375,13 +370,38 @@
 
 <script>
 // ==========================================
+// ACCENT COLORS (aus design.css gelesen, nicht hartkodiert — siehe
+// Redesign: ein Farbwechsel im Design-System wirkt sich so automatisch
+// auf die Canvas-Zeichnungen aus)
+// ==========================================
+/**
+ * Liest eine CSS-Custom-Property vom :root-Element aus, mit Fallback
+ * für den Fall, dass design.css (noch) nicht geladen ist.
+ * @param {string} name - Name der CSS-Variable (inkl. "--").
+ * @param {string} fallback - Rückgabewert, falls die Variable leer ist.
+ * @returns {string} Getrimmter Farbwert.
+ */
+function readAccentVar(name, fallback) {
+    try {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+        return (v && v.trim()) || fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
+const WHEEL_ACCENT = readAccentVar('--accent', '#1f6d4a');
+const WHEEL_ACCENT_2 = readAccentVar('--accent-hover', '#2fa06b');
+const WHEEL_ACCENT_DEEP = '#134a32';
+
+// ==========================================
 // BIKE DATA — aus der geteilten Quelle bikes-data.js abgeleitet
 // ==========================================
 // Reihenfolge/Auswahl entspricht dem bisherigen Glücksrad-Sortiment.
 const WHEEL_BIKE_KEYS = [
     'h2', 'zx10r', 'zh2', 'h2sx', 'hybrid1200', 'zx6r', 'z900', 'versys1000',
     'ninja650', 'z650', 'ninja400', 'zx25r', 'eliminator400', 'w800',
-    'klx300', 'kx450', 'samurai'
+    'klx300', 'kx450', 'samurai',
+    'ninja7hybrid', 'z900se', 'versys650', 'w230', 'klr650', 'vulcans'
 ];
 
 /**
@@ -423,10 +443,10 @@ const SEGMENT_COLORS = [
     '#001a1a', '#1a0000'
 ];
 const SEGMENT_BORDERS = [
-    '#ff8800', '#ff6600', '#cc3300', '#ff6600', '#ff6600',
-    '#cc3300', '#ff6600', '#ff8800', '#333333', '#cc3300',
-    '#ff6600', '#ff8800', '#cc3300', '#333333', '#ff6600',
-    '#ff8800', '#cc3300'
+    WHEEL_ACCENT_2, WHEEL_ACCENT, WHEEL_ACCENT_DEEP, WHEEL_ACCENT, WHEEL_ACCENT,
+    WHEEL_ACCENT_DEEP, WHEEL_ACCENT, WHEEL_ACCENT_2, '#333333', WHEEL_ACCENT_DEEP,
+    WHEEL_ACCENT, WHEEL_ACCENT_2, WHEEL_ACCENT_DEEP, '#333333', WHEEL_ACCENT,
+    WHEEL_ACCENT_2, WHEEL_ACCENT_DEEP
 ];
 
 // State
@@ -530,7 +550,7 @@ function drawWheel() {
     ctx.arc(cx, cy, 35, 0, Math.PI * 2);
     ctx.fillStyle = gradient;
     ctx.fill();
-    ctx.strokeStyle = '#ff6600';
+    ctx.strokeStyle = WHEEL_ACCENT;
     ctx.lineWidth = 2;
     ctx.stroke();
 
@@ -622,7 +642,10 @@ function showResult(bike) {
     const display = document.getElementById('resultBike');
     display.className = 'result-bike-display active';
 
-    document.getElementById('resIcon').textContent = bike.icon;
+    document.getElementById('resIcon').innerHTML = BikeImage.markup(
+        { id: bike.key, name: bike.name, category: bike.category },
+        { eager: true }
+    );
     document.getElementById('resBikeName').textContent = bike.name;
     document.getElementById('resBikeSub').textContent = bike.sub;
 
@@ -651,7 +674,7 @@ function updateHistory() {
 // CONFETTI
 // ==========================================
 function launchConfetti() {
-    const colors = ['#ff6600', '#ff8800', '#cc3300', '#fff', '#ffcc00'];
+    const colors = [WHEEL_ACCENT, WHEEL_ACCENT_2, WHEEL_ACCENT_DEEP, '#fff', '#ffcc00'];
     for (let i = 0; i < 50; i++) {
         setTimeout(() => {
             const el = document.createElement('div');

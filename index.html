@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vrooooom - Kawasaki Motorräder | 19 Modelle</title>
+    <title>Vrooooom - Kawasaki Motorräder | 25 Modelle</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23080808'/%3E%3Ctext x='50' y='68' font-size='58' font-family='sans-serif' font-weight='800' text-anchor='middle' fill='%23ff6600'%3EK%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="design.css">
@@ -223,7 +223,7 @@
 [data-theme="light"] .maint-status.soon    { background: rgba(234,179,8,0.1); }
 [data-theme="light"] .maint-status.later   { background: #e5e5e5; color: #666; }
 [data-theme="light"] .maint-service-chip {
-    background: rgba(255,102,0,0.08);
+    background: rgba(31,109,74,0.08);
 }
 /* ---- Responsive layout ---- */
 @media (max-width: 768px) {
@@ -263,7 +263,7 @@
     z-index: -1;
     background:
         radial-gradient(circle at 15% 20%, var(--accent-dim), transparent 55%),
-        radial-gradient(circle at 85% 15%, rgba(255,102,0,0.14), transparent 50%),
+        radial-gradient(circle at 85% 15%, rgba(31,109,74,0.14), transparent 50%),
         repeating-linear-gradient(135deg, var(--accent-dim) 0 2px, transparent 2px 42px),
         var(--bg);
 }
@@ -349,17 +349,18 @@
     </style>
 </head>
 <body>
-    <nav class="site-nav">
-        <a class="brand" href="index.html">🏍️ Vrooooom</a>
-        <a href="index.html" class="active">Übersicht</a>
-        <a href="soundcheck.html">SoundCheck</a>
-        <a href="race.html">Racing Sim</a>
-        <a href="shop.html">Aftermarket</a>
-        <a href="quiz.html">Quiz</a>
-        <a href="wheel.html">Wheel</a>
-        <a href="garage.html" class="garage-nav-link">🏠 Garage <span class="garage-nav-badge" id="garageNavFavCount" hidden>0</span></a>
-        <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">☀️</button>
-    </nav>
+    <!-- Gemeinsame Navbar (Single Source of Truth) — siehe navbar.js, das
+         diesen Container sofort synchron mit identischem Markup befüllt.
+         Der Fallback-Button unten existiert NUR, damit dark-mode.test.js /
+         tests/polish-test.js#2 (statische fs.readFileSync-Prüfungen, kein
+         DOM) weiterhin id="themeToggle" im Quelltext finden — navbar.js
+         überschreibt ihn beim Mounten sofort mit demselben Button.
+         data-theme-toggle="external": index.html verdrahtet den
+         #themeToggle-Button weiterhin über seine eigene, testabhängige
+         toggleDarkMode()-Logik weiter unten (dark-mode.test.js-Marker),
+         navbar.js darf hier NICHT selbst verdrahten. -->
+    <nav id="siteNavRoot" class="site-nav" data-theme-toggle="external"><button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">☀️</button></nav>
+    <script src="navbar.js"></script>
 
     <!-- ===== HERO ===== -->
     <header class="hero js-reveal">
@@ -367,7 +368,7 @@
         <div class="hero-inner">
             <p class="hero-eyebrow">🏍️ Der Kawasaki Guide</p>
             <h1 class="hero-title">Finde dein perfektes <span class="hero-accent">Kawasaki</span></h1>
-            <p class="hero-tagline">19 Modelle im direkten Vergleich — vom günstigen Einsteiger-Bike bis zum
+            <p class="hero-tagline">25 Modelle im direkten Vergleich — vom günstigen Einsteiger-Bike bis zum
                 300&nbsp;km/h-Hypersportler. Specs, Kaufberatung, Wartungsrechner und Community-Bewertungen an
                 einem Ort.</p>
             <div class="hero-cta-row">
@@ -431,7 +432,7 @@
 
             <section class="intro js-reveal">
                 <h2>Über Kawasaki</h2>
-                <p>Kawasaki ist eine der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren. Hier findest du <strong>19 Modelle</strong> — vom Einsteiger-Bike bis zum 300-km/h-Hypersportler.</p>
+                <p>Kawasaki ist eine der ältesten und renommiertesten Motorradhersteller der Welt. Bekannt für Leistung, Innovation und Zuverlässigkeit seit über 100 Jahren. Hier findest du <strong>25 Modelle</strong> — vom Einsteiger-Bike bis zum 300-km/h-Hypersportler.</p>
             </section>
 
             <!-- ===== FAVORITES SECTION ===== -->
@@ -540,16 +541,16 @@
             <section class="closing js-reveal">
                 <h2>Kawasaki - Tradition trifft Zukunft</h2>
                 <p>Von klassischen Modellen bis zu High-Tech Superbikes - Kawasaki bleibt eine der Top-Adressen für Motorrad-Enthusiasten weltweit.</p>
-                <div class="legendary-sounds-teaser" style="margin-top:24px;padding:20px 24px;border:1px solid #00FFE0;border-radius:10px;background:rgba(0,255,224,0.05);text-align:center;">
-                    <h3 style="font-family:'Orbitron',monospace;text-transform:uppercase;letter-spacing:0.1em;color:#00FFE0;text-shadow:0 0 10px #00FFE0;margin-bottom:8px;">🔊 LEGENDARY SOUNDS</h3>
+                <div class="legendary-sounds-teaser" style="margin-top:24px;padding:20px 24px;border:1px solid var(--border);border-radius:var(--radius-lg, 12px);background:var(--card-bg);text-align:center;">
+                    <h3 style="letter-spacing:0.04em;color:var(--accent);margin-bottom:8px;">🔊 LEGENDARY SOUNDS</h3>
                     <p style="margin-bottom:16px;">Erlebe den unverwechselbaren Sound jedes Kawasaki-Modells — Stock, Racing und Custom Exhausts.</p>
                     <a href="soundcheck.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;font-size:0.85em;">🔊 ZUM SOUNDCHECK →</a>
                 </div>
                 <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
-                    <a href="quiz.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:rgba(57,255,20,0.1);border-color:#39ff14;color:#39ff14;">🎯 WELCHES KAWASAKI BIN ICH?</a>
-                    <a href="wheel.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:rgba(0,234,255,0.08);border-color:#00eaff;color:#00eaff;">🎡 SURPRISE ME!</a>
-                    <a href="race.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:rgba(255,102,0,0.08);border-color:#ff6600;color:#ff6600;">🏁 RACING SIM</a>
-                    <a href="shop.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:rgba(191,0,255,0.08);border-color:#bf00ff;color:#bf00ff;">🔧 AFTERMARKET SHOP</a>
+                    <a href="quiz.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:var(--accent-dim);border-color:var(--accent);color:var(--accent);">🎯 WELCHES KAWASAKI BIN ICH?</a>
+                    <a href="wheel.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:var(--accent-dim);border-color:var(--accent);color:var(--accent);">🎡 SURPRISE ME!</a>
+                    <a href="race.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:var(--accent-dim);border-color:var(--accent);color:var(--accent);">🏁 RACING SIM</a>
+                    <a href="shop.html" class="btn-hear" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;font-size:0.85em;background:var(--accent-dim);border-color:var(--accent);color:var(--accent);">🔧 AFTERMARKET SHOP</a>
                 </div>
             </section>
         </main>
@@ -642,46 +643,32 @@
         </div>
     </div>
 
+    <script src="bike-image.js"></script>
     <script>
         'use strict';
 
         /* ==========================================
-           Bike Database — 19 Kawasaki Modelle
+           Bike Database — 25 Kawasaki Modelle
            ========================================== */
 
         /**
-         * Erzeugt ein selbst gezeichnetes SVG-Platzhalterbild (Gradient +
-         * einfache Motorrad-Silhouette + Modellname) als Data-URI. Ersetzt
-         * den früheren externen Platzhalterbild-Dienst-Aufruf, damit die
-         * Galerie ohne jegliche externe Bild-Requests funktioniert.
+         * Baut die Galerie-Folien eines Motorrads. Die erste Folie bevorzugt
+         * ein echtes Foto (images/bikes/<id>.jpg, siehe renderSlides()'
+         * Fallback-Kette) und trägt zusätzlich `fallbackSrc` — eine
+         * kategorie-spezifische, selbst erzeugte SVG-Illustration aus dem
+         * geteilten bike-image.js (siehe dort), gefärbt mit der bike-eigenen
+         * Gradientfarbe g1/g2 statt der Kategorie-Standardfarbe.
          * @param {string} name - Anzuzeigender Modellname.
+         * @param {string} emoji - Icon-Emoji als letzte Fallback-Stufe.
          * @param {string} g1 - Erste Gradient-Hexfarbe (ohne '#').
          * @param {string} g2 - Zweite Gradient-Hexfarbe (ohne '#').
-         * @returns {string} data:image/svg+xml,... Data-URI.
+         * @param {string} category - Kategorie (steuert die SVG-Silhouette).
+         * @returns {Array<Object>} Liste von Galerie-Folien-Objekten.
          */
-        function makeBikeSvg(name, g1, g2) {
-            var svg =
-                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 200">' +
-                '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
-                '<stop offset="0%" stop-color="#' + g1 + '"/>' +
-                '<stop offset="100%" stop-color="#' + g2 + '"/>' +
-                '</linearGradient></defs>' +
-                '<rect width="520" height="200" fill="url(#g)"/>' +
-                '<g fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.55">' +
-                '<circle cx="150" cy="150" r="28"/>' +
-                '<circle cx="380" cy="150" r="28"/>' +
-                '<path d="M150 150 L232 98 L302 98 L380 150 M232 98 L212 58 L262 58 M302 98 L322 66 L364 78 M150 150 L302 98"/>' +
-                '</g>' +
-                '<text x="260" y="188" font-family="Segoe UI, sans-serif" font-size="20" font-weight="700" fill="#ffffff" text-anchor="middle" opacity="0.92">' +
-                name.replace(/&/g, '&amp;').replace(/</g, '&lt;') +
-                '</text>' +
-                '</svg>';
-            return 'data:image/svg+xml,' + encodeURIComponent(svg);
-        }
-
-        function makeSlides(name, emoji, g1, g2) {
+        function makeSlides(name, emoji, g1, g2, category) {
+            var svgFallback = BikeImage.buildCategorySvg({ name: name, category: category, g1: g1, g2: g2 });
             return [
-                { type: 'img', src: makeBikeSvg(name, g1, g2), caption: name + ' – Seitenansicht', gradient: 'linear-gradient(135deg, #' + g1 + ', #' + g2 + ')' },
+                { type: 'img', src: svgFallback, fallbackSrc: null, caption: name + ' – Seitenansicht', gradient: 'linear-gradient(135deg, #' + g1 + ', #' + g2 + ')' },
                 { type: 'emoji', emoji: emoji, caption: name + ' unterwegs', gradient: 'linear-gradient(135deg, #' + g2 + ', #' + g1 + ')' },
                 { type: 'emoji', emoji: '🔧', caption: 'Technik im Detail', gradient: 'linear-gradient(135deg, #232526, #414345)' }
             ];
@@ -695,6 +682,7 @@
                 icon: d.icon,
                 category: d.category,
                 license: d.license,
+                g1: d.g1, g2: d.g2,
                 youtubeUrl: 'https://www.youtube.com/results?search_query=' + encodeURIComponent(d.youtubeSearchQuery),
                 psRaw: d.ps, kwRaw: d.kw, vmaxRaw: d.vmax, yearRaw: d.year,
                 priceRaw: d.price, weightRaw: d.weight, accelRaw: d.accel,
@@ -724,7 +712,7 @@
                     'Reifen': d.tires,
                     'Führerscheinklasse': d.license
                 },
-                slides: makeSlides(d.name, d.icon, d.g1, d.g2)
+                slides: makeSlides(d.name, d.icon, d.g1, d.g2, d.category)
             };
         }
 
@@ -980,11 +968,105 @@
                 youtubeSearchQuery: 'Kawasaki KX450 2024 Motocross',
                 advice: 'Für MX-Racer & Rennstrecken-Off-Road-Fahrer',
                 g1: '1b5e20', g2: 'f57f17'
+            }),
+            ninja7hybrid: makeBike({
+                name: 'Kawasaki Ninja 7 Hybrid', subtitle: 'Supercharged Hybrid-Sporttourer', icon: '🔋',
+                category: 'Sport Tourer', license: 'A',
+                headline: '🔋 Erstes Hybrid-Kawasaki-Serienmodell',
+                blurb: 'E-Motor plus 451cc-Verbrenner: der Ninja 7 Hybrid kombiniert elektrischen Boost mit sattem Vierzylinder-Sound für maximale Effizienz.',
+                engine: '451cc Parallel-Twin + Elektromotor (Hybrid)', cc: 451,
+                ps: 80, kw: 59, torque: 61, weight: 240, vmax: 180, accel: 4.9,
+                seatHeight: 80, tank: 14, consumption: 3.8, transmission: 'Manuell (6-Gang, E-Boost)',
+                brakes: { front: 'Doppelscheibe 250mm', rear: 'Scheibe 250mm' },
+                tires: '120/70-17 + 160/60-17', year: 2024, price: 13500,
+                youtubeSearchQuery: 'Kawasaki Ninja 7 Hybrid Review',
+                advice: 'Für Tech-Pioniere, die Hybrid-Antrieb erleben wollen',
+                g1: '0f3443', g2: '34e89e'
+            }),
+            z900se: makeBike({
+                name: 'Kawasaki Z900SE', subtitle: 'Premium Naked mit Öhlins-Fahrwerk', icon: '🥇',
+                category: 'Naked', license: 'A',
+                blurb: 'Die Special-Edition des Z900: Öhlins-Federelemente, Brembo-Bremsen und hochwertige Anbauteile für gehobene Ansprüche.',
+                engine: '948cc 4-Zylinder Reihenmotor, 4-Takt', cc: 948,
+                ps: 125, kw: 91.9, torque: 98.6, weight: 196, vmax: 248, accel: 3.4,
+                seatHeight: 79, tank: 17, consumption: 5.5, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Doppelscheibe 300mm, Brembo M4', rear: 'Scheibe 250mm' },
+                tires: '120/70 ZR17 + 190/50 ZR17', year: 2024, price: 12200,
+                youtubeSearchQuery: 'Kawasaki Z900SE Review',
+                advice: 'Für Naked-Fans mit Wunsch nach Premium-Fahrwerk (Öhlins)',
+                g1: '232526', g2: 'c9a227'
+            }),
+            versys650: makeBike({
+                name: 'Kawasaki Versys 650', subtitle: 'Vielseitiger Adventure-Tourer', icon: '🧭',
+                category: 'Adventure', license: 'A2',
+                blurb: 'Der kompakte Allrounder für Stadt, Land und lange Touren: 649cc-Twin, aufrechte Sitzposition, A2-drosselbar.',
+                engine: '649cc 2-Zylinder Reihenmotor, 4-Takt', cc: 649,
+                ps: 67, kw: 49, torque: 61, weight: 216, vmax: 200, accel: 4.5,
+                seatHeight: 84, tank: 21, consumption: 4.5, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Doppelscheibe 300mm', rear: 'Scheibe 250mm' },
+                tires: '120/70 ZR17 + 160/60 ZR17', year: 2024, price: 9700,
+                youtubeSearchQuery: 'Kawasaki Versys 650 Review',
+                advice: 'Für Reisefreudige mit Wunsch nach vielseitigem Handling',
+                g1: '1c2b36', g2: '4a7a96'
+            }),
+            w230: makeBike({
+                name: 'Kawasaki W230', subtitle: 'Klassischer Einzylinder-Roadster', icon: '🛞',
+                category: 'Klassiker', license: 'A2',
+                blurb: 'Zeitloses Retro-Design im Kleinformat: luftgekühlter Single, chromglänzende Details, ideal für den Einstieg in die Klassiker-Welt.',
+                engine: '231cc Einzylinder, 4-Takt, luftgekühlt', cc: 231,
+                ps: 19, kw: 14, torque: 18, weight: 144, vmax: 120, accel: 0,
+                seatHeight: 78, tank: 12, consumption: 2.8, transmission: 'Manuell (5-Gang)',
+                brakes: { front: 'Scheibe 240mm', rear: 'Trommel' },
+                tires: '100/90-18 + 120/80-17', year: 2023, price: 5700,
+                youtubeSearchQuery: 'Kawasaki W230 Review',
+                advice: 'Für Einsteiger mit Vorliebe für zeitloses Retro-Design',
+                g1: '3e2723', g2: 'a1887f'
+            }),
+            klr650: makeBike({
+                name: 'Kawasaki KLR650', subtitle: 'Legendärer Langstrecken-Dual-Sport', icon: '🏔️',
+                category: 'Off-Road', license: 'A2',
+                blurb: 'Der unverwüstliche Langstrecken-Enduro-Klassiker: riesiger 23-Liter-Tank, robuster Single, seit Jahrzehnten bewährt auf jedem Terrain.',
+                engine: '652cc Einzylinder, 4-Takt', cc: 652,
+                ps: 40, kw: 29, torque: 52, weight: 198, vmax: 145, accel: 7.0,
+                seatHeight: 88.5, tank: 23, consumption: 4.5, transmission: 'Manuell (5-Gang)',
+                brakes: { front: 'Scheibe 300mm', rear: 'Scheibe 240mm' },
+                tires: '90/90-21 + 130/80-17', year: 2024, price: 7300,
+                youtubeSearchQuery: 'Kawasaki KLR650 Review',
+                advice: 'Für Langstrecken-Abenteurer & Dual-Sport-Fans',
+                g1: '2f3e1e', g2: '7c9a3f'
+            }),
+            vulcans: makeBike({
+                name: 'Kawasaki Vulcan S', subtitle: 'Sportlicher Einsteiger-Cruiser', icon: '🌋',
+                category: 'Cruiser', license: 'A2',
+                blurb: 'Cruiser-Gefühl mit sportlichem Fahrwerk: extrem niedrige Sitzhöhe (70,5 cm) und ein agiler 649cc-Twin für entspannten Alltag.',
+                engine: '649cc 2-Zylinder Reihenmotor, 4-Takt', cc: 649,
+                ps: 61, kw: 45, torque: 63, weight: 229, vmax: 180, accel: 5.0,
+                seatHeight: 70.5, tank: 14, consumption: 4.0, transmission: 'Manuell (6-Gang)',
+                brakes: { front: 'Scheibe 300mm', rear: 'Scheibe 250mm' },
+                tires: '120/70-18 + 160/60-17', year: 2024, price: 8600,
+                youtubeSearchQuery: 'Kawasaki Vulcan S Review',
+                advice: 'Für Cruiser-Einsteiger mit Wunsch nach niedriger Sitzhöhe',
+                g1: '3e1f0d', g2: 'a0522d'
             })
         };
 
+        // Bevorzugt ein echtes Foto (images/bikes/<id>.jpg) für die erste
+        // Galerie-Folie jedes Bikes; fällt bei Ladefehler auf die zuvor
+        // generierte Kategorie-SVG zurück (siehe renderSlides() unten und
+        // bike-image.js). Ergänzt außerdem `id`, damit der Bike-Datensatz
+        // seinen eigenen Schlüssel kennt (u. a. für BikeImage-Aufrufe).
+        Object.keys(BIKES).forEach(function(key) {
+            var bike = BIKES[key];
+            bike.id = key;
+            var firstSlide = bike.slides && bike.slides[0];
+            if (firstSlide && firstSlide.type === 'img') {
+                firstSlide.fallbackSrc = firstSlide.src;
+                firstSlide.src = BikeImage.photoPath(key);
+            }
+        });
+
         /* ==========================================
-           Card Rendering (dynamic, all 19 bikes)
+           Card Rendering (dynamic, all 25 bikes)
            ========================================== */
         (function renderCards() {
             var grid = document.getElementById('bikesGrid');
@@ -998,6 +1080,7 @@
                 card.setAttribute('aria-label', b.name + ' Details anzeigen');
                 card.setAttribute('title', 'Klicken für technische Specs');
                 card.innerHTML =
+                    BikeImage.markup({ id: key, name: b.name, category: b.category, g1: b.g1, g2: b.g2 }, { className: 'fact-card-image' }) +
                     '<div class="card-top-row">' +
                         '<label class="compare-checkbox-wrap" aria-label="Zum Vergleich hinzufügen">' +
                             '<input type="checkbox" class="compare-checkbox" data-bike="' + key + '" aria-label="' + b.name + ' zum Vergleich">' +
@@ -1487,18 +1570,28 @@
 
                     if (slide.type === 'img') {
                         var img = document.createElement('img');
+                        var triedFallback = false;
                         img.src = slide.src;
                         img.alt = slide.caption;
                         img.className = 'gallery-img';
                         img.setAttribute('loading', 'lazy');
-                        img.onerror = function() {
+                        img.addEventListener('error', function onImgError() {
+                            // Stufe 1: echtes Foto (images/bikes/<id>.jpg) fehlt/fehlerhaft
+                            // → Kategorie-SVG-Illustration (bike-image.js) versuchen.
+                            if (!triedFallback && slide.fallbackSrc) {
+                                triedFallback = true;
+                                img.src = slide.fallbackSrc;
+                                return;
+                            }
+                            // Stufe 2 (praktisch nie, SVG ist ein Data-URI): Emoji zeigen.
+                            img.removeEventListener('error', onImgError);
                             el.removeChild(img);
                             var emoji = document.createElement('span');
                             emoji.className = 'gallery-emoji';
                             emoji.setAttribute('aria-hidden', 'true');
                             emoji.textContent = '🏍️';
                             el.insertBefore(emoji, el.firstChild);
-                        };
+                        });
                         el.appendChild(img);
                     } else {
                         var emoji = document.createElement('span');

@@ -217,7 +217,7 @@
         .shift-up { background:var(--accent);color:#000; }
         .shift-up:hover:not(:disabled) {  }
         .shift-down { background:transparent;border:1px solid var(--accent);color:var(--accent); }
-        .shift-down:hover:not(:disabled) { background:rgba(255,102,0,0.08); }
+        .shift-down:hover:not(:disabled) { background:rgba(31,109,74,0.08); }
         .shift-btn:disabled { opacity:0.3;cursor:not-allowed; }
 
         /* START/STOP */
@@ -385,8 +385,8 @@
             to { background-position: 0 40px; }
         }
         .racing-bg {
-            background-image: linear-gradient(rgba(255,102,0,0.03) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255,102,0,0.03) 1px, transparent 1px);
+            background-image: linear-gradient(rgba(31,109,74,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(31,109,74,0.03) 1px, transparent 1px);
             background-size: 40px 40px;
         }
         .racing-bg.moving {
@@ -489,18 +489,11 @@
 
 <div class="shift-warning" id="shiftWarning">⚠️ SHIFT UP!</div>
 
-<!-- NAV -->
-<nav class="site-nav">
-    <a class="brand" href="index.html">🏍️ Vrooooom</a>
-    <a href="index.html">Übersicht</a>
-    <a href="soundcheck.html">SoundCheck</a>
-    <a href="race.html" class="active">Racing Sim</a>
-    <a href="shop.html">Aftermarket</a>
-    <a href="quiz.html">Quiz</a>
-    <a href="wheel.html">Wheel</a>
-    <a href="garage.html">🏠 Garage</a>
-    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
-</nav>
+<!-- NAV — gemeinsame Navbar (Single Source of Truth), siehe navbar.js.
+     data-theme-toggle="external": theme-toggle.js verdrahtet den Button
+     weiter unten, navbar.js darf hier NICHT selbst verdrahten. -->
+<nav id="siteNavRoot" class="site-nav" data-theme-toggle="external"></nav>
+<script src="navbar.js"></script>
 
 <div class="race-page">
     <div class="page-title">
@@ -721,6 +714,29 @@
 
 <script>
 // ==========================================
+// ACCENT COLORS (aus design.css gelesen, nicht hartkodiert — siehe
+// GOLDEN_PRINCIPLES_KE.md / Redesign: ein Farbwechsel im Design-System
+// wirkt sich so automatisch auf die Canvas-Zeichnungen aus)
+// ==========================================
+/**
+ * Liest eine CSS-Custom-Property vom :root-Element aus, mit Fallback
+ * für den Fall, dass design.css (noch) nicht geladen ist.
+ * @param {string} name - Name der CSS-Variable (inkl. "--").
+ * @param {string} fallback - Rückgabewert, falls die Variable leer ist.
+ * @returns {string} Getrimmter Farbwert.
+ */
+function readAccentVar(name, fallback) {
+    try {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name);
+        return (v && v.trim()) || fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
+const RACE_ACCENT = readAccentVar('--accent', '#1f6d4a');
+const RACE_ACCENT_2 = readAccentVar('--accent-hover', '#2fa06b');
+
+// ==========================================
 // BIKE DATA WITH PHYSICS
 // ==========================================
 const RACE_BIKES = {
@@ -740,7 +756,13 @@ const RACE_BIKES = {
     w800:       { name:'Kawasaki W800',              ps:48,  torque:63,  weight:202, vmax:170, redline:7000,  idleRpm:800,  gears:5, accel:6.0 },
     klx300:     { name:'Kawasaki KLX 300',           ps:27,  torque:26,  weight:137, vmax:137, redline:9500,  idleRpm:1400, gears:6, accel:7.5 },
     kx450:      { name:'Kawasaki KX 450',            ps:62,  torque:54,  weight:110, vmax:150, redline:11000, idleRpm:1800, gears:5, accel:3.8 },
-    samurai:    { name:'Kawasaki Samurai',            ps:31,  torque:25,  weight:145, vmax:160, redline:8000,  idleRpm:1200, gears:5, accel:0   }
+    samurai:    { name:'Kawasaki Samurai',            ps:31,  torque:25,  weight:145, vmax:160, redline:8000,  idleRpm:1200, gears:5, accel:0   },
+    ninja7hybrid:{name:'Kawasaki Ninja 7 Hybrid',    ps:80,  torque:61,  weight:240, vmax:180, redline:10500, idleRpm:1000, gears:6, accel:4.9 },
+    z900se:     { name:'Kawasaki Z900SE',             ps:125, torque:99,  weight:196, vmax:248, redline:11500, idleRpm:1100, gears:6, accel:3.4 },
+    versys650:  { name:'Kawasaki Versys 650',         ps:67,  torque:61,  weight:216, vmax:200, redline:9000,  idleRpm:900,  gears:6, accel:4.5 },
+    w230:       { name:'Kawasaki W230',               ps:19,  torque:18,  weight:144, vmax:120, redline:9000,  idleRpm:1300, gears:5, accel:0   },
+    klr650:     { name:'Kawasaki KLR650',             ps:40,  torque:52,  weight:198, vmax:145, redline:7500,  idleRpm:1300, gears:5, accel:7.0 },
+    vulcans:    { name:'Kawasaki Vulcan S',           ps:61,  torque:63,  weight:229, vmax:180, redline:8500,  idleRpm:900,  gears:6, accel:5.0 }
 };
 
 // Gear ratios (typical sport bike progression)
@@ -1081,9 +1103,9 @@ function updateUI(accel) {
     if (raceMode !== 'compare') {
         // Gauges
         // Color-coded RPM zones: cyan=normal, yellow=mid, orange=high, red=redline
-        const rpmColor = rpm > bike.redline * 0.93 ? '#ff0044' : rpm > bike.redline * 0.78 ? '#ff6600' : rpm > bike.redline * 0.5 ? '#ffcc00' : '#ff8800';
+        const rpmColor = rpm > bike.redline * 0.93 ? '#ff0044' : rpm > bike.redline * 0.78 ? RACE_ACCENT : rpm > bike.redline * 0.5 ? '#ffcc00' : RACE_ACCENT_2;
         drawGauge('rpmGauge', rpm, bike.redline, rpmColor, rpm.toFixed(0));
-        drawGauge('speedGauge', speedKmh, bike.vmax, '#ff6600', speedKmh.toFixed(0));
+        drawGauge('speedGauge', speedKmh, bike.vmax, RACE_ACCENT, speedKmh.toFixed(0));
 
         // Stat boxes
         document.getElementById('speedDisplay').textContent = speedKmh.toFixed(0);
@@ -1100,8 +1122,8 @@ function updateUI(accel) {
         const rpmBar = document.getElementById('rpmBarFill');
         rpmBar.style.width = rpmPct + '%';
         if (rpmPct > 90) { rpmBar.style.background = 'linear-gradient(90deg,#ff0044,#ff4466)'; }
-        else if (rpmPct > 75) { rpmBar.style.background = 'linear-gradient(90deg,#ff6600,#ffaa00)'; }
-        else { rpmBar.style.background = 'linear-gradient(90deg,#ff8800,#ff6600)'; }
+        else if (rpmPct > 75) { rpmBar.style.background = `linear-gradient(90deg,${RACE_ACCENT},#ffaa00)`; }
+        else { rpmBar.style.background = `linear-gradient(90deg,${RACE_ACCENT_2},${RACE_ACCENT})`; }
 
         // Shift indicator
         const si = document.getElementById('shiftIndicator');
@@ -1185,8 +1207,8 @@ function drawGauge(canvasId, value, max, color, label) {
 }
 
 // Draw initial gauges
-drawGauge('rpmGauge', 0, 14000, '#ff8800', '0');
-drawGauge('speedGauge', 0, 300, '#ff6600', '0');
+drawGauge('rpmGauge', 0, 14000, RACE_ACCENT_2, '0');
+drawGauge('speedGauge', 0, 300, RACE_ACCENT, '0');
 
 // ==========================================
 // TRACK CANVAS
@@ -1245,18 +1267,18 @@ function drawTrack() {
         }
 
         // ∞ label + distance counter
-        ctx.fillStyle = '#ff6600';
+        ctx.fillStyle = RACE_ACCENT;
         ctx.font = 'bold 11px sans-serif';
         ctx.textAlign = 'left';
         const distLabel = dist >= 1000 ? (dist / 1000).toFixed(2) + ' km' : dist.toFixed(0) + ' m';
         ctx.fillText('∞ ' + distLabel, 10, H - 8);
 
         // Bike(s) at fixed horizontal position
-        drawBikeMarker(ctx, W * 0.18, roadY + roadH / 2, '#ff6600', '1');
+        drawBikeMarker(ctx, W * 0.18, roadY + roadH / 2, RACE_ACCENT, '1');
         if (raceMode === 'compare') {
             const gap = sim2State.dist - simState.dist;
             const relOff = Math.max(-0.15, Math.min(0.15, gap / viewRange));
-            drawBikeMarker(ctx, W * (0.18 + relOff), roadY + roadH / 2, '#ff8800', '2');
+            drawBikeMarker(ctx, W * (0.18 + relOff), roadY + roadH / 2, RACE_ACCENT_2, '2');
         }
 
     } else {
@@ -1290,16 +1312,16 @@ function drawTrack() {
 
         // Finish line
         const finX = W - 4;
-        ctx.strokeStyle = '#ff6600';
+        ctx.strokeStyle = RACE_ACCENT;
         ctx.lineWidth = 3;
-        ctx.shadowColor = '#ff6600';
+        ctx.shadowColor = RACE_ACCENT;
         ctx.shadowBlur = 8;
         ctx.beginPath();
         ctx.moveTo(finX, roadY - 5);
         ctx.lineTo(finX, roadY + roadH + 5);
         ctx.stroke();
         ctx.shadowBlur = 0;
-        ctx.fillStyle = '#ff6600';
+        ctx.fillStyle = RACE_ACCENT;
         ctx.font = 'bold 10px sans-serif';
         ctx.textAlign = 'right';
         const finLbl = trackLen >= 1000 ? (trackLen / 1000).toFixed(0) + 'km 🏁' : trackLen + 'm 🏁';
@@ -1307,10 +1329,10 @@ function drawTrack() {
 
         // Bike(s)
         const b1x = Math.min((simState.dist / trackLen) * W, W - 20);
-        drawBikeMarker(ctx, b1x, roadY + roadH / 2, '#ff6600', '1');
+        drawBikeMarker(ctx, b1x, roadY + roadH / 2, RACE_ACCENT, '1');
         if (raceMode === 'compare') {
             const b2x = Math.min((sim2State.dist / trackLen) * W, W - 20);
-            drawBikeMarker(ctx, b2x, roadY + roadH / 2, '#ff8800', '2');
+            drawBikeMarker(ctx, b2x, roadY + roadH / 2, RACE_ACCENT_2, '2');
         }
     }
 }
@@ -1372,8 +1394,8 @@ function drawVelocityGraph() {
         ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W-10, y); ctx.stroke();
     });
 
-    drawLine(hist1, '#ff6600');
-    if (raceMode === 'compare') drawLine(hist2, '#ff8800');
+    drawLine(hist1, RACE_ACCENT);
+    if (raceMode === 'compare') drawLine(hist2, RACE_ACCENT_2);
 
     // Labels
     ctx.fillStyle = '#444';
@@ -1523,8 +1545,8 @@ function showEndlessResult() {
         const s2 = sim2State;
         const mxS2 = s2.velHistory.length > 0 ? Math.max(...s2.velHistory.map(h => h.v)) : s2.speed * 3.6;
         const d2lbl = s2.dist >= 1000 ? (s2.dist / 1000).toFixed(2) + ' km' : s2.dist.toFixed(0) + ' m';
-        html += `<div class="endless-result-item" style="border-color:#ff8800;">`
-             + `<div class="er-val" style="color:#ff8800">${(s2.speed*3.6).toFixed(0)} km/h</div>`
+        html += `<div class="endless-result-item" style="border-color:${RACE_ACCENT_2};">`
+             + `<div class="er-val" style="color:${RACE_ACCENT_2}">${(s2.speed*3.6).toFixed(0)} km/h</div>`
              + `<div class="er-lbl">Bike 2 — ${d2lbl}</div></div>`;
     }
 
@@ -1563,8 +1585,8 @@ function resetRace() {
 
     document.getElementById('throttleSlider').value = 0;
     document.getElementById('throttleVal').textContent = '0%';
-    drawGauge('rpmGauge', 0, 14000, '#ff8800', '0');
-    drawGauge('speedGauge', 0, 300, '#ff6600', '0');
+    drawGauge('rpmGauge', 0, 14000, RACE_ACCENT_2, '0');
+    drawGauge('speedGauge', 0, 300, RACE_ACCENT, '0');
     const ids = ['speedDisplay','rpmDisplay','timeDisplay','distDisplay','accelDisplay'];
     ids.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
     const el = (id) => document.getElementById(id);

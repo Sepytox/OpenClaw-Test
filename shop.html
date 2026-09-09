@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="design.css">
     <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <script src="bikes-data.js"></script>
+    <script src="bike-image.js"></script>
     <style>
 /* PAGE */
         .shop-page { max-width:1200px;margin:0 auto;padding:1.5rem 1rem 4rem; }
@@ -30,6 +31,7 @@
         }
         .shop-bike-info { flex: 1; min-width: 200px; }
         .shop-bike-icon { font-size: 3rem; margin-bottom: 0.3rem; }
+        .shop-bike-photo { width: 220px; max-width: 100%; margin-bottom: 0.6rem; }
         .shop-bike-name { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 0.2rem; }
         .shop-bike-sub { color: #777; font-size: 0.9rem; }
         .shop-bike-selector select {
@@ -100,7 +102,7 @@
             transition: all 0.2s;
         }
         .cat-tab:hover { border-color: #444; color: #ccc; }
-        .cat-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(255,102,0,0.06); }
+        .cat-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(31,109,74,0.06); }
 
         /* PARTS GRID */
         .parts-grid {
@@ -124,7 +126,7 @@
         .part-card:hover { border-color: #333; }
         .part-card.selected {
             border-color: var(--accent);
-            background: rgba(255,102,0,0.04);
+            background: rgba(31,109,74,0.04);
             
         }
         .part-card-header {
@@ -176,7 +178,7 @@
         }
         .gain-ps { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--border-hover); }
         .gain-weight { background: rgba(0,234,255,0.1); color: #00c8ff; border: 1px solid rgba(0,234,255,0.2); }
-        .gain-accel { background: rgba(255,102,0,0.1); color: var(--accent); border: 1px solid rgba(255,102,0,0.2); }
+        .gain-accel { background: rgba(31,109,74,0.1); color: var(--accent); border: 1px solid rgba(31,109,74,0.2); }
 
         /* RATING */
         .part-rating { display:flex;align-items:center;gap:0.3rem;font-size:0.72rem; }
@@ -392,7 +394,7 @@
         }
         .mc-color-swatch.selected .mc-color-circle {
             border-color: var(--accent);
-            box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent), 0 4px 12px rgba(255,102,0,0.3);
+            box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent), 0 4px 12px rgba(31,109,74,0.3);
         }
         .mc-color-swatch.selected .mc-color-circle::after {
             content: '\2713';
@@ -595,7 +597,7 @@
             background: #fff;
         }
         [data-theme="light"] .mc-addon-item:has(.mc-addon-check:checked) {
-            background: rgba(255,102,0,0.06);
+            background: rgba(31,109,74,0.06);
         }
         [data-theme="light"] .mc-price-card {
             background: #fff;
@@ -617,18 +619,11 @@
 </head>
 <body>
 
-<!-- NAV -->
-<nav class="site-nav">
-    <a class="brand" href="index.html">🏍️ Vrooooom</a>
-    <a href="index.html">Übersicht</a>
-    <a href="soundcheck.html">SoundCheck</a>
-    <a href="race.html">Racing Sim</a>
-    <a href="shop.html" class="active">Aftermarket</a>
-    <a href="quiz.html">Quiz</a>
-    <a href="wheel.html">Wheel</a>
-    <a href="garage.html">🏠 Garage</a>
-    <button class="theme-toggle" id="themeToggle" aria-label="Theme">☀️</button>
-</nav>
+<!-- NAV — gemeinsame Navbar (Single Source of Truth), siehe navbar.js.
+     data-theme-toggle="external": theme-toggle.js verdrahtet den Button
+     weiter unten, navbar.js darf hier NICHT selbst verdrahten. -->
+<nav id="siteNavRoot" class="site-nav" data-theme-toggle="external"></nav>
+<script src="navbar.js"></script>
 
 <div class="shop-page">
     <div class="page-header">
@@ -890,7 +885,8 @@
 // Reihenfolge/Auswahl entspricht dem bisherigen Shop-Sortiment (Tuning-relevante Modelle).
 const SHOP_BIKE_KEYS = [
     'zx10r', 'h2', 'zh2', 'h2sx', 'zx6r', 'z900', 'versys1000', 'ninja650',
-    'z650', 'ninja400', 'zx25r', 'eliminator400', 'w800', 'klx300', 'kx450'
+    'z650', 'ninja400', 'zx25r', 'eliminator400', 'w800', 'klx300', 'kx450',
+    'ninja7hybrid', 'z900se', 'versys650', 'w230', 'klr650', 'vulcans'
 ];
 
 /**
@@ -988,7 +984,11 @@ function selectBike() {
 
 function updateHero() {
     const bike = SHOP_BIKES[currentBike];
-    document.getElementById('heroBikeIcon').textContent = bike.icon;
+    const shared = SHARED_BIKES[currentBike];
+    document.getElementById('heroBikeIcon').innerHTML = BikeImage.markup(
+        { id: currentBike, name: bike.name, category: shared ? shared.category : '' },
+        { eager: true, className: 'shop-bike-photo' }
+    );
     document.getElementById('heroBikeName').textContent = bike.name;
     document.getElementById('heroBikeSub').textContent = bike.sub;
 }

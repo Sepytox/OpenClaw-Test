@@ -251,6 +251,15 @@ footer {
 .fact-card p { margin: 2px 0; line-height: 1.6; font-size: 0.92em; color: var(--text-muted); }
 .fact-card strong { color: var(--text); font-weight: 600; }
 
+/* Bike-Foto/-Illustration (bike-image.js) am oberen Kartenrand — bleedet
+   bis zum Kartenrand (kompensiert das Card-Padding via negativem Margin). */
+.fact-card-image {
+  margin: -18px -20px 10px;
+  width: calc(100% + 40px);
+  aspect-ratio: 16 / 8;
+  border-radius: var(--radius-lg, 14px) var(--radius-lg, 14px) 0 0;
+}
+
 /* Card animations stagger */
 @keyframes cardFadeUp {
   from { opacity: 0; transform: translateY(16px); }
@@ -275,6 +284,12 @@ footer {
 .fact-card:nth-child(17) { animation-delay: 0.34s; }
 .fact-card:nth-child(18) { animation-delay: 0.36s; }
 .fact-card:nth-child(19) { animation-delay: 0.38s; }
+.fact-card:nth-child(20) { animation-delay: 0.40s; }
+.fact-card:nth-child(21) { animation-delay: 0.42s; }
+.fact-card:nth-child(22) { animation-delay: 0.44s; }
+.fact-card:nth-child(23) { animation-delay: 0.46s; }
+.fact-card:nth-child(24) { animation-delay: 0.48s; }
+.fact-card:nth-child(25) { animation-delay: 0.50s; }
 
 /* Card top row (compare + fav) */
 .card-top-row {
@@ -507,7 +522,10 @@ footer {
 
 /* Consistent aspect ratio, rounded corners, gentle fade-in on load and a
    subtle zoom on hover for every gallery image (self-authored SVG or
-   local asset — no external image requests). */
+   local asset — no external image requests). The hover-zoom itself uses
+   --dur-base (a calm ~250ms, matching every other hover micro-interaction
+   in the design system) — only the one-time entrance fade keeps
+   --dur-slow. */
 .gallery-img {
   width: 100%;
   height: 100%;
@@ -515,7 +533,7 @@ footer {
   border-radius: var(--radius-md, 10px);
   opacity: 0;
   animation: imgFadeIn var(--dur-slow, 0.4s) var(--ease-out, ease) forwards;
-  transition: transform var(--dur-slow, 0.4s) var(--ease-standard, ease);
+  transition: transform var(--dur-base, 0.25s) var(--ease-standard, ease);
 }
 .gallery:hover .gallery-img { transform: scale(1.05); }
 @keyframes imgFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -934,8 +952,8 @@ footer {
   flex-shrink: 0;
   border: 1px solid var(--border);
 }
-.theme-preview-neon     { background: linear-gradient(135deg, #080808, #ff6600); }
-.theme-preview-light    { background: linear-gradient(135deg, #f5f5f5, #ff6600); }
+.theme-preview-neon     { background: linear-gradient(135deg, #1c1c1e, var(--accent)); }
+.theme-preview-light    { background: linear-gradient(135deg, #fafafa, var(--accent)); }
 .theme-preview-dark-pro { background: linear-gradient(135deg, #111, #444); }
 
 .theme-option-info { display: flex; flex-direction: column; gap: 1px; }

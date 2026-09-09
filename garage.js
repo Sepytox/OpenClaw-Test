@@ -414,8 +414,11 @@ function renderDreamBike(vm, bikes) {
   empty.hidden = true;
   hero.hidden = false;
   var bike = vm.bike;
+  var photoMarkup = (typeof window !== 'undefined' && window.BikeImage)
+    ? window.BikeImage.markup({ id: bike.id, name: bike.name, category: bike.category }, { eager: true, className: 'garage-dream-photo' })
+    : '<div class="garage-dream-icon">' + bike.icon + '</div>';
   hero.innerHTML =
-    '<div class="garage-dream-icon">' + bike.icon + '</div>' +
+    photoMarkup +
     '<div class="garage-dream-info">' +
     '<h3>' + escapeHtml(bike.name) + '</h3>' +
     '<p>' + escapeHtml(bike.sub || '') + '</p>' +
