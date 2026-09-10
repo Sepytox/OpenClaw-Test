@@ -428,7 +428,28 @@
   width: 120px;
 }
 
-/* ── Saison & Werksverträge (MECHANIK B) — feat(idle-prestige) ─── */
+/* ── Saison & Werksverträge (MECHANIK B) — feat(idle-prestige) ───
+   style(polish): .idle-season/.idle-parts-section/.idle-stats-section hatten
+   bisher KEINE Karten-Umrandung/kein Innenabstand und sassen daher ohne
+   jeden Zwischenraum direkt aneinander (0px Abstand zwischen den Sektionen,
+   Playwright-verifiziert) — inkonsistent zu .idle-drive/.idle-bike-card/
+   .idle-shop, die bereits die Karten-Optik tragen. Vereinheitlicht die
+   Optik + schafft Luft zwischen den Sektionen (gleicher Wert wie
+   .idle-layout's margin-bottom). */
+.idle-shop,
+.idle-season,
+.idle-parts-section,
+.idle-stats-section {
+  margin-bottom: 1.75rem;
+}
+.idle-season,
+.idle-parts-section,
+.idle-stats-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.5rem;
+}
 .idle-season h2 { font-size: 1.15em; margin-bottom: 0.5rem; }
 .idle-season-intro {
   color: var(--text-muted);
