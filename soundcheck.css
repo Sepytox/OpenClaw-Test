@@ -439,6 +439,75 @@ main#soundcheckMain {
   }
 }
 
+/* TEIL 2 — Sound-Wiedergabe global deaktiviert (soundcheck.js,
+   SOUND_PLAYBACK_ENABLED=false). "🚧 Im Aufbau"-Badge, analog zu
+   .sc-badge-synth gestaltet, aber optisch als klarer "kommt bald"-Hinweis
+   (Warnfarbe) statt als reine Info-Kennzeichnung. */
+.sc-badge-wip {
+  display: inline-block;
+  margin-left: 0.4em;
+  padding: 0.08em 0.5em;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #f5a623;
+  background: rgba(245,166,35,0.12);
+  border: 1px solid #f5a623;
+  border-radius: var(--radius-full, 999px);
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .sc-badge-wip {
+    display: block;
+    margin: 0.2em 0 0;
+    width: fit-content;
+  }
+}
+
+/* Play-Buttons (Karten, Favoriten, Player-Modal) im "Im Aufbau"-Zustand:
+   sichtbar greyed-out, bleiben aber klickbar (siehe soundcheck.js
+   showComingSoonNotice()), damit ein Klick die Hinweismeldung zeigt. */
+.sc-play-btn-disabled {
+  opacity: 0.4;
+  filter: grayscale(70%);
+  cursor: not-allowed;
+}
+
+.sc-play-btn-disabled:hover {
+  background: transparent;
+  color: var(--accent);
+  box-shadow: none;
+}
+
+/* Kurzlebiger Hinweis-Toast, wenn auf einen deaktivierten Play-Button
+   geklickt wird ("Dieser Sound wird gerade überarbeitet."). */
+.sc-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translate(-50%, 12px);
+  background: var(--card-bg, #16181f);
+  color: var(--text, #fff);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md, 10px);
+  padding: 0.7em 1.1em;
+  font-size: 0.85em;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 9999;
+  max-width: calc(100vw - 32px);
+  text-align: center;
+}
+
+.sc-toast-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 .sc-exhaust-db {
   font-family: inherit;
   font-size: 0.7em;
