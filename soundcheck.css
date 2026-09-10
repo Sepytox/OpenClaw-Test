@@ -288,6 +288,13 @@ main#soundcheckMain {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  /* Grid items default to min-width:auto (= min-content of all descendants),
+     which lets a card's exhaust rows force it wider than its assigned
+     1-column grid track on narrow viewports (horizontal page overflow at
+     e.g. 375px). min-width:0 allows the card to actually shrink to the
+     track width; .sc-exhaust-name below gets the matching flex min-width:0
+     so its text can wrap/truncate instead of forcing extra width. */
+  min-width: 0;
 }
 
 .sc-bike-card:hover {
@@ -410,6 +417,7 @@ main#soundcheckMain {
   font-size: 0.72em;
   color: var(--text);
   flex: 1;
+  min-width: 0;
 }
 
 /* "Sound folgt" — Kennzeichnung für Bike/Exhaust-Kombinationen ohne echte
@@ -1342,8 +1350,12 @@ body.cyberpunk-mode .eq-bar {
    21. MOBILE-RESPONSIVE SOUNDCHECK — Final Touch
    ============================================================ */
 
-/* Extra small screens (360px and below) */
-@media (max-width: 360px) {
+/* Extra small screens (480px and below). War vorher max-width:360px — auf
+   480px erweitert, damit auch verbreitete 375px-Viewports (z. B. iPhone
+   SE/8) die gestapelte Exhaust-Zeilen-Ansicht bekommen; ohne das erzwang
+   der (nicht umbrechbare) Zeileninhalt eine horizontale
+   Seiten-Überlaufbreite von ~462px bei 375px Viewportbreite. */
+@media (max-width: 480px) {
   .sc-intro {
     padding: 14px;
   }
