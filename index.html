@@ -1051,15 +1051,19 @@
         };
 
         // Bevorzugt ein echtes Foto (images/bikes/<id>.jpg) für die erste
-        // Galerie-Folie jedes Bikes; fällt bei Ladefehler auf die zuvor
-        // generierte Kategorie-SVG zurück (siehe renderSlides() unten und
-        // bike-image.js). Ergänzt außerdem `id`, damit der Bike-Datensatz
-        // seinen eigenen Schlüssel kennt (u. a. für BikeImage-Aufrufe).
+        // Galerie-Folie jedes Bikes — aber NUR, wenn BikeImage.hasPhoto()
+        // bestätigt, dass die Datei laut Manifest tatsächlich vorhanden ist
+        // (siehe bike-image.js), sonst bleibt die bereits generierte
+        // Kategorie-SVG als src stehen (kein 404-Ladeversuch ins Leere).
+        // Fällt bei Ladefehler eines echten Fotos auf die zuvor generierte
+        // Kategorie-SVG zurück (siehe renderSlides() unten und bike-image.js).
+        // Ergänzt außerdem `id`, damit der Bike-Datensatz seinen eigenen
+        // Schlüssel kennt (u. a. für BikeImage-Aufrufe).
         Object.keys(BIKES).forEach(function(key) {
             var bike = BIKES[key];
             bike.id = key;
             var firstSlide = bike.slides && bike.slides[0];
-            if (firstSlide && firstSlide.type === 'img') {
+            if (firstSlide && firstSlide.type === 'img' && BikeImage.hasPhoto(key)) {
                 firstSlide.fallbackSrc = firstSlide.src;
                 firstSlide.src = BikeImage.photoPath(key);
             }
