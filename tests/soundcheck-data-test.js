@@ -121,6 +121,37 @@ section('4 · "Sound folgt"-Kennzeichnung ist implementiert (kein stilles Fehlve
   assert(soundcheckSrc.includes('sc-badge-synth'), 'CSS-Klasse für das "Sound folgt"-Badge wird gesetzt');
 })();
 
+section('5 · TEIL 2: Sound-Wiedergabe ist über ein Feature-Flag deaktiviert ("Im Aufbau")');
+(function() {
+  assert(/var SOUND_PLAYBACK_ENABLED\s*=\s*false;/.test(soundcheckSrc), 'SOUND_PLAYBACK_ENABLED ist auf false gesetzt (Sound-Vorschau deaktiviert)');
+
+  // Zentrales Gate in openPlayer() — verhindert JEDE Wiedergabe (Bike-Karten,
+  // Favoriten, URL-Param-Autoplay), ohne die eigentlichen Play-Funktionen
+  // zu löschen.
+  const openPlayerMatch = soundcheckSrc.match(/function openPlayer\(bike, exhaustIdx\) \{([\s\S]*?)\n  \}/);
+  assert(openPlayerMatch !== null, 'openPlayer() gefunden');
+  const openPlayerBody = openPlayerMatch ? openPlayerMatch[1] : '';
+  assert(/if \(!SOUND_PLAYBACK_ENABLED\)/.test(openPlayerBody), 'openPlayer() prüft SOUND_PLAYBACK_ENABLED zuerst (zentraler Kill-Switch)');
+  assert(/showComingSoonNotice\(\)/.test(openPlayerBody), 'openPlayer() zeigt bei deaktiviertem Sound die Hinweismeldung statt abzuspielen');
+
+  // A/B Compare hat ein eigenes Gate (läuft nicht über openPlayer()).
+  const toggleABMatch = soundcheckSrc.match(/function toggleABCompare\(\) \{([\s\S]*?)if \(!compareA/);
+  assert(toggleABMatch !== null && /SOUND_PLAYBACK_ENABLED/.test(toggleABMatch[1]), 'toggleABCompare() prüft SOUND_PLAYBACK_ENABLED ebenfalls');
+
+  // Die eigentlichen Play-Funktionen bleiben vollständig erhalten (nicht
+  // gelöscht), damit eine Reaktivierung (Flag auf true) sofort funktioniert.
+  ['function playExhaust(', 'function playRealAudio(', 'function fallbackToSynthesis('].forEach(sig => {
+    assert(soundcheckSrc.includes(sig), `${sig.replace('function ', '').replace('(', '()')} bleibt im Code erhalten (nur gegated, nicht gelöscht)`);
+  });
+
+  // UI-Kennzeichnung: "Im Aufbau"-Badge + deutsche Hinweismeldung.
+  assert(soundcheckSrc.includes('sc-badge-wip'), 'CSS-Klasse für das "Im Aufbau"-Badge wird gesetzt');
+  assert(soundcheckSrc.includes('🚧 Im Aufbau'), 'UI zeigt den deutschen "🚧 Im Aufbau"-Hinweis');
+  assert(soundcheckSrc.includes('Dieser Sound wird gerade überarbeitet.'), 'Klick auf einen deaktivierten Play-Button zeigt die deutsche Hinweismeldung');
+  assert(soundcheckSrc.includes('function showComingSoonNotice'), 'showComingSoonNotice() Toast-Funktion existiert');
+  assert(!/console\.log/.test(soundcheckSrc), 'Kein console.log im Feature-Code (GOLDEN_PRINCIPLES_KE.md Regel 2)');
+})();
+
 // ============================================================
 // Results
 // ============================================================
