@@ -152,6 +152,27 @@ section('5 · TEIL 2: Sound-Wiedergabe ist über ein Feature-Flag deaktiviert ("
   assert(!/console\.log/.test(soundcheckSrc), 'Kein console.log im Feature-Code (GOLDEN_PRINCIPLES_KE.md Regel 2)');
 })();
 
+section('6 · Kein horizontaler Overflow bei 375px (soundcheck.css)');
+(function() {
+  // Statischer Regressionsschutz für den per Playwright verifizierten Fix
+  // (scrollWidth 462px -> 375px bei 375px Viewportbreite): Grid-Items
+  // dürfen unter ihre Content-Mindestbreite schrumpfen (min-width:0), und
+  // die gestapelte Mobile-Ansicht der Exhaust-Zeilen greift bereits ab
+  // 480px (vorher nur ab 360px, also nicht bei 375px).
+  const css = read('soundcheck.css');
+
+  const cardBlockMatch = css.match(/\.sc-bike-card \{([\s\S]*?)\n\}/);
+  assert(cardBlockMatch !== null, '.sc-bike-card Regelblock gefunden');
+  assert(cardBlockMatch && /min-width:\s*0/.test(cardBlockMatch[1]), '.sc-bike-card erlaubt min-width:0 (kann unter Content-Breite schrumpfen)');
+
+  const nameBlockMatch = css.match(/\.sc-exhaust-name \{([\s\S]*?)\n\}/);
+  assert(nameBlockMatch !== null, '.sc-exhaust-name Regelblock gefunden');
+  assert(nameBlockMatch && /min-width:\s*0/.test(nameBlockMatch[1]), '.sc-exhaust-name erlaubt min-width:0 (Text kann umbrechen statt Zeile zu sprengen)');
+
+  assert(/@media \(max-width:\s*480px\)\s*\{\s*\.sc-intro/.test(css), 'Die gestapelte Mobile-Ansicht der Exhaust-Zeilen greift bereits ab 480px (deckt 375px-Viewports ab)');
+  assert(!/@media \(max-width:\s*360px\)\s*\{\s*\.sc-intro/.test(css), 'Die alte, zu enge 360px-Schwelle wurde ersetzt (nicht doppelt vorhanden)');
+})();
+
 // ============================================================
 // Results
 // ============================================================
