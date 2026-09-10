@@ -127,6 +127,18 @@ section('5. Garage-Achievement-Grid (weitere gefundene Lücke)');
 }
 
 // ============================================================
+section('5b. idle.html — vereinheitlichte Kartenoptik + Abstand zwischen Sektionen');
+// ============================================================
+{
+  assert(/\.idle-shop,\s*\n\.idle-season,\s*\n\.idle-parts-section,\s*\n\.idle-stats-section\s*\{\s*\n\s*margin-bottom:\s*1\.75rem;/.test(idleCss),
+    '.idle-shop/.idle-season/.idle-parts-section/.idle-stats-section bekommen jetzt Abstand zueinander (vorher 0px, direkt aneinander)');
+  const cardBlockMatch = idleCss.match(/\}\n\.idle-season,\n\.idle-parts-section,\n\.idle-stats-section \{\n([\s\S]*?)\n\}/);
+  assert(cardBlockMatch !== null, 'Karten-Regelblock für .idle-season/.idle-parts-section/.idle-stats-section gefunden');
+  assert(cardBlockMatch && /background:\s*var\(--card-bg\)/.test(cardBlockMatch[1]) && /border:\s*1px solid var\(--border\)/.test(cardBlockMatch[1]),
+    '.idle-season/.idle-parts-section/.idle-stats-section bekommen jetzt dieselbe Karten-Optik wie .idle-drive/.idle-bike-card/.idle-shop');
+}
+
+// ============================================================
 section('6. Globale :focus-visible-Baseline bleibt vollständig');
 // ============================================================
 {
