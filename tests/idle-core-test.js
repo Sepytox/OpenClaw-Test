@@ -8,7 +8,9 @@
  * liefern die erwarteten Werte; Level-Zustand pro Bike übersteht
  * saveState()/loadState(); loadState() liefert bei leerem Speicher einen
  * gültigen initialen {version:1,...}-Zustand; migrateState() behandelt
- * fehlende/ältere/korrupte Rohdaten defensiv.
+ * fehlende/ältere/korrupte Rohdaten defensiv; rampUpDurationSeconds()/
+ * rampUpProgress() (Rundenzeit-Anlaufphase); Balance-Zielsimulation für
+ * "erste 3 Bikes in ~10min" / "erste Saison in ~1-2h aktivem Spiel".
  *
  * Run: node tests/idle-core-test.js
  * Exit 0 = alle Tests bestanden, Exit 1 = mindestens ein Fehler.
@@ -647,6 +649,89 @@ section('13 · Statistiken (recordLap/recordComboPeak/addPlayTime) + vollständi
   const migratedCorrupt = IdleCore.migrateState(corruptRaw);
   assert(migratedCorrupt.prestige.contracts.length === 1 && migratedCorrupt.prestige.contracts[0] === 'ertrag25', 'migrateState() entfernt unbekannte Vertrags-ids, behält gültige');
   assert(migratedCorrupt.parts.collected.length === 1 && migratedCorrupt.parts.collected[0] === 'helm_standard', 'migrateState() entfernt unbekannte Teile-ids, behält gültige');
+})();
+
+section('14 · Rundenzeit-Anlaufphase (rampUpDurationSeconds/rampUpProgress)');
+(function () {
+  const max = IdleCore.IDLE_BALANCE.TRACK_RAMP_MAX_SECONDS;
+  const min = IdleCore.IDLE_BALANCE.TRACK_RAMP_MIN_SECONDS;
+
+  assert(IdleCore.rampUpDurationSeconds(0) === max, `rampUpDurationSeconds(0) === TRACK_RAMP_MAX_SECONDS (${max})`);
+  assert(IdleCore.rampUpDurationSeconds(100) === min, `rampUpDurationSeconds(100) === TRACK_RAMP_MIN_SECONDS (${min})`);
+  assert(
+    IdleCore.rampUpDurationSeconds(20) > IdleCore.rampUpDurationSeconds(80),
+    'rampUpDurationSeconds() ist monoton fallend: mehr Beschleunigung → kürzere Anlaufphase'
+  );
+
+  assert(IdleCore.rampUpProgress(0, 4) === 0, 'rampUpProgress(0s, 4s) === 0 (Anlaufphase gerade erst gestartet)');
+  assert(IdleCore.rampUpProgress(4, 4) === 1, 'rampUpProgress(4s, 4s) === 1 (Anlaufphase abgeschlossen)');
+  assert(IdleCore.rampUpProgress(999, 4) === 1, 'rampUpProgress() clamped über die Dauer hinaus auf 1 (kein Überschwingen)');
+  assert(IdleCore.rampUpProgress(-5, 4) === 0, 'rampUpProgress() clamped negative Restzeit auf 0 (kein Rückwärtslaufen)');
+  assert(IdleCore.rampUpProgress(2, 0) === 1, 'rampUpProgress() mit durationSeconds<=0 liefert sofort 1 (kein Deadlock)');
+
+  // Ease-out-quadratisch: bei halber Zeit ist der Fortschritt bereits über 50% (schneller Start, sanftes Abflachen).
+  const halfProgress = IdleCore.rampUpProgress(2, 4);
+  assert(halfProgress > 0.5 && halfProgress < 1, `rampUpProgress(2s, 4s) liegt ease-out-typisch über 50% (${halfProgress.toFixed(3)})`);
+
+  // Zusammenspiel mit deriveBikeStats(): ein höher getuntes/schnelleres Bike hat eine kürzere Anlaufphase.
+  const slowBike = IdleCore.IDLE_BIKES[0];
+  const fastBike = IdleCore.IDLE_BIKES[IdleCore.IDLE_BIKES.length - 1];
+  const slowStats = IdleCore.deriveBikeStats(slowBike, 0);
+  const fastStats = IdleCore.deriveBikeStats(fastBike, 0);
+  assert(
+    IdleCore.rampUpDurationSeconds(fastStats.beschleunigungPct) <= IdleCore.rampUpDurationSeconds(slowStats.beschleunigungPct),
+    `Anlaufphase von ${fastBike.id} (PS ${fastBike.ps}) ist nicht länger als die von ${slowBike.id} (PS ${slowBike.ps})`
+  );
+})();
+
+section('15 · Balance-Zielsimulation — "erste 3 Bikes in ~10min" / "erste Saison in ~1-2h aktivem Spiel"');
+(function () {
+  // Reine Simulation der Greedy-Progression (immer sofort das nächste
+  // erreichbare Bike kaufen, kein Tuning zwischendurch) über die echten
+  // bikeCost()/PASSIVE_KM_PER_SEC/ACTIVE_KM_PER_CLICK-Formeln — dieselbe
+  // Methode wie im Balancing-Kommentar von IDLE_BALANCE dokumentiert.
+  /**
+   * Simuliert eine Greedy-Bike-Kauf-Progression und liefert die
+   * kumulierte Zeit (Sekunden) bis zum Besitz des Bikes an targetIndex.
+   * @param {number} targetIndex - Ziel-Bike-Index in IDLE_BIKES.
+   * @param {number} clickIntervalSeconds - Sekunden zwischen zwei "Gas geben"-Klicks (0 = rein passiv).
+   * @returns {number} Kumulierte Zeit in Sekunden.
+   */
+  function simulateGreedyProgressionSeconds(targetIndex, clickIntervalSeconds) {
+    const starterTopspeed = IdleCore.IDLE_BIKES[0].topspeed;
+    let elapsedSeconds = 0;
+    for (let i = 1; i <= targetIndex; i++) {
+      const speedFactor = IdleCore.IDLE_BIKES[i - 1].topspeed / starterTopspeed;
+      const passiveRate = IdleCore.IDLE_BALANCE.PASSIVE_KM_PER_SEC * speedFactor;
+      const activeRate = clickIntervalSeconds > 0
+        ? (IdleCore.IDLE_BALANCE.ACTIVE_KM_PER_CLICK * speedFactor) / clickIntervalSeconds
+        : 0;
+      const cost = IdleCore.bikeCost(i);
+      elapsedSeconds += cost / (passiveRate + activeRate);
+    }
+    return elapsedSeconds;
+  }
+
+  const zxIndex = IdleCore.findBikeIndex('zx10r');
+
+  // "Erste 3 Bikes" (Startbike + 2 gekaufte, Index 1+2) in ~10 Minuten.
+  const first3PassiveHours = simulateGreedyProgressionSeconds(2, 0) / 3600;
+  assert(first3PassiveHours <= 0.5, `erste 3 Bikes rein passiv in ≤30min erreichbar (Simulation: ${(first3PassiveHours * 60).toFixed(1)}min)`);
+
+  // Erste Saison (Besitz der ZX-10R) bei realistisch-aktivem Spiel (ein Klick alle 15s) innerhalb 1-2h.
+  const seasonActiveHours = simulateGreedyProgressionSeconds(zxIndex, 15) / 3600;
+  assert(
+    seasonActiveHours >= 0.5 && seasonActiveHours <= 2.5,
+    `erste Saison (ZX-10R) bei aktivem Spiel (1 Klick/15s) innerhalb ~0.5-2.5h erreichbar (Simulation: ${seasonActiveHours.toFixed(2)}h)`
+  );
+
+  // Rein passives Spiel darf deutlich länger dauern (wie im Idle-Genre üblich), sollte aber nicht ausufern.
+  const seasonPassiveHours = simulateGreedyProgressionSeconds(zxIndex, 0) / 3600;
+  assert(
+    seasonPassiveHours >= seasonActiveHours,
+    'erste Saison rein passiv dauert mindestens so lange wie mit regelmässigem aktivem Klicken'
+  );
+  assert(seasonPassiveHours <= 6, `erste Saison rein passiv bleibt unter 6h (Simulation: ${seasonPassiveHours.toFixed(2)}h)`);
 })();
 
 // ============================================================

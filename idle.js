@@ -120,6 +120,8 @@
   /** DOM-Referenzen für Canvas + 2D-Kontext (einmalig aufgelöst, siehe initCanvases()). */
   var trackCanvas = null, trackCtx = null;
   var tachoCanvas = null, tachoCtx = null;
+  /** Zeitstempel (rAF-Uhr, ms), zu dem die aktuelle Rundenzeit-Anlaufphase begann. */
+  var rampUpStartedAtMs = null;
 
   /* ── Tacho: Laufzeit-Zustand ─────────────────────────────────────── */
   /** Aktuell angezeigter (weich nachlaufender) Tacho-Nadel-Prozentwert. */
@@ -289,6 +291,7 @@
           selectBtn.addEventListener('click', function () {
             IdleCore.selectBike(state, bike.id);
             IdleCore.saveState(state);
+            beginRampUp();
             renderAll();
           });
           action.appendChild(selectBtn);
@@ -304,6 +307,7 @@
           if (result.success) {
             IdleCore.selectBike(state, result.bike.id);
             IdleCore.saveState(state);
+            beginRampUp();
             renderAll();
             triggerBikeHandover(result.bike);
           }
@@ -579,6 +583,18 @@
     tachoCtx.font = (Math.max(10, radius * 0.16)) + 'px sans-serif';
     tachoCtx.textAlign = 'center';
     tachoCtx.fillText(Math.round(kmh) + ' km/h', cx, cy - radius * 0.22);
+  }
+
+  /**
+   * Startet (bzw. setzt zurück) die Rundenzeit-Anlaufphase des aktuell
+   * gefahrenen Bikes: ab sofort fährt renderTrack() die Rundenzeit über
+   * IdleCore.rampUpDurationSeconds() Sekunden hoch, statt augenblicklich
+   * auf voller Geschwindigkeit zu starten (siehe tick()). Wird bei jedem
+   * Bike-Kauf/-Wechsel sowie einmalig beim Laden der Seite aufgerufen.
+   * @returns {void}
+   */
+  function beginRampUp() {
+    rampUpStartedAtMs = (window.performance && typeof performance.now === 'function') ? performance.now() : Date.now();
   }
 
   /**
@@ -1259,7 +1275,19 @@
     // Strecke/Tacho teilen sich denselben Game-Loop-Tick (kein zweiter rAF-Loop).
     var info = getCurrentBikeInfo();
     var kmh = (info.bike.topspeed * info.stats.geschwindigkeitPct) / 100;
-    renderTrack(clampedDt, info.stats.geschwindigkeitPct);
+
+    // Rundenzeit-Anlaufphase (Beschleunigung als echte Mechanik): direkt
+    // nach einem Bike-Kauf/-Wechsel startet die Strecken-Rundenzeit
+    // langsam und fährt über IdleCore.rampUpDurationSeconds() (abhängig
+    // von beschleunigungPct) auf die volle Geschwindigkeit hoch. Die
+    // Tacho-Nadel bleibt davon unberührt (die sweept bereits eigenständig
+    // per TACHO_NEEDLE_EASE vom alten zum neuen Zielwert).
+    var rampElapsedSeconds = rampUpStartedAtMs === null ? Infinity : (timestamp - rampUpStartedAtMs) / 1000;
+    var rampDurationSeconds = IdleCore.rampUpDurationSeconds(info.stats.beschleunigungPct);
+    var rampProgress = IdleCore.rampUpProgress(rampElapsedSeconds, rampDurationSeconds);
+    var trackSpeedPct = info.stats.geschwindigkeitPct * rampProgress;
+
+    renderTrack(clampedDt, trackSpeedPct);
     renderTacho(info.stats.geschwindigkeitPct, kmh);
     updateEngineSound(info.stats.geschwindigkeitPct);
     tickShift(clampedDt);
@@ -1306,6 +1334,7 @@
     renderAll();
     updateKmDisplay();
     initCanvases();
+    beginRampUp();
     tachoDisplayPct = getCurrentBikeInfo().stats.geschwindigkeitPct;
     updateComboBadge();
     showOfflineBanner();

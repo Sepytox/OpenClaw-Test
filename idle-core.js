@@ -43,17 +43,30 @@ var IDLE_STATE_VERSION = 1;
  *   - PASSIVE_KM_PER_SEC=1 ergibt bei reinem Idle-Zusehen 600 km in 10 Min
  *     (600s × 1 km/s), ohne jeglichen Klick.
  *   - Bike-Index 1 (KLX 300) kostet BASE_BIKE_COST=300 km, Bike-Index 2
- *     (Eliminator 500) kostet 300×1.6=480 km → kumulativ 780 km für die
+ *     (Eliminator 500) kostet 300×1.3=390 km → kumulativ 690 km für die
  *     ersten beiden Käufe (macht das Startbike + 2 gekaufte = "erste 3
  *     Bikes" komplett).
- *   - 780 km liegt knapp über den rein-passiven 600 km in 10 Minuten;
+ *   - 690 km liegt knapp über den rein-passiven 600 km in 10 Minuten;
  *     bereits gelegentliches Klicken auf "Gas geben" (ACTIVE_KM_PER_CLICK
- *     =10 km/Klick, ca. 20 Klicks über 10 Minuten verteilt = 200 km)
- *     schließt die Lücke komfortabel (600+200=800 ≥ 780). Damit sind die
+ *     =10 km/Klick, ca. 10 Klicks über 10 Minuten verteilt = 100 km)
+ *     schließt die Lücke komfortabel (600+100=700 ≥ 690). Damit sind die
  *     ersten 3 Bikes für aktive UND rein passive Spieler:innen realistisch
- *     in ~10 Minuten erreichbar, ohne die Kurve danach zu verflachen
- *     (BIKE_COST_GROWTH=1.6 sorgt für spürbares, aber nicht extremes
- *     exponentielles Wachstum bis Bike 16 bei ca. 216.170 km).
+ *     in ~10 Minuten erreichbar (Simulation: ~0.17h/10.2min passiv, ~0.10h/
+ *     6min aktiv).
+ *
+ * Zielvorgabe "erste Saison (Besitz der ZX-10R, Bike-Index 12) nach ~1-2h
+ * aktivem Spielen erreichbar":
+ *   - BIKE_COST_GROWTH=1.3 sorgt für spürbares, aber gegenüber einer
+ *     früheren Kalibrierung (1.6) deutlich sanfteres exponentielles
+ *     Wachstum (Bike 16 kostet dadurch ca. 11.810 statt 216.170 km).
+ *   - Simulierte Greedy-Progression (immer sofort das nächst erreichbare
+ *     Bike kaufen, keine Zwischen-Tunings) bis zum Besitz der ZX-10R:
+ *     ~2,7h bei rein passivem Zusehen, ~1,6h bei realistisch-aktivem
+ *     Spielen (ein "Gas geben"-Klick alle ~15s, kein Dauer-Spam). Damit
+ *     liegt die erste Saison bei aktivem Spielen innerhalb der Zielspanne
+ *     von 1-2h, während rein passives Spiel etwas länger braucht — wie in
+ *     Idle-Games üblich und gewollt (siehe tests/idle-core-test.js,
+ *     Abschnitt "Balance-Zielsimulation").
  */
 var IDLE_BALANCE = {
   /** Index des kostenlosen Startbikes in IDLE_BIKES (immer besessen). */
@@ -62,7 +75,7 @@ var IDLE_BALANCE = {
   /** Kaufpreis (in km) des ersten käuflichen Bikes (Index 1). */
   BASE_BIKE_COST: 300,
   /** Wachstumsfaktor je weiterem Bike-Index (exponentiell). */
-  BIKE_COST_GROWTH: 1.6,
+  BIKE_COST_GROWTH: 1.3,
   /** Rundungsschritt für Bike-Kaufpreise (auf "runde" km-Werte). */
   BIKE_COST_ROUND_TO: 10,
 
@@ -87,6 +100,17 @@ var IDLE_BALANCE = {
   STAT_BAR_MAX_PS: 320,
   /** Zusätzlicher Balken-Boost pro Tuning-Level (Geschwindigkeit/Beschleunigung). */
   STAT_BAR_LEVEL_BOOST_PER_LEVEL: 0.01,
+
+  /* ── Rundenzeit-Anlaufphase (Beschleunigung als echte Spielmechanik) ──
+   * Nach jedem Bike-Wechsel/-Kauf startet die Strecken-Rundenzeit nicht
+   * sofort auf voller Geschwindigkeit, sondern fährt über
+   * rampUpDurationSeconds() Sekunden hoch (siehe rampUpProgress()). Ein
+   * Bike mit hoher Beschleunigung (deriveBikeStats().beschleunigungPct)
+   * hat eine kürzere Anlaufphase. */
+  /** Dauer (Sekunden) der Anlaufphase bei 0% Beschleunigung (langsamster Fall). */
+  TRACK_RAMP_MAX_SECONDS: 6,
+  /** Dauer (Sekunden) der Anlaufphase bei 100% Beschleunigung (kürzester Fall). */
+  TRACK_RAMP_MIN_SECONDS: 1.5,
 
   /** Zeit-Deckelung (Sekunden) für EINEN Game-Loop-Tick in idle.js — verhindert,
    *  dass ein längere Zeit inaktiver/hintergründiger Tab beim Zurückkehren
@@ -378,6 +402,37 @@ function clampPct(value) {
   if (value < 0) return 0;
   if (value > 100) return 100;
   return value;
+}
+
+/**
+ * Berechnet die Dauer (Sekunden) der Rundenzeit-Anlaufphase eines Bikes:
+ * je höher beschleunigungPct (aus deriveBikeStats()), desto kürzer die
+ * Phase, in der die Rundenzeit von "langsam" auf die volle, geschwindig-
+ * keitsabhängige Rundenzeit hochfährt (siehe idle.js renderTrack()). Reine
+ * Funktion aus IDLE_BALANCE.
+ * @param {number} beschleunigungPct - 0–100, aus deriveBikeStats().
+ * @returns {number} Anlaufphasen-Dauer in Sekunden (> 0).
+ */
+function rampUpDurationSeconds(beschleunigungPct) {
+  var pct = clampPct(beschleunigungPct);
+  var max = IDLE_BALANCE.TRACK_RAMP_MAX_SECONDS;
+  var min = IDLE_BALANCE.TRACK_RAMP_MIN_SECONDS;
+  return max - (max - min) * (pct / 100);
+}
+
+/**
+ * Berechnet den (ease-out-quadratisch geglätteten) Fortschritt einer
+ * Rundenzeit-Anlaufphase: 0 = gerade erst gestartet (volle Anlauf-
+ * Verlangsamung), 1 = Anlaufphase abgeschlossen (volle Geschwindigkeit).
+ * Reine Funktion.
+ * @param {number} elapsedSeconds - Verstrichene Zeit seit Bike-Wechsel/-Kauf (>= 0).
+ * @param {number} durationSeconds - Ergebnis von rampUpDurationSeconds() (> 0 erwartet).
+ * @returns {number} Fortschritt im Bereich [0, 1].
+ */
+function rampUpProgress(elapsedSeconds, durationSeconds) {
+  if (!durationSeconds || durationSeconds <= 0) return 1;
+  var linear = clampPct((Math.max(0, elapsedSeconds) / durationSeconds) * 100) / 100;
+  return 1 - Math.pow(1 - linear, 2);
 }
 
 /**
@@ -1223,6 +1278,8 @@ var IdleCore = {
   findBikeIndex: findBikeIndex,
   getBikeLevel: getBikeLevel,
   deriveBikeStats: deriveBikeStats,
+  rampUpDurationSeconds: rampUpDurationSeconds,
+  rampUpProgress: rampUpProgress,
   bikeSpeedFactor: bikeSpeedFactor,
   passiveEarn: passiveEarn,
   activeEarn: activeEarn,
