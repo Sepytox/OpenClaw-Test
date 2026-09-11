@@ -307,7 +307,7 @@
 }
 .idle-shift.is-active {
   opacity: 1;
-  max-height: 6rem;
+  max-height: 7.2rem;
   margin-bottom: 1.1rem;
 }
 .idle-shift-hint {
@@ -317,6 +317,24 @@
   color: var(--text-muted);
   margin-top: 0.35rem;
 }
+.idle-shift-result {
+  display: block;
+  text-align: center;
+  font-size: 0.82em;
+  font-weight: 600;
+  min-height: 1.1em;
+  margin-top: 0.15rem;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity var(--dur-base, 0.25s) var(--ease-standard, ease),
+              transform var(--dur-base, 0.25s) var(--ease-standard, ease);
+}
+.idle-shift-result.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.idle-shift-result.is-hit { color: var(--accent); }
+.idle-shift-result.is-miss { color: #c83c3c; }
 .idle-shift-track {
   position: relative;
   height: 30px;

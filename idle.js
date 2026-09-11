@@ -840,6 +840,8 @@
       zoneEl.style.width = shiftState.zoneWidthPct + '%';
     }
     if (trackEl) trackEl.classList.remove('is-hit', 'is-miss');
+    var resultEl = document.getElementById('idleShiftResult');
+    if (resultEl) resultEl.classList.remove('is-visible', 'is-hit', 'is-miss');
     if (wrapEl) {
       wrapEl.classList.add('is-active');
       wrapEl.setAttribute('aria-hidden', 'false');
@@ -872,11 +874,17 @@
     shiftState.resultShown = true;
 
     var trackEl = document.getElementById('idleShiftTrack');
+    var resultEl = document.getElementById('idleShiftResult');
     if (!isIgnore) {
       IdleCore.applyShiftResult(state, hit, Date.now());
       IdleCore.recordComboPeak(state, state.combo.count);
       IdleCore.saveState(state);
       if (trackEl) trackEl.classList.add(hit ? 'is-hit' : 'is-miss');
+      if (resultEl) {
+        resultEl.textContent = hit ? '✅ Perfekter Schaltpunkt!' : '❌ Verpasst!';
+        resultEl.classList.remove('is-hit', 'is-miss');
+        resultEl.classList.add(hit ? 'is-hit' : 'is-miss', 'is-visible');
+      }
       renderAll();
       updateComboBadge();
     }
@@ -887,6 +895,7 @@
         wrapEl.classList.remove('is-active');
         wrapEl.setAttribute('aria-hidden', 'true');
       }
+      if (resultEl) resultEl.classList.remove('is-visible');
       shiftState.active = false;
       shiftTimerSeconds = IdleCore.nextShiftIntervalSeconds();
     }, isIgnore ? 0 : SHIFT_RESULT_FLASH_MS);
